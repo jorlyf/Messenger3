@@ -1,0 +1,30 @@
+.form {
+  display       : flex;
+  flex-direction: column;
+
+  margin-top  : 50px;
+  margin-left : auto;
+  margin-right: auto;
+  width       : 60%;
+}
+
+.inputs {
+  display       : flex;
+  flex-direction: column;
+  row-gap       : 20px;
+}
+
+.submit {
+  margin       : auto;
+  margin-top   : 10px;
+  margin-bottom: 0px;
+  width        : max-content;
+}
+
+.changeMode {
+  width          : max-content;
+  margin-top     : 20px;
+  text-decoration: underline;
+  color          : var(--dark-blue-color);
+  cursor         : pointer;
+}

@@ -1,0 +1,16 @@
+{
+  "validations": {
+    "login": {
+      "maxLength": 20,
+      "minLength": 4
+    },
+    "username": {
+      "maxLength": 16,
+      "minLength": 2
+    },
+    "password": {
+      "maxLength": 30,
+      "minLength": 5
+    }
+  }
+}

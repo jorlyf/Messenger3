@@ -1,1 +1,12 @@
 /.vs
+
+# front
+/front/node_modules
+/front/build
+
+# back
+/back/.vs
+/back/bin
+/back/obj
+/back/appsettings.*
+/back/back.sln

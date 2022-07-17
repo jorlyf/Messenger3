@@ -1,0 +1,8 @@
+.dialog {
+  width: 350px;
+  height: 100px;
+}
+
+.messageText {
+  text-decoration: underline;
+}

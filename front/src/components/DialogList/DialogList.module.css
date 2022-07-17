@@ -1,0 +1,5 @@
+.dialogList {
+  display: flex;
+  flex-direction: column;
+  
+}

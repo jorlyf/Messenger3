@@ -1,0 +1,16 @@
+.search {
+  display      : grid;
+  grid-template-columns: 40px 200px;
+  border       : 1px solid var(--dark-blue-color);
+  border-radius: 5px;
+  box-sizing   : border-box;
+}
+
+.icon {
+  padding: 3px;
+}
+
+.input {
+  width     : 200px;
+  margin-top: 6px;
+}
