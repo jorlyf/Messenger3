@@ -1,9 +1,48 @@
+using back.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+{
+	options.RequireHttpsMetadata = false;
+	options.SaveToken = true;
+	options.TokenValidationParameters = new TokenValidationParameters()
+	{
+		RequireAudience = false,
+		ValidateIssuer = false,
+		ValidateAudience = false,
+		ValidateLifetime = true,
+		IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+	};
+});
+
+builder.Services.AddSingleton<AuthService>();
+
+builder.Services.AddCors(options =>
+{
+	options.AddPolicy("Development", policy =>
+	{
+		policy.WithOrigins("http://localhost:3000", "https://localhost:3000")
+			.AllowAnyHeader()
+			.AllowAnyMethod()
+			.AllowCredentials();
+	});
+	options.AddPolicy("Production", policy =>
+	{
+		policy.WithOrigins("http://localhost", "https://localhost")
+			.AllowAnyHeader()
+			.AllowAnyMethod()
+			.AllowCredentials();
+	});
+});
 
 WebApplication app = builder.Build();
 
@@ -13,8 +52,18 @@ if (app.Environment.IsDevelopment())
 	app.UseSwaggerUI();
 }
 
+if (app.Environment.IsDevelopment())
+{
+	app.UseCors("Development");
+}
+else
+{
+	app.UseCors("Production");
+}
+
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

@@ -2,9 +2,9 @@ import * as React from "react";
 import LeftColumnHeaderContainer from "./containers/LeftColumnHeaderContainer";
 import RightColumnHeaderContainer from "./containers/RightColumnHeaderContainer";
 import DialogListContainer from "./containers/DialogListContainer";
+import Auth from "./pages/Auth";
 
 import styles from "./App.module.css";
-import Auth from "./pages/Auth";
 
 const App: React.FC = () => {
   return (

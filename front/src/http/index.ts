@@ -6,7 +6,7 @@ enum NodeEnv {
 }
 
 export enum ResponseStatus {
-  Ok = 200,
+  OK = 200,
   BadRequest = 400,
   Unauthorized = 401,
   NotFound = 404,
@@ -28,7 +28,7 @@ const $api = axios.create({
 });
 
 $api.interceptors.request.use(config => {
-  config.headers!.Authorization = localStorage.getItem("token") || "";
+  config.headers!.Authorization = "Bearer " + localStorage.getItem("token") || "";
   return config;
 });
 
