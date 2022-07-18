@@ -27,6 +27,12 @@ const authSlice = createSlice({
       state.isAuthorized = true;
       state.wasInitAuthAttempt = true;
     },
+    loginByTokenSuccess(state) {
+      state.isLogging = false;
+      state.token = localStorage.getItem("token") || undefined;
+      state.isAuthorized = true;
+      state.wasInitAuthAttempt = true;
+    },
     loginError(state) {
       state.isLogging = false;
       state.token = undefined;
@@ -39,6 +45,6 @@ const authSlice = createSlice({
   }
 });
 
-export const { loginInit, loginSuccess, loginError, setInitAuthAttempt } = authSlice.actions;
+export const { loginInit, loginSuccess, loginByTokenSuccess, loginError, setInitAuthAttempt } = authSlice.actions;
 
 export default authSlice.reducer;

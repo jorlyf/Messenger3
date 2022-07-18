@@ -1,10 +1,12 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace back.Models
 {
+	[Index(nameof(Login), IsUnique = true)]
 	public class UserModel
 	{
-		[Required]
+		[Key]
 		public int Id { get; set; }
 
 		[Required]

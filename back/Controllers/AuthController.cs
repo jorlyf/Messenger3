@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using back.Models.DTOs;
 using back.Services;
+using back.Models.DTOs.Auth;
+using Microsoft.EntityFrameworkCore;
+using back.Infrastructure.Exceptions;
 
 namespace back.Controllers
 {
@@ -20,36 +22,71 @@ namespace back.Controllers
 		[Authorize]
 		[HttpPost]
 		[Route("LoginByToken")]
-		[ProducesResponseType(StatusCodes.Status200OK)]
 		public ActionResult LoginByToken()
-		{		
+		{
 			return Ok();
 		}
 
 		[HttpPost]
 		[Route("Login")]
-		[ProducesResponseType(StatusCodes.Status400BadRequest)]
-		[ProducesResponseType(StatusCodes.Status200OK)]
-		public ActionResult<string> Login([FromBody] LoginDataDTO loginData)
+		public async Task<ActionResult<LoginAnswerDataDTO>> LoginAsync([FromBody] LoginDataDTO loginData)
 		{
-			if (this.AuthService.Login(loginData, out string token))
+			try
 			{
-				return token;
+				string token = await this.AuthService.LoginAsync(loginData);
+				return Ok(new LoginAnswerDataDTO
+				{
+					IsSuccess = true,
+					Token = token
+				});
 			}
-			return BadRequest();
+			catch (LoginException ex)
+			{
+				return BadRequest(new LoginAnswerDataDTO
+				{
+					IsSuccess = false,
+					ExceptionReason = ex.Reason
+				});
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				return BadRequest(new LoginAnswerDataDTO
+				{
+					IsSuccess = false
+				});
+			}
 		}
 
 		[HttpPost]
 		[Route("Registrate")]
-		[ProducesResponseType(StatusCodes.Status400BadRequest)]
-		[ProducesResponseType(StatusCodes.Status200OK)]
-		public ActionResult<string> Registrate([FromBody] RegistrationDataDTO registrationData)
+		public async Task<ActionResult<RegistrationAnswerDataDTO>> RegistrateAsync([FromBody] RegistrationDataDTO registrationData)
 		{
-			if (this.AuthService.Registrate(registrationData, out string token))
+			try
 			{
-				return token;
+				string token = await this.AuthService.RegistrateAsync(registrationData);
+				return Ok(new RegistrationAnswerDataDTO
+				{
+					IsSuccess = true,
+					Token = token
+				});
 			}
-			return BadRequest();
+			catch (RegistrationException ex)
+			{
+				return BadRequest(new RegistrationAnswerDataDTO
+				{
+					IsSuccess = false,
+					ExceptionReason = ex.Reason
+				});
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex);
+				return BadRequest(new RegistrationAnswerDataDTO
+				{
+					IsSuccess = false
+				});
+			}
 		}
 	}
 }

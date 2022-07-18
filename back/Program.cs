@@ -1,7 +1,11 @@
-using back.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using back.Contexts;
+using back.Repositories;
+using back.Repositories.Interfaces;
+using back.Services;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +20,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 	options.SaveToken = true;
 	options.TokenValidationParameters = new TokenValidationParameters()
 	{
+		ClockSkew = TimeSpan.Zero,
 		RequireAudience = false,
 		ValidateIssuer = false,
 		ValidateAudience = false,
@@ -24,7 +29,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 	};
 });
 
-builder.Services.AddSingleton<AuthService>();
+builder.Services.AddDbContext<DataContext>(options =>
+	options.UseSqlite($"Data Source={Environment.CurrentDirectory}\\messanger.db")
+	.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
+
+builder.Services.AddScoped<IAsyncUserRepository, AsyncUserRepository>();
+
+builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<ChatService>();
+builder.Services.AddScoped<ProfileService>();
 
 builder.Services.AddCors(options =>
 {

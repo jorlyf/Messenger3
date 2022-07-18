@@ -1,5 +1,10 @@
 import * as React from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router";
+import useAppSelector from "../../hooks/useAppSelector";
 import InputField from "../../components/InputField";
+import AuthService from "../../services/AuthService";
+import LoginDataDTO from "../../models/dtos/LoginDataDTO";
 
 import styles from "./Auth.module.css";
 
@@ -9,12 +14,17 @@ enum Mode {
 }
 
 const Auth: React.FC = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const [mode, setMode] = React.useState<Mode>(Mode.login);
 
   const [login, setLogin] = React.useState<string>("");
   const [username, setUsername] = React.useState<string>("");
   const [password, setPassword] = React.useState<string>("");
+
+  const isLogging = useAppSelector(state => state.auth.isLogging);
+  const isAuthorized = useAppSelector(state => state.auth.isAuthorized);
 
   const clearInputs = () => {
     setLogin("");
@@ -27,12 +37,17 @@ const Auth: React.FC = () => {
   }
 
   const handleLogin = () => {
-
+    const loginData: LoginDataDTO = { login, password }
+    AuthService.login(dispatch, loginData);
   }
 
   const handleRegistrate = () => {
-
+    
   }
+
+  React.useEffect(() => {
+    if (isAuthorized) { navigate("/"); }
+  }, [isAuthorized, navigate]);
 
   return (
     <div>
@@ -45,12 +60,14 @@ const Auth: React.FC = () => {
                 setValue={setLogin}
                 placeholder={"Логин"}
                 isOneRow={true}
+                disabled={isLogging}
               />
               <InputField
                 value={password}
                 setValue={setPassword}
                 placeholder={"Пароль"}
                 isOneRow={true}
+                disabled={isLogging}
               />
             </div>
             <button onClick={handleLogin} className={styles.submit}>Войти</button>
@@ -66,18 +83,21 @@ const Auth: React.FC = () => {
                 setValue={setLogin}
                 placeholder={"Логин"}
                 isOneRow={true}
+                disabled={isLogging}
               />
               <InputField
                 value={username}
                 setValue={setUsername}
                 placeholder={"Имя"}
                 isOneRow={true}
+                disabled={isLogging}
               />
               <InputField
                 value={password}
                 setValue={setPassword}
                 placeholder={"Пароль"}
                 isOneRow={true}
+                disabled={isLogging}
               />
             </div>
             <button onClick={handleRegistrate} className={styles.submit}>Зарегистрироваться</button>
