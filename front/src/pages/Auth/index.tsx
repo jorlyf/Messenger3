@@ -5,6 +5,7 @@ import useAppSelector from "../../hooks/useAppSelector";
 import InputField from "../../components/InputField";
 import AuthService from "../../services/AuthService";
 import LoginDataDTO from "../../models/dtos/LoginDataDTO";
+import RegistrationDataDTO from "../../models/dtos/RegistrationDataDTO";
 
 import styles from "./Auth.module.css";
 
@@ -42,7 +43,8 @@ const Auth: React.FC = () => {
   }
 
   const handleRegistrate = () => {
-    
+    const registrationData: RegistrationDataDTO = { login, username, password }
+    AuthService.registrate(dispatch, registrationData);
   }
 
   React.useEffect(() => {

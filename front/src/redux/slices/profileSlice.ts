@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import User from "../../models/User";
+import UserModel from "../../models/UserModel";
 
 interface ProfileState {
   isLoaded: boolean,
@@ -17,7 +17,7 @@ const profileSlice = createSlice({
   name: "profile",
   initialState,
   reducers: {
-    loadProfile(state, action: PayloadAction<User>) {
+    loadProfile(state, action: PayloadAction<UserModel>) {
       state.isLoaded = true;
       state.id = action.payload.id,
         state.login = action.payload.login;

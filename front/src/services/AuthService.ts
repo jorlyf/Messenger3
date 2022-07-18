@@ -1,9 +1,11 @@
 import $api from "../http";
 import { AppDispatch } from "../redux/store";
 import { loginByTokenSuccess, loginError, loginInit, loginSuccess } from "../redux/slices/authSlice";
-import LoginDataDTO from "../models/dtos/LoginDataDTO";
-import RegistrationDataDTO from "../models/dtos/RegistrationDataDTO";
 import ProfileService from "./ProfileService";
+import LoginDataDTO from "../models/dtos/LoginDataDTO";
+import LoginAnswerDataDTO from "../models/dtos/LoginAnswerDataDTO";
+import RegistrationDataDTO from "../models/dtos/RegistrationDataDTO";
+import RegistrationAnswerDataDTO from "../models/dtos/RegistrationAnswerDataDTO";
 
 export default class AuthService {
   static async loginByToken(dispatch: AppDispatch): Promise<void> {
@@ -11,25 +13,34 @@ export default class AuthService {
       dispatch(loginInit());
       const response = await $api.post<null>("/Auth/LoginByToken");
       AuthService.onLoginByTokenSuccess(dispatch);
-    } catch (error) {
+    } catch (error: any) {
       dispatch(loginError());
-      console.log(error);
+      if (error?.response?.status === 401) {
+        localStorage.removeItem("token");
+      }
     }
   }
   static async login(dispatch: AppDispatch, loginData: LoginDataDTO): Promise<void> {
     try {
       dispatch(loginInit());
-      const response = await $api.post<string>("/Auth/Login", loginData);
-      AuthService.onLoginSuccess(dispatch, response.data);
+      const response = await $api.post<LoginAnswerDataDTO>("/Auth/Login", loginData);
+      if (response.data.token) {
+        AuthService.onLoginSuccess(dispatch, response.data.token);
+      }
     } catch (error) {
       dispatch(loginError());
-      console.log(error);
     }
   }
-  static async registrate(registrationData: RegistrationDataDTO): Promise<void> {
-
-
-
+  static async registrate(dispatch: AppDispatch, registrationData: RegistrationDataDTO): Promise<void> {
+    try {
+      dispatch(loginInit());
+      const response = await $api.post<RegistrationAnswerDataDTO>("/Auth/Registrate", registrationData);
+      if (response.data.token) {
+        AuthService.onLoginSuccess(dispatch, response.data.token);
+      }
+    } catch (error) {
+      dispatch(loginError());
+    }
   }
   static logout(): void {
     localStorage.clear();

@@ -10,7 +10,6 @@ interface SearchProps {
 }
 
 const Search: React.FC<SearchProps> = (props) => {
-
   return (
     <div className={styles.search}>
       <img className={styles.icon} src={SearchIcon} alt="SearchIcon" />
