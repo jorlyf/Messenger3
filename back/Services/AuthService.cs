@@ -6,27 +6,33 @@ using back.Models;
 using back.Repositories.Interfaces;
 using back.Infrastructure.Exceptions;
 using back.Models.DTOs.Auth;
+using back.Repositories;
 
 namespace back.Services
 {
 	public class AuthService
 	{
 		private IConfiguration Configuration { get; }
+		private AsyncUnitOfWork UoW { get; }
 
-		private IAsyncUserRepository UserRepository { get; }
-
-		public AuthService(IConfiguration configuration, IAsyncUserRepository asyncUserRepository)
+		public AuthService(IConfiguration configuration, AsyncUnitOfWork uow)
 		{
 			this.Configuration = configuration;
-			this.UserRepository = asyncUserRepository;
+			this.UoW = uow;
 		}
+
 
 		public async Task<string> LoginAsync(LoginDataDTO loginData)
 		{
-			UserModel? user = await this.UserRepository.GetByLoginAsync(loginData.Login);
+			UserModel? user = await this.UoW.UserRepository.GetByLoginAsync(loginData.Login);
 			if (user is null)
 			{
 				throw new LoginException(LoginExceptionReasons.UserIsNotFound);
+			}
+
+			if (user.Password != loginData.Password)
+			{
+				throw new LoginException(LoginExceptionReasons.IncorrectLoginData);
 			}
 
 			string token = GenerateToken(user);
@@ -42,13 +48,13 @@ namespace back.Services
 				Password = registrationData.Password
 			};
 
-			if (await this.UserRepository.GetByLoginAsync(registrationData.Login) is not null)
+			if (await this.UoW.UserRepository.GetByLoginAsync(registrationData.Login) is not null)
 			{
 				throw new RegistrationException(RegistrationExceptionReasons.LoginIsNotUnique);
 			}
 
-			await this.UserRepository.AddAsync(user);
-			await this.UserRepository.SaveAsync();
+			await this.UoW.UserRepository.AddAsync(user);
+			await this.UoW.UserRepository.SaveAsync();
 
 			string token = GenerateToken(user);
 			return token;
@@ -57,15 +63,15 @@ namespace back.Services
 		private string GenerateToken(UserModel user)
 		{
 			Claim[] claims = new[] {
-						new Claim("Id", user.Id.ToString()),
-						new Claim("Login", user.Login)
+						new Claim("id", user.Id.ToString()),
+						new Claim("login", user.Login)
 					};
 
 			var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(this.Configuration["Jwt:Key"]));
 			var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 			var token = new JwtSecurityToken(
 				claims: claims,
-				expires: DateTime.UtcNow.AddSeconds(20),
+				expires: DateTime.UtcNow.AddDays(30),
 				signingCredentials: signIn);
 
 			return new JwtSecurityTokenHandler().WriteToken(token);

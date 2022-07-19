@@ -5,6 +5,8 @@ namespace back.Repositories.Interfaces
 	public interface IAsyncUserRepository : IAsyncRepositoryBase<UserModel>
 	{
 		Task<UserModel?> GetByLoginAsync(string login);
-		Task<UserModel?> GetByUsernameAsync(string username);
+		Task<IEnumerable<UserModel?>> GetByLoginContainsAsync(string login);
+		Task<IEnumerable<UserModel?>> GetByUsernameAsync(string username);
+		Task<IEnumerable<UserModel?>> GetByUsernameContainsAsync(string login);
 	}
 }

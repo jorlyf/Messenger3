@@ -1,10 +1,10 @@
 import * as React from "react";
-import Dialog, { DialogProps } from "../Dialog";
+import Dialog, { DialogListItemProps } from "../DialogListItem";
 
 import styles from "./DialogList.module.css";
 
 interface DialogListProps {
-  items?: DialogProps[];
+  items?: DialogListItemProps[];
 }
 
 const DialogList: React.FC<DialogListProps> = ({ items }) => {

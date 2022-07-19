@@ -3,14 +3,18 @@ import UserModel from "../../models/UserModel";
 
 interface ProfileState {
   isLoaded: boolean,
-  id?: number;
-  login?: string;
-  username?: string;
-  avatarUrl?: string;
+  id: number | null;
+  login: string | null;
+  username: string | null;
+  avatarUrl: string | null;
 }
 
 const initialState: ProfileState = {
-  isLoaded: false
+  isLoaded: false,
+  id: null,
+  login: null,
+  username: null,
+  avatarUrl: null,
 }
 
 const profileSlice = createSlice({
@@ -19,17 +23,17 @@ const profileSlice = createSlice({
   reducers: {
     loadProfile(state, action: PayloadAction<UserModel>) {
       state.isLoaded = true;
-      state.id = action.payload.id,
-        state.login = action.payload.login;
+      state.id = action.payload.id;
+      state.login = action.payload.login;
       state.username = action.payload.username;
       state.avatarUrl = action.payload.avatarUrl;
     },
     unloadProfile(state) {
       state.isLoaded = false;
-      state.id = undefined;
-      state.login = undefined;
-      state.username = undefined;
-      state.avatarUrl = undefined;
+      state.id = null;
+      state.login = null;
+      state.username = null;
+      state.avatarUrl = null;
     },
     setUsername(state, action: PayloadAction<string>) {
       if (state.isLoaded) return;

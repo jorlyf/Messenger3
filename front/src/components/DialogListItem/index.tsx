@@ -1,8 +1,8 @@
 import React from "react";
 
-import styles from "./Dialog.module.css";
+import styles from "./DialogListItem.module.css";
 
-export interface DialogProps {
+export interface DialogListItemProps {
   username: string;
   avatarUrl?: string;
   onClick?: () => void;
@@ -11,7 +11,7 @@ export interface DialogProps {
   notificationCount?: number;
 }
 
-const Dialog: React.FC<DialogProps> = (props) => {
+const DialogListItem: React.FC<DialogListItemProps> = (props) => {
   return (
     <div className={styles.dialog}>
 
@@ -19,4 +19,4 @@ const Dialog: React.FC<DialogProps> = (props) => {
   )
 }
 
-export default Dialog;
+export default DialogListItem;

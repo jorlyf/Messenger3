@@ -6,26 +6,31 @@ interface InputFieldProps {
   setValue: (value: string) => void;
   placeholder?: string;
   handleEnter?: () => void;
+  setIsFocus?: (bool: boolean) => void;
   minRows?: number;
   maxRows?: number;
   disabled?: boolean;
   isOneRow?: boolean;
 }
 
-const InputField: React.FC<InputFieldProps> = ({ value, setValue, placeholder, handleEnter, minRows = 1, maxRows = 4, disabled = false, isOneRow = false }) => {
+const InputField: React.FC<InputFieldProps> = ({ value, setValue, placeholder, handleEnter, setIsFocus, minRows = 1, maxRows = 4, disabled = false, isOneRow = false }) => {
 
   const handleChangeValue = (e: any) => {
     setValue(e.target.value);
   }
   const handlePress = (e: any) => { // keyCode 13 - "Enter"
-    if (isOneRow && e.keyCode === 13) e.preventDefault(); // no \n
+    if (isOneRow && e.keyCode === 13) { e.preventDefault(); } // no \n
     if (handleEnter && e.keyCode === 13 && !e.shiftKey) {
       e.preventDefault();
       handleEnter();
     }
   }
+  const handleFocus = () => {
+    if (setIsFocus) { setIsFocus(true); }
+  }
   const handleUnfocus = () => {
-    //dispatchFunction(value); // trim
+    if (setIsFocus) { setIsFocus(false); }
+    setValue(value.trim()); // trim
   }
 
   const getMaxRows = () => {
@@ -37,11 +42,13 @@ const InputField: React.FC<InputFieldProps> = ({ value, setValue, placeholder, h
     <TextareaAutosize
       onKeyDown={handlePress}
       onChange={handleChangeValue}
-      onBlur={handleUnfocus}
       value={value}
       placeholder={placeholder}
 
       disabled={disabled}
+
+      onFocus={handleFocus}
+      onBlur={handleUnfocus}
 
       minRows={minRows}
       maxRows={getMaxRows()}

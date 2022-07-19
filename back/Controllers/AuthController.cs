@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Authorization;
 using back.Services;
 using back.Models.DTOs.Auth;
-using Microsoft.EntityFrameworkCore;
 using back.Infrastructure.Exceptions;
 
 namespace back.Controllers

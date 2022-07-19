@@ -4,7 +4,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using back.Contexts;
 using back.Repositories;
-using back.Repositories.Interfaces;
 using back.Services;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -33,7 +32,7 @@ builder.Services.AddDbContext<DataContext>(options =>
 	options.UseSqlite($"Data Source={Environment.CurrentDirectory}\\messanger.db")
 	.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
 
-builder.Services.AddScoped<IAsyncUserRepository, AsyncUserRepository>();
+builder.Services.AddScoped<AsyncUnitOfWork>();
 
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<ChatService>();

@@ -14,34 +14,44 @@ namespace back.Repositories
 			this.Context = context;
 			this.Set = context.Set<T>();
 		}
+
+
 		public async Task<T?> GetByIdAsync(int id)
 		{
 			return await this.Set.FindAsync(id);
 		}
+
 		public Task<T?> GetAsync(Expression<Func<T, bool>> where)
 		{
 			return this.Set.Where(where).FirstOrDefaultAsync();
 		}
+
 		public async Task<IEnumerable<T?>> GetManyAsync(Expression<Func<T, bool>> where)
 		{
 			return await this.Set.Where(where).ToListAsync();
 		}
+
 		public async Task<IEnumerable<T?>> GetAllAsync()
 		{
 			return await this.Set.ToListAsync();
 		}
+
 		public async Task AddAsync(T item)
+
 		{
 			await this.Set.AddAsync(item);
 		}
+
 		public Task UpdateAsync(T item)
 		{
 			return Task.Run(() => this.Context.Entry(item).State = EntityState.Modified);
 		}
+
 		public Task DeleteAsync(T item)
 		{
 			return Task.Run(() => this.Set.Remove(item));
 		}
+
 		public Task SaveAsync()
 		{
 			return this.Context.SaveChangesAsync();

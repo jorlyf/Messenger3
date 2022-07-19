@@ -13,9 +13,20 @@ namespace back.Repositories
 		{
 			return this.Set.Where(x => x.Login == login).FirstOrDefaultAsync();
 		}
-		public Task<UserModel?> GetByUsernameAsync(string username)
+
+		public async Task<IEnumerable<UserModel?>> GetByLoginContainsAsync(string login)
 		{
-			return this.Set.Where(x => x.Username == username).FirstOrDefaultAsync();
+			return await this.Set.Where(x => x.Login.Contains(login)).ToListAsync();
+		}
+
+		public async Task<IEnumerable<UserModel?>> GetByUsernameAsync(string username)
+		{
+			return await this.Set.Where(x => x.Username == username).ToListAsync();
+		}
+
+		public async Task<IEnumerable<UserModel?>> GetByUsernameContainsAsync(string username)
+		{
+			return await this.Set.Where(x => x.Username.Contains(username)).ToListAsync();
 		}
 	}
 }

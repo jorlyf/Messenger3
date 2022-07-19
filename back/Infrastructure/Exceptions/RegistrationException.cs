@@ -1,8 +1,8 @@
 ﻿namespace back.Infrastructure.Exceptions
 {
-	public enum RegistrationExceptionReasons
+	public enum RegistrationExceptionReasons: byte
 	{
-		LoginIsNotUnique
+		LoginIsNotUnique = 0
 	}
 	public class RegistrationException : Exception
 	{

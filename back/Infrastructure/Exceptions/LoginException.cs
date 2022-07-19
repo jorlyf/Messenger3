@@ -1,8 +1,9 @@
 ﻿namespace back.Infrastructure.Exceptions
 {
-	public enum LoginExceptionReasons
+	public enum LoginExceptionReasons : byte
 	{
-		UserIsNotFound
+		UserIsNotFound = 0,
+		IncorrectLoginData = 1
 	}
 	public class LoginException : Exception
 	{

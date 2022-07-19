@@ -7,6 +7,8 @@ import styles from "./Search.module.css";
 interface SearchProps {
   value: string;
   setValue: (newValue: string) => void;
+  isFocus: boolean;
+  setIsFocus: (bool: boolean) => void;
 }
 
 const Search: React.FC<SearchProps> = (props) => {
@@ -20,6 +22,7 @@ const Search: React.FC<SearchProps> = (props) => {
           placeholder={"Поиск..."}
           isOneRow={true}
           maxRows={1}
+          setIsFocus={props.setIsFocus}
         />
       </div>
     </div>
