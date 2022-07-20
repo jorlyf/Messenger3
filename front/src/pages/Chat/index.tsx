@@ -1,11 +1,12 @@
 import * as React from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import useAppSelector from "../../hooks/useAppSelector";
 
 import styles from "./Chat.module.css";
 
 const Chat: React.FC = () => {
   const navigate = useNavigate();
+  const { chatId } = useParams();
 
   const isAuthorized = useAppSelector(state => state.auth.isAuthorized);
 
@@ -15,7 +16,7 @@ const Chat: React.FC = () => {
 
   return (
     <div className={styles.chat}>
-
+      {chatId}
     </div>
   );
 }

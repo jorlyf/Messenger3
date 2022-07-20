@@ -48,13 +48,13 @@ export default class AuthService {
   }
   private static onLoginByTokenSuccess(dispatch: AppDispatch): void {
     dispatch(loginByTokenSuccess());
-    AuthService.loadProfileAfterLogin(dispatch);
+    AuthService.loadAfterLogin(dispatch);
   }
   private static onLoginSuccess(dispatch: AppDispatch, token: string): void {
     dispatch(loginSuccess(token));
-    AuthService.loadProfileAfterLogin(dispatch);
+    AuthService.loadAfterLogin(dispatch);
   }
-  private static loadProfileAfterLogin(dispatch: AppDispatch) {
+  private static loadAfterLogin(dispatch: AppDispatch) {
     ProfileService.LoadProfile(dispatch);
   }
 }

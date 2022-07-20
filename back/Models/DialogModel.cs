@@ -8,10 +8,9 @@ namespace back.Models
 		public int Id { get; set; }
 
 		[Required]
-		public string Name { get; set; }
-
-		[Required]
 		public bool IsPrivate { get; set; }
+
+		public string? Name { get; set; }
 
 		public IEnumerable<MessageModel>? Messages { get; set; }
 

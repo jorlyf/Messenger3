@@ -14,7 +14,7 @@ namespace back.Models
 		public int Id { get; set; }
 
 		[Required]
-		public AttachmentModel Type { get; set; }
+		public AttachmentTypes Type { get; set; }
 
 		[Required]
 		public string Url { get; set; }

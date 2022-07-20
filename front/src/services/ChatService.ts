@@ -1,6 +1,8 @@
 import $api from "../http";
+import { AppDispatch } from "../redux/store";
 import DialogModel from "../models/DialogModel";
 import UserModel from "../models/UserModel";
+import MessageDTO from "../models/dtos/MessageDTO";
 
 export default class ChatService {
   static async searchDialogsByNameContains(name: string): Promise<DialogModel[]> {
@@ -29,6 +31,24 @@ export default class ChatService {
     } catch (error) {
       console.log(error);
       return [];
+    }
+  }
+  static async loadDialogs(dispatch: AppDispatch) {
+    try {
+      const response = await $api.get<DialogModel[]>("/Chat/LoadDialogs");
+      console.log(response);
+
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  static async sendMessageToUser(dispatch: AppDispatch, message: MessageDTO) {
+    try {
+      const response = await $api.post("/Chat/SendMessageToUser", message);
+      console.log(response);
+    } catch (error) {
+      console.log(error);
     }
   }
 }

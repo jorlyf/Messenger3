@@ -30,7 +30,8 @@ const App: React.FC = () => {
         <RightColumnHeaderContainer />
         {wasInitAuthAttempt &&
           <Routes>
-            <Route element={<Chat />} path="/" />
+            <Route element={<></>} path="/" />
+            <Route element={<Chat />} path="/:chatId" />
             <Route element={<Auth />} path="/auth" />
             <Route element={<Profile />} path="/profile" />
             <Route element={<NotFound />} path="*" />

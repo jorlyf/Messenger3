@@ -21,4 +21,6 @@
 .item {
   display: flex;
   padding: 5px;
+
+  cursor: pointer;
 }

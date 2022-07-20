@@ -44,7 +44,8 @@ namespace back.Repositories
 
 		public Task UpdateAsync(T item)
 		{
-			return Task.Run(() => this.Context.Entry(item).State = EntityState.Modified);
+			return Task.Run(() => this.Set.Update(item));
+			//return Task.Run(() => this.Context.Entry(item).State = EntityState.Modified);
 		}
 
 		public Task DeleteAsync(T item)

@@ -4,6 +4,7 @@ namespace back.Infrastructure
 {
 	public static class Utils
 	{
+		public static string RootPath { get => Environment.CurrentDirectory; }
 		public static int GetAuthorizedUserId(ClaimsPrincipal user)
 		{
 

@@ -18,5 +18,14 @@ namespace back.Repositories
 		{
 			return await this.Set.Where(x => x.Name.Contains(name)).ToListAsync();
 		}
+
+		public Task<DialogModel?> GetPrivateAsync(UserModel firstUser, UserModel secondUser)
+		{
+			return this.Set
+				.Where(x => x.IsPrivate == true)
+				.Where(x => x.Users.Contains(firstUser))
+				.Where(x => x.Users.Contains(secondUser))
+				.FirstOrDefaultAsync();
+		}
 	}
 }

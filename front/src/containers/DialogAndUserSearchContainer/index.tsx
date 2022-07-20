@@ -6,7 +6,6 @@ import Search from '../../components/Search';
 import DialogAndUserSearchResult from '../../components/DialogAndUserSearchResult';
 import Dialog from '../../models/DialogModel';
 import UserModel from '../../models/UserModel';
-import useOutsideClick from '../../hooks/useOutsideClick';
 
 export interface DialogAndUserSearchResultItems {
   users: UserModel[];
@@ -35,13 +34,14 @@ const DialogAndUserSearchContainer: React.FC = () => {
   const handleChangeValue = (newValue: string) => {
     setInputValue(newValue);
     if (newValue) {
+      setIsActive(true);
       search(newValue);
     }
     else {
       setIsActive(false);
       setSearchResult(null);
     }
-  }
+  };
 
   const handleOutsideClick = () => {
     if (!isInputFocus) {

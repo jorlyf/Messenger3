@@ -6,7 +6,5 @@ namespace back.Repositories.Interfaces
 	{
 		Task<UserModel?> GetByLoginAsync(string login);
 		Task<IEnumerable<UserModel?>> GetByLoginContainsAsync(string login);
-		Task<IEnumerable<UserModel?>> GetByUsernameAsync(string username);
-		Task<IEnumerable<UserModel?>> GetByUsernameContainsAsync(string login);
 	}
 }

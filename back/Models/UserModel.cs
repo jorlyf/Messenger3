@@ -14,10 +14,6 @@ namespace back.Models
 		public string Login { get; set; }
 
 		[Required]
-		[StringLength(maximumLength: 20, MinimumLength = 2)]
-		public string Username { get; set; }
-
-		[Required]
 		[StringLength(maximumLength: 20, MinimumLength = 5)]
 		public string Password { get; set; }
 

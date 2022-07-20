@@ -28,7 +28,7 @@ namespace back.Controllers
 			{
 				int id = Utils.GetAuthorizedUserId(this.User);
 				UserModel? user = await this.ProfileService.LoadUserAsync(id);
-				if (user is null) { throw new Exception("user is not found"); }
+				if (user == null) { throw new Exception("user is not found"); }
 
 				return Ok(user);
 			}

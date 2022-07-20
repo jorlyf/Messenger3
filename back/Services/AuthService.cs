@@ -25,7 +25,7 @@ namespace back.Services
 		public async Task<string> LoginAsync(LoginDataDTO loginData)
 		{
 			UserModel? user = await this.UoW.UserRepository.GetByLoginAsync(loginData.Login);
-			if (user is null)
+			if (user == null)
 			{
 				throw new LoginException(LoginExceptionReasons.UserIsNotFound);
 			}
@@ -44,11 +44,10 @@ namespace back.Services
 			UserModel user = new()
 			{
 				Login = registrationData.Login,
-				Username = registrationData.Username,
 				Password = registrationData.Password
 			};
 
-			if (await this.UoW.UserRepository.GetByLoginAsync(registrationData.Login) is not null)
+			if (await this.UoW.UserRepository.GetByLoginAsync(registrationData.Login) != null)
 			{
 				throw new RegistrationException(RegistrationExceptionReasons.LoginIsNotUnique);
 			}
