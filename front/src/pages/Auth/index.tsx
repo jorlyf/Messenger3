@@ -43,7 +43,7 @@ const Auth: React.FC = () => {
   }
 
   const handleRegistrate = () => {
-    const registrationData: RegistrationDataDTO = { login, username, password }
+    const registrationData: RegistrationDataDTO = { login, password }
     AuthService.registrate(dispatch, registrationData);
   }
 
@@ -54,58 +54,34 @@ const Auth: React.FC = () => {
   return (
     <div>
       <div className={styles.form}>
-        {mode === Mode.login && (
+        <div className={styles.inputs}>
+          <InputField
+            value={login}
+            setValue={setLogin}
+            placeholder={"Логин"}
+            isOneRow={true}
+            disabled={isLogging}
+          />
+          <InputField
+            value={password}
+            setValue={setPassword}
+            placeholder={"Пароль"}
+            isOneRow={true}
+            disabled={isLogging}
+          />
+        </div>
+        {mode === Mode.login &&
           <>
-            <div className={styles.inputs}>
-              <InputField
-                value={login}
-                setValue={setLogin}
-                placeholder={"Логин"}
-                isOneRow={true}
-                disabled={isLogging}
-              />
-              <InputField
-                value={password}
-                setValue={setPassword}
-                placeholder={"Пароль"}
-                isOneRow={true}
-                disabled={isLogging}
-              />
-            </div>
             <button onClick={handleLogin} className={styles.submit}>Войти</button>
             <a onClick={() => handleChangeMode(Mode.registrate)} className={styles.changeMode}>У меня нет аккаунта</a>
           </>
-        )}
-
-        {mode === Mode.registrate && (
+        }
+        {mode === Mode.registrate &&
           <>
-            <div className={styles.inputs}>
-              <InputField
-                value={login}
-                setValue={setLogin}
-                placeholder={"Логин"}
-                isOneRow={true}
-                disabled={isLogging}
-              />
-              <InputField
-                value={username}
-                setValue={setUsername}
-                placeholder={"Имя"}
-                isOneRow={true}
-                disabled={isLogging}
-              />
-              <InputField
-                value={password}
-                setValue={setPassword}
-                placeholder={"Пароль"}
-                isOneRow={true}
-                disabled={isLogging}
-              />
-            </div>
             <button onClick={handleRegistrate} className={styles.submit}>Зарегистрироваться</button>
-            <a onClick={() => handleChangeMode(Mode.login)} className={styles.changeMode}>Я уже зарегистрирован</a>
+            <a onClick={() => handleChangeMode(Mode.login)} className={styles.changeMode}>У меня есть аккаунт</a>
           </>
-        )}
+        }
       </div>
     </div>
   );

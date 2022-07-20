@@ -20,10 +20,10 @@ const DialogAndUserSearchResult: React.FC<DialogAndUserSearchResultProps> = ({ i
   }
 
   const handleUserItemClick = (id: number) => {
-    navigate(`/${id}`);
+    navigate(`/user=${id}`);
   }
   const handleDialogItemClick = (id: number) => {
-    navigate(`/d${id}`);
+    navigate(`/group=${id}`);
   }
 
   return (

@@ -1,6 +1,6 @@
 import * as React from "react";
 import InputField from "../InputField";
-import SearchIcon from "../../../public/icons/SearchIcon.png";
+import SearchIcon from "../../../public/icons/Search.png";
 
 import styles from "./Search.module.css";
 

@@ -1,0 +1,32 @@
+.container {
+  flex-grow            : 0;
+  display              : grid;
+  grid-template-columns: max-content 1fr max-content;
+  border-top           : 2px solid var(--background-color);
+  box-sizing           : border-box;  
+}
+
+.attach {
+  grid-column: 1;
+  margin-top: auto;
+  padding: 7px;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  border-right: 2px solid var(--background-color);
+}
+.send {
+  grid-column: 3;
+  margin-top: auto;
+  padding: 7px;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  border-left: 2px solid var(--background-color);
+}
+
+.input {
+  grid-column: 2;
+  margin-top: auto;
+  padding: 5px;
+}
