@@ -1,5 +1,5 @@
 import * as React from "react";
-import DialogAndUserSearchContainer from "../../containers/DialogAndUserSearchContainer";
+import DialogAndUserSearchContainer from "../../containers/UserSearchContainer";
 import MenuContainer from "../../containers/MenuContainer";
 
 import styles from "./LeftColumnHeader.module.css";

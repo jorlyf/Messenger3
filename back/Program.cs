@@ -34,7 +34,6 @@ builder.Services.AddDbContext<DataContext>(options =>
 
 builder.Services.AddScoped<AsyncUnitOfWork>();
 
-
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<ChatService>();
 builder.Services.AddScoped<ProfileService>();

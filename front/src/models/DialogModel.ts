@@ -1,11 +1,18 @@
+import MessageInput from "./MessageInput";
 import MessageModel from "./MessageModel";
 import UserModel from "./UserModel";
 
-export default interface Dialog {
+export enum DialogTypes {
+  private,
+  group
+}
+
+export default interface DialogModel {
   id: number;
+  type: DialogTypes;
   name: string;
-  isPrivate: boolean;
-  users?: UserModel[];
-  messages?: MessageModel[];
-  avatarUrl: string | null;
+  messages: MessageModel[];
+  users: UserModel[];
+  inputMessage: MessageInput;
+  avatarUrl?: string;
 }

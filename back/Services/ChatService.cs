@@ -17,12 +17,12 @@ namespace back.Services
 		}
 
 
-		public async Task SendMessageToGroupAsync(int groupId, MessageDTO messageUserModel, UserModel senderUser)
+		public async Task<MessageModel> SendMessageToGroupAsync(int groupId, MessageDTO messageUserModel, UserModel senderUser)
 		{
 			throw new NotImplementedException();
 		}
 
-		public async Task SendMessageToUserAsync(int userId, MessageDTO messageDTO, int senderUserId)
+		public async Task<MessageModel> SendMessageToUserAsync(int userId, MessageDTO messageDTO, int senderUserId)
 		{
 			Task<UserModel?> userTask = this.UoW.UserRepository.GetByIdAsync(userId);
 			Task<UserModel?> senderUserTask = this.UoW.UserRepository.GetByIdAsync(senderUserId);
@@ -36,15 +36,10 @@ namespace back.Services
 				throw new SendMessageException(SendMessageExceptionReasons.UserIsNotFound);
 			}
 
-			DialogModel? dialog = await this.UoW.DialogRepository.GetPrivateAsync(user, senderUser);
+			PrivateDialogModel? dialog = await this.UoW.PrivateDialogRepository.GetByUsersAsync(user, senderUser);
 			if (dialog == null) { dialog = await CreatePrivateDialogAsync(user, senderUser); }
 
 
-			await SendMessage(dialog, messageDTO, senderUser);
-		}
-
-		private async Task SendMessage(DialogModel dialog, MessageDTO messageDTO, UserModel senderUser)
-		{
 			List<MessageModel> messages;
 			if (dialog.Messages != null) { messages = dialog.Messages.ToList(); }
 			else { messages = new(); }
@@ -58,56 +53,63 @@ namespace back.Services
 
 			MessageModel newMessage = new()
 			{
+				SenderUser = senderUser,
 				Text = messageDTO.Text,
-				Attachments = attachments
+				Attachments = attachments,
+				SentAt = DateTime.Now
 			};
 			messages.Add(newMessage);
 			dialog.Messages = messages;
+			dialog.LastUpdate = DateTime.Now;
 
-			await this.UoW.DialogRepository.UpdateAsync(dialog);
-			await this.UoW.DialogRepository.SaveAsync();
+			await this.UoW.PrivateDialogRepository.UpdateAsync(dialog);
+			await this.UoW.PrivateDialogRepository.SaveAsync();
+
+			return newMessage;
 		}
 
-		public async Task<DialogModel> CreateGroupDialogAsync(IEnumerable<UserModel> users)
+		public async Task<GroupDialogModel> CreateGroupDialogAsync(IEnumerable<UserModel> users)
 		{
-			DialogModel dialog = new()
+			GroupDialogModel dialog = new()
 			{
-				IsPrivate = false,
 				Name = string.Join(" ", users.Select(x => x.Login)),
-				Users = users
+				Users = users,
+				LastUpdate = DateTime.Now,
 			};
-			await this.UoW.DialogRepository.AddAsync(dialog);
-			await this.UoW.DialogRepository.SaveAsync();
+			await this.UoW.GroupDialogRepository.AddAsync(dialog);
+			await this.UoW.GroupDialogRepository.SaveAsync();
 
 			return dialog;
 		}
 
-		public async Task<DialogModel> CreatePrivateDialogAsync(UserModel firstUser, UserModel secondUser)
+		public async Task<PrivateDialogModel> CreatePrivateDialogAsync(UserModel firstUser, UserModel secondUser)
 		{
-			UserModel[] users = new UserModel[2];
-			users[0] = firstUser;
-			users[1] = secondUser;
-
-			DialogModel dialog = new()
+			PrivateDialogModel dialog = new()
 			{
-				IsPrivate = true,
-				Users = users
+				FirstUserId = firstUser.Id,
+				SecondUserId = secondUser.Id,
+				LastUpdate = DateTime.Now,
 			};
-			await this.UoW.DialogRepository.AddAsync(dialog);
-			await this.UoW.DialogRepository.SaveAsync();
+			await this.UoW.PrivateDialogRepository.AddAsync(dialog);
+			await this.UoW.PrivateDialogRepository.SaveAsync();
 
 			return dialog;
 		}
 
+		public Task<PrivateDialogModel?> SearchPrivateDialogByUserIds(int firstUserId, int secondUserId)
+		{
+			return this.UoW.PrivateDialogRepository.GetByUserIdsAsync(firstUserId, secondUserId);
+		}
 
-		public Task<IEnumerable<UserModel?>> SearchUsersByLoginContainsAsync(string login)
+
+		public Task<IEnumerable<UserModel>> SearchUsersByLoginContainsAsync(string login)
 		{
 			return this.UoW.UserRepository.GetByLoginContainsAsync(login);
 		}
 
-		public Task<IEnumerable<DialogModel?>> SearchDialogsByNameContainsAsync(string name)
+		public Task<IEnumerable<GroupDialogModel>> SearchGroupDialogsByNameContainsAsync(string name)
 		{
-			return this.UoW.DialogRepository.GetByNameContainsAsync(name);
+			return this.UoW.GroupDialogRepository.GetByNameContainsAsync(name);
 		}
 	}
 }

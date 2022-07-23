@@ -8,12 +8,14 @@ import styles from "./ChatInput.module.css";
 interface ChatInputProps {
   value: string;
   setValue: (newValue: string) => void;
+  handleSubmit: () => void;
+  handleAttach: () => void;
 }
 
-const ChatInput: React.FC<ChatInputProps> = ({ value, setValue }) => {
+const ChatInput: React.FC<ChatInputProps> = ({ value, setValue, handleSubmit, handleAttach }) => {
   return (
     <div className={styles.container}>
-      <img src={AttachIcon} className={styles.attach} alt="Attach" />
+      <img onClick={handleAttach} src={AttachIcon} className={styles.attach} alt="Attach" />
 
       <div className={styles.input}>
         <InputField
@@ -22,10 +24,11 @@ const ChatInput: React.FC<ChatInputProps> = ({ value, setValue }) => {
           placeholder={"Напишите сообщение..."}
           minRows={1}
           maxRows={4}
+          handleEnter={handleSubmit}
         />
       </div>
 
-      <img src={SendIcon} className={styles.send} alt="Send" />
+      <img onClick={handleSubmit} src={SendIcon} className={styles.send} alt="Send" />
     </div>
   );
 }

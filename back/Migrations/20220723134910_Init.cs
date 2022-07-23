@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -9,17 +10,33 @@ namespace back.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Dialogs",
+                name: "GroupDialogs",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
-                    IsPrivate = table.Column<bool>(type: "INTEGER", nullable: false)
+                    AvatarUrl = table.Column<string>(type: "TEXT", nullable: true),
+                    LastUpdate = table.Column<DateTime>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Dialogs", x => x.Id);
+                    table.PrimaryKey("PK_GroupDialogs", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PrivateDialogs",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    FirstUserId = table.Column<int>(type: "INTEGER", nullable: false),
+                    SecondUserId = table.Column<int>(type: "INTEGER", nullable: false),
+                    LastUpdate = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PrivateDialogs", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -29,18 +46,17 @@ namespace back.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Login = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false),
-                    Username = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false),
                     Password = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false),
                     AvatarUrl = table.Column<string>(type: "TEXT", nullable: true),
-                    DialogModelId = table.Column<int>(type: "INTEGER", nullable: true)
+                    GroupDialogModelId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Users_Dialogs_DialogModelId",
-                        column: x => x.DialogModelId,
-                        principalTable: "Dialogs",
+                        name: "FK_Users_GroupDialogs_GroupDialogModelId",
+                        column: x => x.GroupDialogModelId,
+                        principalTable: "GroupDialogs",
                         principalColumn: "Id");
                 });
 
@@ -52,15 +68,22 @@ namespace back.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     SenderUserId = table.Column<int>(type: "INTEGER", nullable: false),
                     Text = table.Column<string>(type: "TEXT", maxLength: 1024, nullable: true),
-                    DialogModelId = table.Column<int>(type: "INTEGER", nullable: true)
+                    SentAt = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    GroupDialogModelId = table.Column<int>(type: "INTEGER", nullable: true),
+                    PrivateDialogModelId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Messages", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Messages_Dialogs_DialogModelId",
-                        column: x => x.DialogModelId,
-                        principalTable: "Dialogs",
+                        name: "FK_Messages_GroupDialogs_GroupDialogModelId",
+                        column: x => x.GroupDialogModelId,
+                        principalTable: "GroupDialogs",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Messages_PrivateDialogs_PrivateDialogModelId",
+                        column: x => x.PrivateDialogModelId,
+                        principalTable: "PrivateDialogs",
                         principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Messages_Users_SenderUserId",
@@ -76,19 +99,13 @@ namespace back.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    TypeId = table.Column<int>(type: "INTEGER", nullable: false),
+                    Type = table.Column<byte>(type: "INTEGER", nullable: false),
                     Url = table.Column<string>(type: "TEXT", nullable: false),
                     MessageModelId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Attachments", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Attachments_Attachments_TypeId",
-                        column: x => x.TypeId,
-                        principalTable: "Attachments",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Attachments_Messages_MessageModelId",
                         column: x => x.MessageModelId,
@@ -102,14 +119,14 @@ namespace back.Migrations
                 column: "MessageModelId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Attachments_TypeId",
-                table: "Attachments",
-                column: "TypeId");
+                name: "IX_Messages_GroupDialogModelId",
+                table: "Messages",
+                column: "GroupDialogModelId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Messages_DialogModelId",
+                name: "IX_Messages_PrivateDialogModelId",
                 table: "Messages",
-                column: "DialogModelId");
+                column: "PrivateDialogModelId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Messages_SenderUserId",
@@ -117,9 +134,9 @@ namespace back.Migrations
                 column: "SenderUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Users_DialogModelId",
+                name: "IX_Users_GroupDialogModelId",
                 table: "Users",
-                column: "DialogModelId");
+                column: "GroupDialogModelId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_Login",
@@ -137,10 +154,13 @@ namespace back.Migrations
                 name: "Messages");
 
             migrationBuilder.DropTable(
+                name: "PrivateDialogs");
+
+            migrationBuilder.DropTable(
                 name: "Users");
 
             migrationBuilder.DropTable(
-                name: "Dialogs");
+                name: "GroupDialogs");
         }
     }
 }

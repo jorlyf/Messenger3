@@ -9,6 +9,7 @@ interface SearchProps {
   setValue: (newValue: string) => void;
   isFocus: boolean;
   setIsFocus: (bool: boolean) => void;
+  disabled: boolean;
 }
 
 const Search: React.FC<SearchProps> = (props) => {
@@ -23,6 +24,7 @@ const Search: React.FC<SearchProps> = (props) => {
           isOneRow={true}
           maxRows={1}
           setIsFocus={props.setIsFocus}
+          disabled={props.disabled}
         />
       </div>
     </div>

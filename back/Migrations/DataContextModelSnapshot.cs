@@ -26,7 +26,7 @@ namespace back.Migrations
                     b.Property<int?>("MessageModelId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("TypeId")
+                    b.Property<byte>("Type")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Url")
@@ -37,19 +37,20 @@ namespace back.Migrations
 
                     b.HasIndex("MessageModelId");
 
-                    b.HasIndex("TypeId");
-
                     b.ToTable("Attachments");
                 });
 
-            modelBuilder.Entity("back.Models.DialogModel", b =>
+            modelBuilder.Entity("back.Models.GroupDialogModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool>("IsPrivate")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("AvatarUrl")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("LastUpdate")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -57,7 +58,7 @@ namespace back.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Dialogs");
+                    b.ToTable("GroupDialogs");
                 });
 
             modelBuilder.Entity("back.Models.MessageModel", b =>
@@ -66,11 +67,17 @@ namespace back.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("DialogModelId")
+                    b.Property<int?>("GroupDialogModelId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("PrivateDialogModelId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("SenderUserId")
                         .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Text")
                         .HasMaxLength(1024)
@@ -78,11 +85,33 @@ namespace back.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DialogModelId");
+                    b.HasIndex("GroupDialogModelId");
+
+                    b.HasIndex("PrivateDialogModelId");
 
                     b.HasIndex("SenderUserId");
 
                     b.ToTable("Messages");
+                });
+
+            modelBuilder.Entity("back.Models.PrivateDialogModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("FirstUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("LastUpdate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("SecondUserId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PrivateDialogs");
                 });
 
             modelBuilder.Entity("back.Models.UserModel", b =>
@@ -94,7 +123,7 @@ namespace back.Migrations
                     b.Property<string>("AvatarUrl")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("DialogModelId")
+                    b.Property<int?>("GroupDialogModelId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Login")
@@ -107,14 +136,9 @@ namespace back.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("TEXT");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("DialogModelId");
+                    b.HasIndex("GroupDialogModelId");
 
                     b.HasIndex("Login")
                         .IsUnique();
@@ -127,21 +151,17 @@ namespace back.Migrations
                     b.HasOne("back.Models.MessageModel", null)
                         .WithMany("Attachments")
                         .HasForeignKey("MessageModelId");
-
-                    b.HasOne("back.Models.AttachmentModel", "Type")
-                        .WithMany()
-                        .HasForeignKey("TypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Type");
                 });
 
             modelBuilder.Entity("back.Models.MessageModel", b =>
                 {
-                    b.HasOne("back.Models.DialogModel", null)
+                    b.HasOne("back.Models.GroupDialogModel", null)
                         .WithMany("Messages")
-                        .HasForeignKey("DialogModelId");
+                        .HasForeignKey("GroupDialogModelId");
+
+                    b.HasOne("back.Models.PrivateDialogModel", null)
+                        .WithMany("Messages")
+                        .HasForeignKey("PrivateDialogModelId");
 
                     b.HasOne("back.Models.UserModel", "SenderUser")
                         .WithMany()
@@ -154,12 +174,12 @@ namespace back.Migrations
 
             modelBuilder.Entity("back.Models.UserModel", b =>
                 {
-                    b.HasOne("back.Models.DialogModel", null)
+                    b.HasOne("back.Models.GroupDialogModel", null)
                         .WithMany("Users")
-                        .HasForeignKey("DialogModelId");
+                        .HasForeignKey("GroupDialogModelId");
                 });
 
-            modelBuilder.Entity("back.Models.DialogModel", b =>
+            modelBuilder.Entity("back.Models.GroupDialogModel", b =>
                 {
                     b.Navigation("Messages");
 
@@ -169,6 +189,11 @@ namespace back.Migrations
             modelBuilder.Entity("back.Models.MessageModel", b =>
                 {
                     b.Navigation("Attachments");
+                });
+
+            modelBuilder.Entity("back.Models.PrivateDialogModel", b =>
+                {
+                    b.Navigation("Messages");
                 });
 #pragma warning restore 612, 618
         }

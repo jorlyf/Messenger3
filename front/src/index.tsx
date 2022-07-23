@@ -15,6 +15,7 @@ if (!rootElement) { throw new Error("root element not found"); }
 const root = createRoot(rootElement);
 root.render(
   <Provider store={store}>
+
     <BrowserRouter>
       <App />
     </BrowserRouter>

@@ -1,45 +1,88 @@
 import * as React from "react";
 import { useNavigate, useParams } from "react-router";
-import useAppSelector from "../../hooks/useAppSelector";
-import MessageListContainer from "../../containers/MessageListContainer";
-
-import styles from "./Chat.module.css";
 import ChatInputContainer from "../../containers/ChatInputContainer";
 import { useDispatch } from "react-redux";
+import MessageListContainer from "../../containers/MessageListContainer";
+import useAppSelector from "../../hooks/useAppSelector";
+import ChatService from "../../services/ChatService";
+import { DialogTypes } from "../../models/DialogModel";
 import { setCurrentDialog } from "../../redux/slices/chatSlice";
+import { uuid } from "../../utils";
+import MessageDTO from "../../models/dtos/MessageDTO";
+
+import styles from "./Chat.module.css";
 
 const Chat: React.FC = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+
   const { chatId } = useParams();
 
-  const isAuthorized = useAppSelector(state => state.auth.isAuthorized);
-  const dialogs = useAppSelector(state => state.chat.dialogs);
+  const allDialogs = useAppSelector(state => state.chat.dialogs);
   const currentDialog = useAppSelector(state => state.chat.currentDialog);
 
-  React.useEffect(() => {
-    if (!isAuthorized) { navigate("/auth"); }
-  }, [isAuthorized, navigate]);
-
-  React.useEffect(() => {
+  const handleSendMessage = () => {
     if (!chatId) return;
-    const splitted = chatId.split("=");
-    const type = splitted[0];
-    const id = Number(splitted[1]);
+    const dto: MessageDTO = { text: currentDialog?.inputMessage.text, attachments: currentDialog?.inputMessage.attachments }
+    console.log(dto);
+    
+    ChatService.sendMessageToUser(dispatch, Number(chatId.split("=")[1]), dto);
+  }
 
-    if (type === "user") {
-      const dialog = dialogs.filter(d => d.id === id);
-      // dispatch(setCurrentDialog());
-    }
-    if (type === "group") {
+  React.useEffect(() => {
+    if (!chatId) { return; }
+    const id = Number(chatId.split("=")[1]);
+    if (!id) { return; }
 
+    const stringType = chatId.split("=")[0];
+    let type: DialogTypes;
+    if (stringType === "user") { type = DialogTypes.private; }
+    else if (stringType === "group") { type = DialogTypes.group; }
+    else { return; }
+
+    const dialogFromStore = ChatService.findDialog(id, type, allDialogs);
+    if (dialogFromStore) {
+      dispatch(setCurrentDialog(dialogFromStore));
+      return;
     }
-  }, [chatId]);
+
+    (async () => {
+      let dialogFromApi;
+      if (type === DialogTypes.private) {
+        dialogFromApi = await ChatService.getPrivateDialogFromApi(id);
+        if (dialogFromApi) { dialogFromApi = ChatService.processPrivateDialogDTO(dialogFromApi); }
+      } else if (type === DialogTypes.group) {
+        dialogFromApi = await ChatService.getGroupDialogFromApi(id);
+        if (dialogFromApi) { dialogFromApi = ChatService.processGroupDialogDTO(dialogFromApi); }
+      }
+      if (dialogFromApi) {
+        dispatch(setCurrentDialog(dialogFromApi));
+        return;
+      }
+    })();
+
+    const name: string = "ss";
+    dispatch(setCurrentDialog({
+      id: id,
+      type: type,
+      messages: [],
+      inputMessage: { id: uuid(), text: "", attachments: [] },
+      name: name,
+      users: [],
+      avatarUrl: undefined
+    }));
+
+  }, [chatId, allDialogs, dispatch]);
 
   return (
     <div className={styles.chat}>
-      <MessageListContainer />
-      <ChatInputContainer />
+      {currentDialog &&
+        <>
+          <MessageListContainer />
+          <ChatInputContainer
+            handleSubmit={handleSendMessage}
+          />
+        </>
+      }
     </div>
   );
 }

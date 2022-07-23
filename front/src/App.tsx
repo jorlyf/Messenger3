@@ -11,12 +11,15 @@ import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 import styles from "./App.module.css";
+import Home from "./pages/Home";
+import useAuth from "./hooks/useAuth";
 
 const App: React.FC = () => {
 
   const wasInitAuthAttempt = useAppSelector(state => state.auth.wasInitAuthAttempt);
 
   useInitAuth();
+  useAuth();
 
   return (
     <div className={styles.app}>
@@ -30,7 +33,7 @@ const App: React.FC = () => {
         <RightColumnHeaderContainer />
         {wasInitAuthAttempt &&
           <Routes>
-            <Route element={<></>} path="/" />
+            <Route element={<Home />} path="/" />
             <Route element={<Chat />} path="/:chatId" />
             <Route element={<Auth />} path="/auth" />
             <Route element={<Profile />} path="/profile" />

@@ -19,12 +19,12 @@ namespace back.Controllers
 		}
 
 		[HttpGet]
-		[Route("SearchDialogsByNameContains")]
-		public async Task<ActionResult> SearchDialogsByNameContainsAsync(string name)
+		[Route("SearchGroupDialogsByNameContains")]
+		public async Task<ActionResult<IEnumerable<GroupDialogDTO>>> SearchGroupDialogsByNameContainsAsync(string name)
 		{
 			try
 			{
-				return Ok(await this.ChatService.SearchDialogsByNameContainsAsync(name));
+				return Ok(await this.ChatService.SearchGroupDialogsByNameContainsAsync(name));
 			}
 			catch (Exception)
 			{
@@ -48,28 +48,43 @@ namespace back.Controllers
 
 		[HttpPost]
 		[Route("SendMessageToGroup")]
-		public async Task<ActionResult> SendMessageToGroupAsync(int groupId, [FromForm] MessageDTO message)
+		public async Task<ActionResult<MessageModel>> SendMessageToGroupAsync(int groupId, [FromBody] MessageDTO message)
 		{
 			try
 			{
 				int senderId = Utils.GetAuthorizedUserId(this.User);
+				throw new NotImplementedException();
 			}
 			catch (Exception)
 			{
 				return BadRequest();
 			}
-			throw new NotImplementedException();
 		}
 
 		[HttpPost]
 		[Route("SendMessageToUser")]
-		public async Task<ActionResult> SendMessageToUserAsync(int userId, [FromForm] MessageDTO message)
+		public async Task<ActionResult<MessageModel>> SendMessageToUserAsync(int userId, [FromBody] MessageDTO message)
 		{
 			try
 			{
 				int senderId = Utils.GetAuthorizedUserId(this.User);
-				await this.ChatService.SendMessageToUserAsync(userId, message, senderId);
-				return Ok();
+				MessageModel messageModel = await this.ChatService.SendMessageToUserAsync(userId, message, senderId);
+				return Ok(messageModel);
+			}
+			catch (Exception)
+			{
+				return BadRequest();
+			}
+		}
+
+		[HttpGet]
+		[Route("LoadDialogs")]
+		public async Task<ActionResult<IEnumerable<DialogsDTO>>> LoadDialogsAsync()
+		{
+			try
+			{
+				int id = Utils.GetAuthorizedUserId(this.User);
+				throw new NotImplementedException();
 			}
 			catch (Exception)
 			{
@@ -79,18 +94,19 @@ namespace back.Controllers
 		}
 
 		[HttpGet]
-		[Route("LoadDialogs")]
-		public async Task<ActionResult<IEnumerable<DialogModel>>> LoadDialogsAsync()
+		[Route("GetPrivateDialog")]
+		public async Task<ActionResult<PrivateDialogModel?>> GetPrivateDialogAsync(int userId)
 		{
 			try
 			{
-				int id = Utils.GetAuthorizedUserId(this.User);
+				int senderId = Utils.GetAuthorizedUserId(this.User);
+				PrivateDialogModel? dialog = await this.ChatService.SearchPrivateDialogByUserIds(userId, senderId);
+				return dialog;
 			}
 			catch (Exception)
 			{
 				return BadRequest();
 			}
-			throw new NotImplementedException();
 		}
 	}
 }

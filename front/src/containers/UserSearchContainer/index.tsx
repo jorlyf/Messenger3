@@ -2,33 +2,27 @@ import * as React from 'react';
 import useDebounce from '../../hooks/useDebounce';
 import useAppSelector from '../../hooks/useAppSelector';
 import ChatService from '../../services/ChatService';
-import Search from '../../components/Search';
-import DialogAndUserSearchResult from '../../components/DialogAndUserSearchResult';
-import Dialog from '../../models/DialogModel';
 import UserModel from '../../models/UserModel';
+import Search from '../../components/Search';
+import UserSearchResult from '../../components/UserSearchResult';
+import { useNavigate } from 'react-router-dom';
 
-export interface DialogAndUserSearchResultItems {
-  users: UserModel[];
-  dialogs: Dialog[];
-}
+const UserSearchContainer: React.FC = () => {
+  const navigate = useNavigate();
 
-const DialogAndUserSearchContainer: React.FC = () => {
   const ownerId = useAppSelector(state => state.profile.id);
 
   const [inputValue, setInputValue] = React.useState<string>("");
   const [isInputFocus, setIsInputFocus] = React.useState<boolean>(false);
   const [isActive, setIsActive] = React.useState<boolean>(false);
 
-  const [searchResult, setSearchResult] = React.useState<DialogAndUserSearchResultItems | null>(null);
+  const [searchResult, setSearchResult] = React.useState<UserModel[]>([]);
 
   const search = useDebounce(async (value: string) => {
-    const usersPromise = ChatService.searchUsersByLoginContains(value);
-    const dialogsPromise = ChatService.searchDialogsByNameContains(value);
-
-    let [users, dialogs] = await Promise.all([usersPromise, dialogsPromise]);
+    let users = await ChatService.searchUsersByLoginContains(value);
     users = users.filter(u => u.id !== ownerId);
 
-    setSearchResult({ users, dialogs });
+    setSearchResult(users);
   }, 250);
 
   const handleChangeValue = (newValue: string) => {
@@ -39,15 +33,26 @@ const DialogAndUserSearchContainer: React.FC = () => {
     }
     else {
       setIsActive(false);
-      setSearchResult(null);
+      setSearchResult([]);
     }
-  };
+  }
 
   const handleOutsideClick = () => {
     if (!isInputFocus) {
       setIsActive(false);
     }
-  };
+  }
+
+  const clear = () => {
+    setSearchResult([]);
+    setInputValue("");
+    setIsActive(false);
+  }
+
+  const handleUserItemClick = (userId: number) => {
+    navigate(`/user=${userId}`);
+    clear();
+  }
 
   React.useEffect(() => {
     if (isInputFocus) {
@@ -62,11 +67,13 @@ const DialogAndUserSearchContainer: React.FC = () => {
         setValue={handleChangeValue}
         isFocus={isInputFocus}
         setIsFocus={setIsInputFocus}
+        disabled={!ownerId}
       />
       {isActive && searchResult &&
         <>
-          <DialogAndUserSearchResult
+          <UserSearchResult
             items={searchResult}
+            handleUserItemClick={handleUserItemClick}
             handleOutsideClick={handleOutsideClick}
           />
         </>
@@ -75,4 +82,4 @@ const DialogAndUserSearchContainer: React.FC = () => {
   );
 }
 
-export default React.memo(DialogAndUserSearchContainer);
+export default React.memo(UserSearchContainer);
