@@ -2,7 +2,9 @@
 {
 	public enum SendMessageExceptionReasons
 	{
-		UserIsNotFound = 0
+		UnexpectedError,
+		UserIsNotFound,
+		SenderUserIsReceiver
 	}
 
 	public class SendMessageException : Exception

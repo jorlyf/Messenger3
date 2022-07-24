@@ -1,12 +1,13 @@
 import $api from "../http";
 import { AppDispatch } from "../redux/store";
+import { setCurrentDialog, setDialogs } from "../redux/slices/chatSlice";
+import { uuid } from "../utils";
 import UserModel from "../models/UserModel";
 import MessageDTO from "../models/dtos/MessageDTO";
 import DialogModel, { DialogTypes } from "../models/DialogModel";
 import PrivateDialogDTO from "../models/dtos/PrivateDialogDTO";
 import GroupDialogDTO from "../models/dtos/GroupDialogDTO";
-import { setCurrentDialog, setDialogs } from "../redux/slices/chatSlice";
-import { uuid } from "../utils";
+import MessageModel from "../models/MessageModel";
 
 export default class ChatService {
   static async searchGroupDialogsByNameContains(name: string): Promise<GroupDialogDTO[]> {
@@ -56,24 +57,26 @@ export default class ChatService {
     }
   }
 
-  static async sendMessage(dispatch: AppDispatch, dialog: DialogModel, message: MessageDTO) {
+  static async sendMessage(dispatch: AppDispatch, dialog: DialogModel, message: MessageDTO): Promise<MessageModel | null> {
     try {
       if (dialog.type === DialogTypes.private) {
-        ChatService.sendMessageToUser(dispatch, dialog.id, message);
+        return await ChatService.sendMessageToUser(dialog.id, message);
       }
       else if (dialog.type === DialogTypes.group) {
-        ChatService.sendMessageToGroup(dispatch, dialog.id, message);
+        return null;
+        //return await ChatService.sendMessageToGroup(dialog.id, message);
       }
+      else { return null; }
     } catch (error) {
-      console.log(error);
+      return null;
     }
   }
 
-  static async sendMessageToUser(dispatch: AppDispatch, userId: number, message: MessageDTO) {
-    const response = await $api.post(`/Chat/SendMessageToUser?userId=${userId}`, message);
-    console.log(response);
+  static async sendMessageToUser(userId: number, message: MessageDTO) {
+    const response = await $api.post<MessageModel>(`/Chat/SendMessageToUser?userId=${userId}`, message);
+    return response.data;
   }
-  static async sendMessageToGroup(dispatch: AppDispatch, groupId: number, message: MessageDTO) {
+  static async sendMessageToGroup(groupId: number, message: MessageDTO) {
 
   }
 
@@ -85,7 +88,7 @@ export default class ChatService {
   }
   static async changeCurrentDialog(dispatch: AppDispatch, id: number, type: DialogTypes, dialogs: DialogModel[]) {
     dispatch(setCurrentDialog(undefined));
-    
+
     const dialog = ChatService.findDialog(id, type, dialogs);
     if (!dialog) { return; }
 
@@ -110,6 +113,8 @@ export default class ChatService {
   }
 
   static processPrivateDialogDTO(dialog: PrivateDialogDTO): DialogModel {
+    console.log(dialog);
+    
     return {
       id: dialog.user.id,
       type: DialogTypes.private,

@@ -4,9 +4,9 @@ namespace back.Models
 {
 	public enum AttachmentTypes: byte
 	{
-		Photo = 1,
-		Video = 2,
-		File = 3
+		Photo,
+		Video,
+		File
 	}
 	public class AttachmentModel
 	{

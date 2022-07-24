@@ -23,5 +23,10 @@ namespace back.Repositories
 		{
 			return GetByUserIdsAsync(firstUser.Id, secondUser.Id);
 		}
+
+		public async Task<IEnumerable<PrivateDialogModel>> GetByUserId(int userId)
+		{
+			return await this.Set.Where(x => x.FirstUserId == userId || x.SecondUserId == userId).ToListAsync();
+		}
 	}
 }

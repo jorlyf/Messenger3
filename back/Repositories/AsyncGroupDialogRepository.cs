@@ -9,14 +9,19 @@ namespace back.Repositories
 	{
 		public AsyncGroupDialogRepository(DataContext context) : base(context) { }
 
-		public async Task<IEnumerable<GroupDialogModel?>> GetByNameAsync(string name)
+		public async Task<IEnumerable<GroupDialogModel>> GetByNameAsync(string name)
 		{
 			return await this.Set.Where(x => x.Name == name).ToListAsync();
 		}
 
-		public async Task<IEnumerable<GroupDialogModel?>> GetByNameContainsAsync(string name)
+		public async Task<IEnumerable<GroupDialogModel>> GetByNameContainsAsync(string name)
 		{
 			return await this.Set.Where(x => x.Name.Contains(name)).ToListAsync();
+		}
+
+		public async Task<IEnumerable<GroupDialogModel>> GetByUserId(int userId)
+		{
+			return await this.Set.Where(x => x.Users.Any(u => u.Id == userId)).ToListAsync();
 		}
 	}
 }

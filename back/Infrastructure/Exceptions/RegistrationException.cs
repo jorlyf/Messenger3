@@ -2,7 +2,8 @@
 {
 	public enum RegistrationExceptionReasons: byte
 	{
-		LoginIsNotUnique = 0
+		UnexpectedError,
+		LoginIsNotUnique
 	}
 	public class RegistrationException : Exception
 	{

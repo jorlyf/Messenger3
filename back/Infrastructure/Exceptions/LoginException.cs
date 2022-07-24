@@ -2,8 +2,9 @@
 {
 	public enum LoginExceptionReasons : byte
 	{
-		UserIsNotFound = 0,
-		IncorrectLoginData = 1
+		UnexpectedError,
+		UserIsNotFound,
+		IncorrectLoginData
 	}
 	public class LoginException : Exception
 	{

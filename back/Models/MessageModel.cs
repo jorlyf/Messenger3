@@ -8,11 +8,12 @@ namespace back.Models
 		public int Id { get; set; }
 
 		[Required]
-		public UserModel SenderUser { get; set; }
+		public int SenderUserId { get; set; }
 
 		[MaxLength(1024)]
 		public string? Text { get; set; }
 
+		//[Range(0, 10)]
 		public IEnumerable<AttachmentModel?>? Attachments { get; set; }
 
 		[Required]

@@ -6,5 +6,7 @@ namespace back.Repositories.Interfaces
 	{
 		Task<PrivateDialogModel?> GetByUserIdsAsync(int firstUserId, int secondUserId);
 		Task<PrivateDialogModel?> GetByUsersAsync(UserModel firstUser, UserModel secondUser);
+
+		Task<IEnumerable<PrivateDialogModel>> GetByUserId(int userId);
 	}
 }

@@ -7,5 +7,7 @@ namespace back.Repositories.Interfaces
 		Task<IEnumerable<GroupDialogModel>> GetByNameAsync(string name);
 
 		Task<IEnumerable<GroupDialogModel>> GetByNameContainsAsync(string name);
+
+		Task<IEnumerable<GroupDialogModel>> GetByUserId(int userId);
 	}
 }

@@ -8,7 +8,7 @@ namespace back.Models
 		public int Id { get; set; }
 
 		[Required]
-		public IEnumerable<MessageModel> Messages { get; set; }
+		public IList<MessageModel> Messages { get; set; }
 
 		[Required]
 		public DateTime LastUpdate { get; set; }

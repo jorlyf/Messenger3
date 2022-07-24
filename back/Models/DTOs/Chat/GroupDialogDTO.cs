@@ -8,7 +8,7 @@ namespace back.Models.DTOs.Chat
 		public int GroupId { get; set; }
 
 		[Required]
-		public IEnumerable<UserModel> Users { get; set; }
+		public IEnumerable<int> UserIds { get; set; }
 
 		[Required]
 		public IEnumerable<MessageModel> Messages { get; set; }
@@ -19,6 +19,6 @@ namespace back.Models.DTOs.Chat
 		public string? GroupAvatarUrl { get; set; }
 
 		[Required]
-		public long LastUpdateTotalSeconds { get; set; }
+		public long LastUpdateTotalMilliseconds { get; set; }
 	}
 }
