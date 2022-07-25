@@ -26,7 +26,7 @@ export default class ChatService {
   }
   static async searchUsersByLoginContains(login: string): Promise<UserModel[]> {
     try {
-      const response = await $api.get<UserModel[]>(`/Chat/SearchUsersByLoginContains?login=${login}`);
+      const response = await $api.get<UserModel[]>(`/Chat/GetUsersByLoginContains?login=${login}`);
 
       if (response.data) {
         return response.data;
@@ -89,10 +89,43 @@ export default class ChatService {
   static async changeCurrentDialog(dispatch: AppDispatch, id: number, type: DialogTypes, dialogs: DialogModel[]) {
     dispatch(setCurrentDialog(undefined));
 
-    const dialog = ChatService.findDialog(id, type, dialogs);
-    if (!dialog) { return; }
+    let dialog = ChatService.findDialog(id, type, dialogs);
+    let dialogDTO: PrivateDialogDTO | GroupDialogDTO | null;
+    if (!dialog) {
+      switch (type) {
+        case DialogTypes.private: {
+          dialogDTO = await this.getPrivateDialogFromApi(id);
+          if (!dialogDTO) {
+            dialog = this.createEmptyDialogModel(id, type);
+            break;
+          }
+          dialog = ChatService.processPrivateDialogDTO(dialogDTO);
+          break;
+        }
+        case DialogTypes.group: {
+          dialogDTO = await this.getGroupDialogFromApi(id);
+          if (!dialogDTO) {
+            dialog = this.createEmptyDialogModel(id, type);
+            break;
+          }
+          dialog = ChatService.processGroupDialogDTO(dialogDTO);
+          break;
+        }
+        default: { return; }
+      }
+    }
 
     dispatch(setCurrentDialog(dialog));
+  }
+  static createEmptyDialogModel(id: number, type: DialogTypes): DialogModel {
+    return {
+      id: id,
+      type: type,
+      userIds: [],
+      messages: [],
+      name: "",
+      inputMessage: { id: uuid(), text: "", attachments: [] }
+    }
   }
 
   static async getPrivateDialogFromApi(userId: number): Promise<PrivateDialogDTO | null> {
@@ -113,16 +146,14 @@ export default class ChatService {
   }
 
   static processPrivateDialogDTO(dialog: PrivateDialogDTO): DialogModel {
-    console.log(dialog);
-    
     return {
-      id: dialog.user.id,
+      id: dialog.userId,
       type: DialogTypes.private,
-      name: dialog.user.login,
+      name: dialog.name,
       messages: dialog.messages,
-      users: [dialog.user],
+      userIds: [dialog.userId],
       inputMessage: { id: uuid(), text: "", attachments: [] },
-      avatarUrl: dialog.user.avatarUrl
+      avatarUrl: dialog.userAvatarUrl
     };
   }
   static processGroupDialogDTO(dialog: GroupDialogDTO): DialogModel {
@@ -131,7 +162,7 @@ export default class ChatService {
       type: DialogTypes.group,
       name: dialog.name,
       messages: dialog.messages,
-      users: dialog.users,
+      userIds: dialog.userIds,
       inputMessage: { id: uuid(), text: "", attachments: [] },
       avatarUrl: dialog.groupAvatarUrl
     };

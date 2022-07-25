@@ -35,25 +35,16 @@ namespace back.Controllers
 				string token = await this.AuthService.LoginAsync(loginData);
 				return Ok(new LoginAnswerDataDTO
 				{
-					IsSuccess = true,
 					Token = token
 				});
 			}
-			catch (LoginException ex)
+			catch (ApiException ex)
 			{
-				return BadRequest(new LoginAnswerDataDTO
-				{
-					IsSuccess = false,
-					ExceptionReason = ex.Reason
-				});
+				return BadRequest(ex.Reason);
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
-				Console.WriteLine(ex);
-				return BadRequest(new LoginAnswerDataDTO
-				{
-					IsSuccess = false
-				});
+				return StatusCode(500);
 			}
 		}
 
@@ -66,25 +57,16 @@ namespace back.Controllers
 				string token = await this.AuthService.RegistrateAsync(registrationData);
 				return Ok(new RegistrationAnswerDataDTO
 				{
-					IsSuccess = true,
 					Token = token
 				});
 			}
-			catch (RegistrationException ex)
+			catch (ApiException ex)
 			{
-				return BadRequest(new RegistrationAnswerDataDTO
-				{
-					IsSuccess = false,
-					ExceptionReason = ex.Reason
-				});
+				return BadRequest(ex.Reason);
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
-				Console.WriteLine(ex);
-				return BadRequest(new RegistrationAnswerDataDTO
-				{
-					IsSuccess = false
-				});
+				return StatusCode(500);
 			}
 		}
 	}

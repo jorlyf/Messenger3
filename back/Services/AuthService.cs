@@ -27,12 +27,12 @@ namespace back.Services
 			UserModel? user = await this.UoW.UserRepository.GetByLoginAsync(loginData.Login);
 			if (user == null)
 			{
-				throw new LoginException(LoginExceptionReasons.UserIsNotFound);
+				throw new ApiException(ApiExceptionReason.UserIsNotFound);
 			}
 
 			if (user.Password != loginData.Password)
 			{
-				throw new LoginException(LoginExceptionReasons.IncorrectLoginData);
+				throw new ApiException(ApiExceptionReason.IncorrectLoginData);
 			}
 
 			string token = GenerateToken(user);
@@ -49,7 +49,7 @@ namespace back.Services
 
 			if (await this.UoW.UserRepository.GetByLoginAsync(registrationData.Login) != null)
 			{
-				throw new RegistrationException(RegistrationExceptionReasons.LoginIsNotUnique);
+				throw new ApiException(ApiExceptionReason.LoginIsNotUnique);
 			}
 
 			await this.UoW.UserRepository.AddAsync(user);

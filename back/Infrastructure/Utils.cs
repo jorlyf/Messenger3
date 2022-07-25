@@ -10,5 +10,10 @@ namespace back.Infrastructure
 
 			return int.Parse(user.Claims.First(x => x.Type == "id").Value);
 		}
+
+		public static long GetTotalMilliseconds(DateTime dateTime)
+		{
+			return new DateTimeOffset(dateTime).ToUnixTimeMilliseconds();
+		}
 	}
 }

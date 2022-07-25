@@ -4,6 +4,7 @@ using back.Models;
 using back.Services;
 using System.Security.Claims;
 using back.Infrastructure;
+using back.Infrastructure.Exceptions;
 
 namespace back.Controllers
 {
@@ -28,13 +29,17 @@ namespace back.Controllers
 			{
 				int id = Utils.GetAuthorizedUserId(this.User);
 				UserModel? user = await this.ProfileService.LoadUserAsync(id);
-				if (user == null) { throw new Exception("user is not found"); }
+				if (user == null) { throw new ApiException(ApiExceptionReason.UserIsNotFound); }
 
 				return Ok(user);
 			}
+			catch (ApiException ex)
+			{
+				return BadRequest(ex.Reason);
+			}
 			catch (Exception)
 			{
-				return BadRequest();
+				return StatusCode(500);
 			}
 		}
 	}

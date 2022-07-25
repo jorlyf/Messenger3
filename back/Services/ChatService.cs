@@ -1,4 +1,5 @@
-﻿using back.Infrastructure.Exceptions;
+﻿using back.Infrastructure;
+using back.Infrastructure.Exceptions;
 using back.Models;
 using back.Models.DTOs;
 using back.Models.DTOs.Chat;
@@ -21,23 +22,28 @@ namespace back.Services
 		public async Task<MessageModel> SendMessageToUserAsync(int senderId, MessageContainerDTO messageContainerDTO)
 		{
 			if (senderId == messageContainerDTO.ToId)
-			{ throw new SendMessageException(SendMessageExceptionReasons.SenderUserIsReceiver); }
+			{ throw new ApiException(ApiExceptionReason.SenderUserIsReceiver); }
 
 			if ((await this.UoW.UserRepository.GetByIdAsync(messageContainerDTO.ToId)) == null)
-			{ throw new SendMessageException(SendMessageExceptionReasons.UserIsNotFound); }
+			{ throw new ApiException(ApiExceptionReason.UserIsNotFound); }
 
-			PrivateDialogModel? dialog = await GetPrivateDialogAsync(senderId, messageContainerDTO.ToId);
+			Task<UserModel?> senderUserTask = this.UoW.UserRepository.GetByIdAsync(senderId);
+			Task<UserModel?> receiveUserTask = this.UoW.UserRepository.GetByIdAsync(messageContainerDTO.ToId);
+
+			Task.WaitAll(senderUserTask, receiveUserTask);
+			UserModel? senderUser = senderUserTask.Result;
+			UserModel? receiveUser = receiveUserTask.Result;
+			if (senderUser == null || receiveUser == null)
+			{ throw new ApiException(ApiExceptionReason.UserIsNotFound); }
+
+			PrivateDialogModel? dialog = await GetPrivateDialogAsync(senderUser.Id, receiveUser.Id);
 			if (dialog == null)
-			{
-				dialog = await CreatePrivateDialogAsync(senderId, messageContainerDTO.ToId);
-			}
+			{ dialog = await CreatePrivateDialogAsync(senderUser, receiveUser); }
 
 			string? messageText = messageContainerDTO.Message.Text;
 			IEnumerable<AttachmentModel>? attachments = null;
 			if (messageContainerDTO.Message.Attachments != null)
-			{
-				attachments = await this.FileService.SaveMessageAttachmentsAsync(messageContainerDTO.Message.Attachments);
-			}
+			{ attachments = await this.FileService.SaveMessageAttachmentsAsync(messageContainerDTO.Message.Attachments); }
 
 			MessageModel messageModel = new()
 			{
@@ -54,10 +60,10 @@ namespace back.Services
 			return messageModel;
 		}
 
-		public async Task<DialogsDTO> GetDialogsDTOAsync(int userId)
+		public async Task<DialogsDTO> GetDialogsDTOAsync(int responseSenderUserId)
 		{
-			Task<IEnumerable<PrivateDialogModel>> privateDialogs = this.UoW.PrivateDialogRepository.GetByUserId(userId);
-			Task<IEnumerable<GroupDialogModel>> groupDialogs = this.UoW.GroupDialogRepository.GetByUserId(userId);
+			Task<IEnumerable<PrivateDialogModel>> privateDialogs = this.UoW.PrivateDialogRepository.GetByUserId(responseSenderUserId);
+			Task<IEnumerable<GroupDialogModel>> groupDialogs = this.UoW.GroupDialogRepository.GetByUserId(responseSenderUserId);
 
 			await Task.WhenAll(privateDialogs, groupDialogs);
 
@@ -65,29 +71,16 @@ namespace back.Services
 			foreach (PrivateDialogModel dialog in privateDialogs.Result)
 			{
 				int id;
-				if (dialog.FirstUserId != userId) { id = dialog.FirstUserId; }
+				if (dialog.FirstUserId != responseSenderUserId) { id = dialog.FirstUserId; }
 				else { id = dialog.SecondUserId; }
 
-				privateDialogDTOs.Add(new PrivateDialogDTO
-				{
-					UserId = id,
-					Messages = dialog.Messages,
-					LastUpdateTotalMilliseconds = new DateTimeOffset(dialog.LastUpdate).ToUnixTimeMilliseconds()
-				});
+				privateDialogDTOs.Add(PrivateDialogModelToDTO(dialog, id));
 			}
 
 			IList<GroupDialogDTO> groupDialogDTOs = new List<GroupDialogDTO>();
 			foreach (GroupDialogModel dialog in groupDialogs.Result)
 			{
-				groupDialogDTOs.Add(new GroupDialogDTO
-				{
-					GroupId = dialog.Id,
-					UserIds = dialog.Users.Select(x => x.Id).ToList(),
-					Name = dialog.Name,
-					Messages = dialog.Messages,
-					GroupAvatarUrl = dialog.AvatarUrl,
-					LastUpdateTotalMilliseconds = new DateTimeOffset(dialog.LastUpdate).ToUnixTimeMilliseconds()
-				});
+				groupDialogDTOs.Add(GroupDialogModelToDTO(dialog));
 			}
 
 			return new DialogsDTO
@@ -111,17 +104,64 @@ namespace back.Services
 			return users.Where(x => x.Login != senderUser.Login);
 		}
 
-		private Task<PrivateDialogModel?> GetPrivateDialogAsync(int firstId, int secondId)
+		public Task<PrivateDialogModel?> GetPrivateDialogAsync(int firstId, int secondId)
 		{
 			return this.UoW.PrivateDialogRepository.GetByUserIdsAsync(firstId, secondId);
 		}
 
-		private async Task<PrivateDialogModel> CreatePrivateDialogAsync(int firstId, int secondId)
+		public Task<GroupDialogModel?> GetGroupDialogAsync(int groupId)
+		{
+			return this.UoW.GroupDialogRepository.GetByIdAsync(groupId);
+		}
+
+		public PrivateDialogDTO PrivateDialogModelToDTO(PrivateDialogModel model, int userId)
+		{
+			if (userId != model.FirstUserId && userId != model.SecondUserId)
+			{ throw new ArgumentException("bad create private dialog dto"); }
+
+			string login;
+			string? avatarUrl;
+			if (userId == model.FirstUserId)
+			{
+				login = model.FirstUser.Login;
+				avatarUrl = model.FirstUser.AvatarUrl;
+			}
+			else
+			{
+				login = model.SecondUser.Login;
+				avatarUrl = model.SecondUser.AvatarUrl;
+			}
+			return new PrivateDialogDTO
+			{
+				UserId = userId,
+				Messages = model.Messages,
+				Name = login,
+				UserAvatarUrl = avatarUrl,
+				LastUpdateTotalMilliseconds = Utils.GetTotalMilliseconds(model.LastUpdate)
+			};
+		}
+
+		public GroupDialogDTO GroupDialogModelToDTO(GroupDialogModel model)
+		{
+			return new GroupDialogDTO
+			{
+				GroupId = model.Id,
+				UserIds = model.Users.Select(x => x.Id),
+				Messages = model.Messages,
+				GroupAvatarUrl = model.AvatarUrl,
+				Name = model.Name,
+				LastUpdateTotalMilliseconds = Utils.GetTotalMilliseconds(model.LastUpdate)
+			};
+		}
+
+		private async Task<PrivateDialogModel> CreatePrivateDialogAsync(UserModel firstUser, UserModel secondUser)
 		{
 			PrivateDialogModel dialog = new()
 			{
-				FirstUserId = firstId,
-				SecondUserId = secondId,
+				FirstUserId = firstUser.Id,
+				SecondUserId = secondUser.Id,
+				FirstUser = firstUser,
+				SecondUser = secondUser,
 				Messages = new List<MessageModel>(),
 				LastUpdate = DateTime.Now,
 			};

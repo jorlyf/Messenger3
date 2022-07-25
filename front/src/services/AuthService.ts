@@ -24,9 +24,7 @@ export default class AuthService {
     try {
       dispatch(loginInit());
       const response = await $api.post<LoginAnswerDataDTO>("/Auth/Login", loginData);
-      if (response.data.token) {
-        AuthService.onLoginSuccess(dispatch, response.data.token);
-      }
+      AuthService.onLoginSuccess(dispatch, response.data.token);
     } catch (error) {
       dispatch(loginError());
     }
@@ -35,9 +33,7 @@ export default class AuthService {
     try {
       dispatch(loginInit());
       const response = await $api.post<RegistrationAnswerDataDTO>("/Auth/Registrate", registrationData);
-      if (response.data.token) {
-        AuthService.onLoginSuccess(dispatch, response.data.token);
-      }
+      AuthService.onLoginSuccess(dispatch, response.data.token);
     } catch (error) {
       dispatch(loginError());
     }

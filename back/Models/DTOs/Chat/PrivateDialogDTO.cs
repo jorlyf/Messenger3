@@ -11,6 +11,11 @@ namespace back.Models.DTOs.Chat
 		public IEnumerable<MessageModel> Messages { get; set; }
 
 		[Required]
+		public string Name { get; set; }
+
+		public string? UserAvatarUrl { get; set; }
+
+		[Required]
 		public long LastUpdateTotalMilliseconds { get; set; }
 	}
 }

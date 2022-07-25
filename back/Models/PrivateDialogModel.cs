@@ -9,5 +9,11 @@ namespace back.Models
 
 		[Required]
 		public int SecondUserId { get; set; }
+
+		[Required]
+		public UserModel FirstUser { get; set; }
+
+		[Required]
+		public UserModel SecondUser { get; set; }
 	}
 }

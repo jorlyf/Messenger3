@@ -1,6 +1,5 @@
 import MessageInput from "./MessageInput";
 import MessageModel from "./MessageModel";
-import UserModel from "./UserModel";
 
 export enum DialogTypes {
   private,
@@ -12,7 +11,7 @@ export default interface DialogModel {
   type: DialogTypes;
   name: string;
   messages: MessageModel[];
-  users: UserModel[];
+  userIds: number[];
   inputMessage: MessageInput;
   avatarUrl?: string;
 }
