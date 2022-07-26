@@ -8,7 +8,7 @@ namespace back.Models.DTOs.Chat
 		public int UserId { get; set; }
 
 		[Required]
-		public IEnumerable<MessageModel> Messages { get; set; }
+		public IEnumerable<MessageDTO> Messages { get; set; }
 
 		[Required]
 		public string Name { get; set; }

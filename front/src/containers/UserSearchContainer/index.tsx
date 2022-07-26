@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 const UserSearchContainer: React.FC = () => {
   const navigate = useNavigate();
 
-  const ownerId = useAppSelector(state => state.profile.id);
+  const ownerUser = useAppSelector(state => state.profile.user);
 
   const [inputValue, setInputValue] = React.useState<string>("");
   const [isInputFocus, setIsInputFocus] = React.useState<boolean>(false);
@@ -19,8 +19,9 @@ const UserSearchContainer: React.FC = () => {
   const [searchResult, setSearchResult] = React.useState<UserModel[]>([]);
 
   const search = useDebounce(async (value: string) => {
+    if (!ownerUser) return;
     let users = await ChatService.searchUsersByLoginContains(value);
-    users = users.filter(u => u.id !== ownerId);
+    users = users.filter(u => u.id !== ownerUser.id);
 
     setSearchResult(users);
   }, 250);
@@ -67,7 +68,7 @@ const UserSearchContainer: React.FC = () => {
         setValue={handleChangeValue}
         isFocus={isInputFocus}
         setIsFocus={setIsInputFocus}
-        disabled={!ownerId}
+        disabled={!ownerUser}
       />
       {isActive && searchResult &&
         <>

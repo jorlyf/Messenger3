@@ -19,7 +19,7 @@ namespace back.Services
 		}
 
 
-		public async Task<MessageModel> SendMessageToUserAsync(int senderId, MessageContainerDTO messageContainerDTO)
+		public async Task<MessageModel> SendMessageToUserAsync(int senderId, SendMessageContainerDTO messageContainerDTO)
 		{
 			if (senderId == messageContainerDTO.ToId)
 			{ throw new ApiException(ApiExceptionReason.SenderUserIsReceiver); }
@@ -36,6 +36,10 @@ namespace back.Services
 			if (senderUser == null || receiveUser == null)
 			{ throw new ApiException(ApiExceptionReason.UserIsNotFound); }
 
+			await this.UoW.UserRepository.AttachAsync(senderUser);
+			await this.UoW.UserRepository.AttachAsync(receiveUser);
+
+
 			PrivateDialogModel? dialog = await GetPrivateDialogAsync(senderUser.Id, receiveUser.Id);
 			if (dialog == null)
 			{ dialog = await CreatePrivateDialogAsync(senderUser, receiveUser); }
@@ -47,7 +51,7 @@ namespace back.Services
 
 			MessageModel messageModel = new()
 			{
-				SenderUserId = senderId,
+				SenderUser = senderUser,
 				Text = messageText,
 				Attachments = attachments,
 				SentAt = DateTime.Now
@@ -134,7 +138,13 @@ namespace back.Services
 			return new PrivateDialogDTO
 			{
 				UserId = userId,
-				Messages = model.Messages,
+				Messages = model.Messages.Select(x => new MessageDTO
+				{
+					SenderUser = x.SenderUser,
+					Text = x.Text,
+					Attachments = x.Attachments,
+					SentAtTotalMilliseconds = Utils.GetTotalMilliseconds(x.SentAt)
+				}),
 				Name = login,
 				UserAvatarUrl = avatarUrl,
 				LastUpdateTotalMilliseconds = Utils.GetTotalMilliseconds(model.LastUpdate)
@@ -147,7 +157,13 @@ namespace back.Services
 			{
 				GroupId = model.Id,
 				UserIds = model.Users.Select(x => x.Id),
-				Messages = model.Messages,
+				Messages = model.Messages.Select(x => new MessageDTO
+				{
+					SenderUser = x.SenderUser,
+					Text = x.Text,
+					Attachments = x.Attachments,
+					SentAtTotalMilliseconds = Utils.GetTotalMilliseconds(x.SentAt)
+				}),
 				GroupAvatarUrl = model.AvatarUrl,
 				Name = model.Name,
 				LastUpdateTotalMilliseconds = Utils.GetTotalMilliseconds(model.LastUpdate)

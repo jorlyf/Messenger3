@@ -11,7 +11,7 @@ namespace back.Models.DTOs.Chat
 		public IEnumerable<int> UserIds { get; set; }
 
 		[Required]
-		public IEnumerable<MessageModel> Messages { get; set; }
+		public IEnumerable<MessageDTO> Messages { get; set; }
 
 		[Required]
 		public string Name { get; set; }

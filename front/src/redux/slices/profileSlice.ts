@@ -2,17 +2,13 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import UserModel from "../../models/UserModel";
 
 interface ProfileState {
-  isLoaded: boolean,
-  id: number | null;
-  login: string | null;
-  avatarUrl: string | null;
+  isLoaded: boolean;
+  user: UserModel | null;
 }
 
 const initialState: ProfileState = {
   isLoaded: false,
-  id: null,
-  login: null,
-  avatarUrl: null,
+  user: null
 }
 
 const profileSlice = createSlice({
@@ -21,20 +17,21 @@ const profileSlice = createSlice({
   reducers: {
     loadProfile(state, action: PayloadAction<UserModel>) {
       state.isLoaded = true;
-      state.id = action.payload.id;
-      state.login = action.payload.login;
-      state.avatarUrl = action.payload.avatarUrl;
+      state.user = {
+        id: action.payload.id,
+        login: action.payload.login,
+        avatarUrl: action.payload.avatarUrl
+      }
     },
     unloadProfile(state) {
       state.isLoaded = false;
-      state.id = null;
-      state.login = null;
-      state.avatarUrl = null;
+      state.user = null;
     },
     setAvatarUrl(state, action: PayloadAction<string>) {
-      if (state.isLoaded) return;
+      if (!state.isLoaded) return;
+      if (!state.user) return;
 
-      state.avatarUrl = action.payload;
+      state.user.avatarUrl = action.payload;
     }
   }
 });

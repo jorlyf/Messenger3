@@ -22,7 +22,7 @@ namespace back.Controllers
 
 		[HttpPost]
 		[Route("SendMessageToUser")]
-		public async Task<ActionResult<MessageModel>> SendMessageToUserAsync(MessageContainerDTO messageContainerDTO)
+		public async Task<ActionResult<MessageModel>> SendMessageToUserAsync(SendMessageContainerDTO messageContainerDTO)
 		{
 			try
 			{

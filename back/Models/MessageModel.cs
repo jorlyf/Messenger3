@@ -8,7 +8,7 @@ namespace back.Models
 		public int Id { get; set; }
 
 		[Required]
-		public int SenderUserId { get; set; }
+		public UserModel SenderUser { get; set; }
 
 		[MaxLength(1024)]
 		public string? Text { get; set; }

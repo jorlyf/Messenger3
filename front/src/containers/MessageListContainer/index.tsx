@@ -1,10 +1,14 @@
 import * as React from "react";
 import MessageList from "../../components/MessageList";
+import Message from "../../models/Message";
 
-const MessageListContainer: React.FC = () => {
+export interface MessageListContainerProps {
+  messages: Message[];
+}
 
+const MessageListContainer: React.FC<MessageListContainerProps> = ({ messages }) => {
   return (
-    <MessageList items={[]} />
+    <MessageList items={messages} />
   );
 }
 

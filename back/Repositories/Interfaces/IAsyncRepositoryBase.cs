@@ -11,6 +11,8 @@ namespace back.Repositories.Interfaces
 		Task AddAsync(T item);
 		Task UpdateAsync(T item);
 		Task DeleteAsync(T item);
+
+		Task AttachAsync(T item);
 		Task SaveAsync();
 	}
 }

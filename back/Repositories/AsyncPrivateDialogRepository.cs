@@ -16,6 +16,12 @@ namespace back.Repositories
 				(x.FirstUserId == firstUserId || x.FirstUserId == secondUserId)
 				&&
 				(x.SecondUserId == firstUserId || x.SecondUserId == secondUserId))
+				.Include(x => x.FirstUser)
+				.Include(x => x.SecondUser)
+				.Include(x => x.Messages)
+					.ThenInclude(x => x.SenderUser)
+				.Include(x => x.Messages)
+					.ThenInclude(x => x.Attachments)
 				.FirstOrDefaultAsync();
 		}
 

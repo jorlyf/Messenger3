@@ -11,8 +11,8 @@ using back.Contexts;
 namespace back.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20220725081148_init")]
-    partial class init
+    [Migration("20220726115112_Initialize")]
+    partial class Initialize
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -91,6 +91,8 @@ namespace back.Migrations
 
                     b.HasIndex("PrivateDialogModelId");
 
+                    b.HasIndex("SenderUserId");
+
                     b.ToTable("Messages");
                 });
 
@@ -166,6 +168,14 @@ namespace back.Migrations
                     b.HasOne("back.Models.PrivateDialogModel", null)
                         .WithMany("Messages")
                         .HasForeignKey("PrivateDialogModelId");
+
+                    b.HasOne("back.Models.UserModel", "SenderUser")
+                        .WithMany()
+                        .HasForeignKey("SenderUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SenderUser");
                 });
 
             modelBuilder.Entity("back.Models.PrivateDialogModel", b =>

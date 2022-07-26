@@ -53,6 +53,11 @@ namespace back.Repositories
 			return Task.Run(() => this.Set.Remove(item));
 		}
 
+		public Task AttachAsync(T item)
+		{
+			return Task.Run(() => this.Set.Attach(item));
+		}
+
 		public Task SaveAsync()
 		{
 			return this.Context.SaveChangesAsync();

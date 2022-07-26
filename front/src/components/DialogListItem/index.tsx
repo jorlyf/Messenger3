@@ -3,7 +3,7 @@ import React from "react";
 import styles from "./DialogListItem.module.css";
 
 export interface DialogListItemProps {
-  username: string;
+  name: string;
   avatarUrl?: string;
   onClick?: () => void;
   lastMessageText?: string;

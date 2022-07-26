@@ -2,7 +2,7 @@ import * as React from "react";
 import { useDispatch } from "react-redux";
 import ChatInput from "../../components/ChatInput";
 import useAppSelector from "../../hooks/useAppSelector";
-import MessageDTO from "../../models/dtos/MessageDTO";
+import MessageDTO from "../../models/dtos/SendMessageDTO";
 import { setTextInputMessage } from "../../redux/slices/chatSlice";
 
 interface ChatInputContainerProps {

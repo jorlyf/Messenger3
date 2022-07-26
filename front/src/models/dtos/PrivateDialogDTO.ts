@@ -1,9 +1,9 @@
-import MessageModel from "../MessageModel";
+import MessageDTO from "./MessageDTO";
 
 export default interface PrivateDialogDTO {
   userId: number;
-  messages: MessageModel[];
+  messages: MessageDTO[];
   name: string;
   userAvatarUrl?: string;
-  lastUpdateTotalSeconds: number;
+  LastUpdateTotalMilliseconds: number;
 }

@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import DialogModel from "../../models/DialogModel";
 import AttachmentDTO from "../../models/dtos/AttachmentDTO";
+import Message from "../../models/Message";
 import { uuid } from "../../utils";
 
 interface ChatState {
@@ -34,7 +35,7 @@ const chatSlice = createSlice({
         state.currentDialog.inputMessage.text = action.payload;
       }
     },
-    clearInputMessage(state, action: PayloadAction<number>) {
+    clearInputMessage(state) {
       if (state.currentDialog) {
         state.currentDialog.inputMessage = { id: uuid(), text: "", attachments: [] }
       }
@@ -42,6 +43,22 @@ const chatSlice = createSlice({
     addInputMessageAttachment(state, action: PayloadAction<AttachmentDTO>) {
       if (state.currentDialog) {
         state.currentDialog.inputMessage.attachments.push(action.payload);
+      }
+    },
+    addCurrentDialogMessage(state, action: PayloadAction<Message>) {
+      if (state.currentDialog) {
+        state.currentDialog.messages.push(action.payload);
+      }
+    },
+    replaceCurrentDialogTempMessage(state, action: PayloadAction<{ message: Message, uuid: string }>) {
+      if (state.currentDialog) {
+        const filtered = state.currentDialog.messages.filter(x => x.id === action.payload.uuid);
+        if (!filtered) return;
+        const tempMessage = filtered[0];
+        const index = state.currentDialog.messages.indexOf(tempMessage);
+        if (index > -1) {
+          state.currentDialog.messages[index] = action.payload.message;
+        }
       }
     }
   }
@@ -54,7 +71,9 @@ export const {
   removeDialogById,
   setTextInputMessage,
   clearInputMessage,
-  addInputMessageAttachment
+  addInputMessageAttachment,
+  addCurrentDialogMessage,
+  replaceCurrentDialogTempMessage
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

@@ -1,10 +1,10 @@
 import * as React from "react";
-import MessageModel from "../../models/MessageModel";
+import Message from "../../models/Message";
 
 import styles from "./MessageListItem.module.css";
 
 interface MessageListItemProps {
-  message: MessageModel;
+  message: Message;
 }
 
 const MessageListItem: React.FC<MessageListItemProps> = ({ message }) => {

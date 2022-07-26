@@ -89,6 +89,8 @@ namespace back.Migrations
 
                     b.HasIndex("PrivateDialogModelId");
 
+                    b.HasIndex("SenderUserId");
+
                     b.ToTable("Messages");
                 });
 
@@ -164,6 +166,14 @@ namespace back.Migrations
                     b.HasOne("back.Models.PrivateDialogModel", null)
                         .WithMany("Messages")
                         .HasForeignKey("PrivateDialogModelId");
+
+                    b.HasOne("back.Models.UserModel", "SenderUser")
+                        .WithMany()
+                        .HasForeignKey("SenderUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SenderUser");
                 });
 
             modelBuilder.Entity("back.Models.PrivateDialogModel", b =>

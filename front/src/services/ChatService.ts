@@ -3,11 +3,13 @@ import { AppDispatch } from "../redux/store";
 import { setCurrentDialog, setDialogs } from "../redux/slices/chatSlice";
 import { uuid } from "../utils";
 import UserModel from "../models/UserModel";
-import MessageDTO from "../models/dtos/MessageDTO";
+import SendMessageDTO from "../models/dtos/SendMessageDTO";
 import DialogModel, { DialogTypes } from "../models/DialogModel";
 import PrivateDialogDTO from "../models/dtos/PrivateDialogDTO";
 import GroupDialogDTO from "../models/dtos/GroupDialogDTO";
-import MessageModel from "../models/MessageModel";
+import Message, { MessageSendingStatus } from "../models/Message";
+import MessageDTO from "../models/dtos/MessageDTO";
+import SendMessageContainerDTO from "../models/dtos/SendMessageContainerDTO";
 
 export default class ChatService {
   static async searchGroupDialogsByNameContains(name: string): Promise<GroupDialogDTO[]> {
@@ -57,7 +59,7 @@ export default class ChatService {
     }
   }
 
-  static async sendMessage(dispatch: AppDispatch, dialog: DialogModel, message: MessageDTO): Promise<MessageModel | null> {
+  static async sendMessage(dispatch: AppDispatch, dialog: DialogModel, message: SendMessageContainerDTO): Promise<MessageDTO | null> {
     try {
       if (dialog.type === DialogTypes.private) {
         return await ChatService.sendMessageToUser(dialog.id, message);
@@ -72,13 +74,13 @@ export default class ChatService {
     }
   }
 
-  static async sendMessageToUser(userId: number, message: MessageDTO) {
-    const response = await $api.post<MessageModel>(`/Chat/SendMessageToUser?userId=${userId}`, message);
+  static async sendMessageToUser(userId: number, message: SendMessageContainerDTO): Promise<MessageDTO | null> {
+    const response = await $api.post<MessageDTO>("/Chat/SendMessageToUser", message);
     return response.data;
   }
-  static async sendMessageToGroup(groupId: number, message: MessageDTO) {
+  // static async sendMessageToGroup(groupId: number, message: SendMessageContainerDTO): Promise<MessageDTO | null> {
 
-  }
+  // }
 
   static findDialog(id: number, type: DialogTypes, dialogs: DialogModel[]): DialogModel | null {
     const dialog = dialogs.filter(d => d.id === id && d.type === type);
@@ -145,23 +147,45 @@ export default class ChatService {
     }
   }
 
+  static processMessageDTOs(dtos: MessageDTO[]): Message[] {
+    return dtos.map(dto => {
+      return this.processMessageDTO(dto);
+    });
+  }
+
+  static processMessageDTO(dto: MessageDTO): Message {
+    const att = dto.attachments?.map(a => {
+      return {id: uuid(), type: a.type, url: a.url}
+    });
+    return {
+      id: uuid(),
+      text: dto.text,
+      attachments: att,
+      senderUser: dto.senderUser,
+      status: MessageSendingStatus.ok,
+      timeMilliseconds: dto.sentAtTotalMilliseconds
+    } 
+  }
+
   static processPrivateDialogDTO(dialog: PrivateDialogDTO): DialogModel {
+    const messages = ChatService.processMessageDTOs(dialog.messages);
     return {
       id: dialog.userId,
       type: DialogTypes.private,
       name: dialog.name,
-      messages: dialog.messages,
+      messages: messages,
       userIds: [dialog.userId],
       inputMessage: { id: uuid(), text: "", attachments: [] },
       avatarUrl: dialog.userAvatarUrl
     };
   }
   static processGroupDialogDTO(dialog: GroupDialogDTO): DialogModel {
+    const messages = ChatService.processMessageDTOs(dialog.messages);
     return {
       id: dialog.groupId,
       type: DialogTypes.group,
       name: dialog.name,
-      messages: dialog.messages,
+      messages: messages,
       userIds: dialog.userIds,
       inputMessage: { id: uuid(), text: "", attachments: [] },
       avatarUrl: dialog.groupAvatarUrl

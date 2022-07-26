@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace back.Migrations
 {
-    public partial class init : Migration
+    public partial class Initialize : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -97,6 +97,12 @@ namespace back.Migrations
                         column: x => x.PrivateDialogModelId,
                         principalTable: "PrivateDialogs",
                         principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Messages_Users_SenderUserId",
+                        column: x => x.SenderUserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -133,6 +139,11 @@ namespace back.Migrations
                 name: "IX_Messages_PrivateDialogModelId",
                 table: "Messages",
                 column: "PrivateDialogModelId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messages_SenderUserId",
+                table: "Messages",
+                column: "SenderUserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PrivateDialogs_FirstUserId",
