@@ -29,8 +29,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 });
 
 builder.Services.AddDbContext<DataContext>(options =>
-	options.UseSqlite($"Data Source={Environment.CurrentDirectory}\\messanger.db")
-	.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
+{
+	options.UseSqlite($"Data Source={Environment.CurrentDirectory}\\messanger.db");
+	//options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+	//options.EnableSensitiveDataLogging();
+});
 
 builder.Services.AddScoped<AsyncUnitOfWork>();
 

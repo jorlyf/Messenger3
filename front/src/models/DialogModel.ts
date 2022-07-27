@@ -2,8 +2,8 @@ import Message from "./Message";
 import MessageInput from "./MessageInput";
 
 export enum DialogTypes {
-  private,
-  group
+  private = "user",
+  group = "group"
 }
 
 export default interface DialogModel {

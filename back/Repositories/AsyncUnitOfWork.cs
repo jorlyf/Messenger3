@@ -16,11 +16,11 @@ namespace back.Repositories
 		{
 			this.Context = context;
 
-			this.UserRepository = new AsyncUserRepository(context);
-			this.PrivateDialogRepository = new AsyncPrivateDialogRepository(context);
-			this.GroupDialogRepository = new AsyncGroupDialogRepository(context);
-			this.MessageRepository = new AsyncMessageRepository(context);
-			this.AttachmentRepository = new AsyncAttachmentRepository(context);
+			this.UserRepository = new AsyncUserRepository(this.Context);
+			this.PrivateDialogRepository = new AsyncPrivateDialogRepository(this.Context);
+			this.GroupDialogRepository = new AsyncGroupDialogRepository(this.Context);
+			this.MessageRepository = new AsyncMessageRepository(this.Context);
+			this.AttachmentRepository = new AsyncAttachmentRepository(this.Context);
 		}
 
 		public void Dispose()

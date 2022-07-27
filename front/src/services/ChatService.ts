@@ -10,6 +10,7 @@ import GroupDialogDTO from "../models/dtos/GroupDialogDTO";
 import Message, { MessageSendingStatus } from "../models/Message";
 import MessageDTO from "../models/dtos/MessageDTO";
 import SendMessageContainerDTO from "../models/dtos/SendMessageContainerDTO";
+import DialogsDTO from "../models/dtos/DialogsDTO";
 
 export default class ChatService {
   static async searchGroupDialogsByNameContains(name: string): Promise<GroupDialogDTO[]> {
@@ -42,7 +43,7 @@ export default class ChatService {
   }
   static async loadDialogs(dispatch: AppDispatch) {
     try {
-      const response = await $api.get<{ privateDialogDTOs: PrivateDialogDTO[], groupDialogDTOs: GroupDialogDTO[] }>("/Chat/LoadDialogs");
+      const response = await $api.get<DialogsDTO>("/Chat/GetDialogs");
       const { privateDialogDTOs, groupDialogDTOs } = response.data;
 
       const dialogs: DialogModel[] = [];
@@ -59,7 +60,7 @@ export default class ChatService {
     }
   }
 
-  static async sendMessage(dispatch: AppDispatch, dialog: DialogModel, message: SendMessageContainerDTO): Promise<MessageDTO | null> {
+  static async sendMessage(dialog: DialogModel, message: SendMessageContainerDTO): Promise<MessageDTO | null> {
     try {
       if (dialog.type === DialogTypes.private) {
         return await ChatService.sendMessageToUser(dialog.id, message);

@@ -4,7 +4,6 @@ using back.Services;
 using back.Models;
 using back.Infrastructure;
 using back.Infrastructure.Exceptions;
-using back.Models.DTOs;
 using back.Models.DTOs.Chat;
 
 namespace back.Controllers
@@ -33,8 +32,9 @@ namespace back.Controllers
 			{
 				return BadRequest(ex.Reason);
 			}
-			catch (Exception)
+			catch (Exception ex)
 			{
+				Console.WriteLine(ex.Message);
 				return StatusCode(500);
 			}
 		}
@@ -60,7 +60,7 @@ namespace back.Controllers
 
 		[HttpGet]
 		[Route("GetPrivateDialog")]
-		public async Task<ActionResult<PrivateDialogDTO>> GetPrivateDialogAsync(int userId)
+		public async Task<ActionResult<PrivateDialogDTO>> GetPrivateDialogDTOAsync(int userId)
 		{
 			try
 			{
@@ -83,7 +83,7 @@ namespace back.Controllers
 
 		[HttpGet]
 		[Route("GetGroupDialog")]
-		public async Task<ActionResult<GroupDialogDTO>> GetGroupDialogAsync(int groupId)
+		public async Task<ActionResult<GroupDialogDTO>> GetGroupDialogDTOAsync(int groupId)
 		{
 			try
 			{

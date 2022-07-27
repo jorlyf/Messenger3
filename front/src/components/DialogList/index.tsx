@@ -10,8 +10,8 @@ interface DialogListProps {
 const DialogList: React.FC<DialogListProps> = ({ items }) => {
   return (
     <div className={styles.dialogList}>
-      {items?.map(item => (
-        <Dialog {...item} />
+      {items?.map((item, index)=> (
+        <Dialog key={index} {...item} />
       ))}
     </div>
   )

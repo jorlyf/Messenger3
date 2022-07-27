@@ -32,7 +32,15 @@ namespace back.Repositories
 
 		public async Task<IEnumerable<PrivateDialogModel>> GetByUserId(int userId)
 		{
-			return await this.Set.Where(x => x.FirstUserId == userId || x.SecondUserId == userId).ToListAsync();
+			return await this.Set
+				.Where(x => x.FirstUserId == userId || x.SecondUserId == userId)
+				.Include(x => x.FirstUser)
+				.Include(x => x.SecondUser)
+				.Include(x => x.Messages)
+					.ThenInclude(x => x.SenderUser)
+				.Include(x => x.Messages)
+					.ThenInclude(x => x.Attachments)
+				.ToListAsync();
 		}
 	}
 }

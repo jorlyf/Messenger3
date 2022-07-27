@@ -36,9 +36,6 @@ namespace back.Services
 			if (senderUser == null || receiveUser == null)
 			{ throw new ApiException(ApiExceptionReason.UserIsNotFound); }
 
-			await this.UoW.UserRepository.AttachAsync(senderUser);
-			await this.UoW.UserRepository.AttachAsync(receiveUser);
-
 
 			PrivateDialogModel? dialog = await GetPrivateDialogAsync(senderUser.Id, receiveUser.Id);
 			if (dialog == null)
@@ -46,7 +43,7 @@ namespace back.Services
 
 			string? messageText = messageContainerDTO.Message.Text;
 			IEnumerable<AttachmentModel>? attachments = null;
-			if (messageContainerDTO.Message.Attachments != null)
+			if (messageContainerDTO.Message.Attachments != null && messageContainerDTO.Message.Attachments.Count() > 0)
 			{ attachments = await this.FileService.SaveMessageAttachmentsAsync(messageContainerDTO.Message.Attachments); }
 
 			MessageModel messageModel = new()
