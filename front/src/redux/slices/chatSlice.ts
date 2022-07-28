@@ -29,13 +29,12 @@ const chatSlice = createSlice({
     removeDialogById(state, action: PayloadAction<number>) {
       state.dialogs = state.dialogs.filter(d => d.id !== action.payload);
     },
-
     setTextInputMessage(state, action: PayloadAction<string>) {
       if (state.currentDialog) {
         state.currentDialog.inputMessage.text = action.payload;
       }
     },
-    clearInputMessage(state) {
+    clearCurrentDialogInputMessage(state) {
       if (state.currentDialog) {
         state.currentDialog.inputMessage = { id: uuid(), text: "", attachments: [] }
       }
@@ -70,7 +69,7 @@ export const {
   addDialog,
   removeDialogById,
   setTextInputMessage,
-  clearInputMessage,
+  clearCurrentDialogInputMessage,
   addInputMessageAttachment,
   addCurrentDialogMessage,
   replaceCurrentDialogTempMessage

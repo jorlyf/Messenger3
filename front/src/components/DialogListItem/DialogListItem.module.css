@@ -31,4 +31,9 @@
 .lastMessageText {
   margin-top: auto;
   border-bottom: 1px solid var(--dark-blue-color);
+  word-wrap: break-word;
+}
+
+.current {
+  background-color: rgba(143, 157, 243, 0.2);
 }

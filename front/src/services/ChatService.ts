@@ -3,7 +3,6 @@ import { AppDispatch } from "../redux/store";
 import { setCurrentDialog, setDialogs } from "../redux/slices/chatSlice";
 import { uuid } from "../utils";
 import UserModel from "../models/UserModel";
-import SendMessageDTO from "../models/dtos/SendMessageDTO";
 import DialogModel, { DialogTypes } from "../models/DialogModel";
 import PrivateDialogDTO from "../models/dtos/PrivateDialogDTO";
 import GroupDialogDTO from "../models/dtos/GroupDialogDTO";

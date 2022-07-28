@@ -1,0 +1,29 @@
+.item {
+  max-width: 80%;
+  width: max-content;
+  display: flex;
+}
+
+.my {
+  margin-left: auto;
+}
+
+.avatar {
+  max-height: 50px;
+  max-width: 50px;
+}
+
+.login {
+  display: block;
+  width: max-content;
+  font-weight: 600;
+}
+
+.text {
+  display: block;
+  word-break: break-word;
+}
+
+.loginAndText {
+  padding-top: 10px;
+}

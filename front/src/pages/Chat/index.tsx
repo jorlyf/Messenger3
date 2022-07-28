@@ -4,15 +4,15 @@ import { useDispatch } from "react-redux";
 import { uuid } from "../../utils";
 import ChatService from "../../services/ChatService";
 import useAppSelector from "../../hooks/useAppSelector";
-import { addCurrentDialogMessage, clearInputMessage, replaceCurrentDialogTempMessage } from "../../redux/slices/chatSlice";
+import { addCurrentDialogMessage, clearCurrentDialogInputMessage, replaceCurrentDialogTempMessage } from "../../redux/slices/chatSlice";
 import MessageListContainer from "../../containers/MessageListContainer";
 import ChatInputContainer from "../../containers/ChatInputContainer";
 import { DialogTypes } from "../../models/DialogModel";
 import Message, { MessageSendingStatus } from "../../models/Message";
 import MessageDTO from "../../models/dtos/MessageDTO";
+import SendMessageContainerDTO from "../../models/dtos/SendMessageContainerDTO";
 
 import styles from "./Chat.module.css";
-import SendMessageContainerDTO from "../../models/dtos/SendMessageContainerDTO";
 
 const Chat: React.FC = () => {
   const { chatId } = useParams();
@@ -31,10 +31,10 @@ const Chat: React.FC = () => {
       text: currentDialog.inputMessage.text,
       senderUser: ownerUser,
       status: MessageSendingStatus.isSending,
-      timeMilliseconds: new Date().getMilliseconds()
+      timeMilliseconds: new Date().getTime()
     }
     dispatch(addCurrentDialogMessage(tempMessage));
-    dispatch(clearInputMessage());
+    dispatch(clearCurrentDialogInputMessage());
 
     const sendMessageDTO: SendMessageContainerDTO = {
       toId: currentDialog.id,
@@ -43,7 +43,7 @@ const Chat: React.FC = () => {
         attachments: currentDialog.inputMessage.attachments
       }
     }
-    const apiMessageDTO: MessageDTO | null = await ChatService.sendMessage(dispatch, currentDialog, sendMessageDTO);
+    const apiMessageDTO: MessageDTO | null = await ChatService.sendMessage(currentDialog, sendMessageDTO);
     if (!apiMessageDTO) return;
 
     const toReplaceTempMessage: Message = ChatService.processMessageDTO(apiMessageDTO);

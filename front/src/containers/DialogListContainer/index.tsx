@@ -15,11 +15,10 @@ const DialogListContainer: React.FC = () => {
   const ownerUser = useAppSelector(state => state.profile.user);
 
   const dialogs = useAppSelector(state => state.chat.dialogs);
-  const currentDialog = useAppSelector(state => state.chat.currentDialog);
 
+  console.log(dialogs); // to delete
+  
   const getLastMessage = (messages: Message[]): Message | undefined => {
-    console.log(messages);
-    
     return messages.reduce((x, y) => (x.timeMilliseconds > y.timeMilliseconds) ? x : y);
   }
 
@@ -27,7 +26,9 @@ const DialogListContainer: React.FC = () => {
     return dialogs.map(d => {
       const lastMsg = getLastMessage(d.messages);
       return {
-        onClick: () => {navigate(`/${d.type}=${d.id}`)},
+        id: d.id,
+        type: d.type,
+        onClick: () => { navigate(`/${d.type}=${d.id}`) },
         name: d.name,
         avatarUrl: d.avatarUrl,
         lastMessageText: lastMsg?.text,

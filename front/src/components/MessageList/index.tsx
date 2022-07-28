@@ -9,14 +9,27 @@ interface MessageListProps {
 }
 
 const MessageList: React.FC<MessageListProps> = ({ items }) => {
+  const scrollListToBottom = () => {
+    endListRef.current?.scrollIntoView({
+      block: "center",
+      behavior: "smooth"
+    });
+  }
+
+  const endListRef: any = React.useRef(null);
+  React.useEffect(() => {
+    scrollListToBottom();
+  }, [items]);
+
   return (
     <div className={styles.list}>
-      {items.map((item, index) =>
+      {items.map(item =>
         <MessageListItem
-          key={index}
+          key={item.id}
           message={item}
         />
       )}
+      <div ref={endListRef} />
     </div>
   );
 }
