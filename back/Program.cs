@@ -30,7 +30,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 
 builder.Services.AddDbContext<DataContext>(options =>
 {
-	options.UseSqlite($"Data Source={Environment.CurrentDirectory}\\messanger.db");
+	options.UseSqlite($"Data Source={Environment.CurrentDirectory}\\messenger.db");
 	//options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 	//options.EnableSensitiveDataLogging();
 });

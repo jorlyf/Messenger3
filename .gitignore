@@ -11,3 +11,4 @@
 /back/obj
 /back/appsettings.*
 /back/back.sln
+/back/messenger.db
