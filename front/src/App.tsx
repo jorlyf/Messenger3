@@ -13,6 +13,7 @@ import NotFound from "./pages/NotFound";
 import styles from "./App.module.css";
 import Home from "./pages/Home";
 import useAuth from "./hooks/useAuth";
+import useMessagingHub from "./hooks/useMessagingHub";
 
 const App: React.FC = () => {
 
@@ -20,6 +21,7 @@ const App: React.FC = () => {
 
   useInitAuth();
   useAuth();
+  useMessagingHub();
 
   return (
     <div className={styles.app}>

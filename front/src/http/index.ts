@@ -1,6 +1,6 @@
 import axios from "axios";
 
-enum NodeEnv {
+export enum NodeEnv {
   production = "production",
   development = "development"
 }
