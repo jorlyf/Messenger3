@@ -1,6 +1,6 @@
 import $api from "../http";
 import { AppDispatch } from "../redux/store";
-import { setCurrentDialog, setDialogs } from "../redux/slices/chatSlice";
+import { addDialog, findCurrentDialog, setCurrentDialogInfo, setDialogs } from "../redux/slices/chatSlice";
 import { uuid } from "../utils";
 import UserModel from "../models/UserModel";
 import DialogModel, { DialogTypes } from "../models/DialogModel";
@@ -83,41 +83,43 @@ export default class ChatService {
   // }
 
   static findDialog(id: number, type: DialogTypes, dialogs: DialogModel[]): DialogModel | null {
-    const dialog = dialogs.filter(d => d.id === id && d.type === type);
-
-    if (dialog) { return dialog[0]; }
-    else { return null; }
+    const dialog = findCurrentDialog(dialogs, { id: id, type: type, index: -1 });
+    return dialog ? dialog : null;
   }
   static async changeCurrentDialog(dispatch: AppDispatch, id: number, type: DialogTypes, dialogs: DialogModel[]) {
-    dispatch(setCurrentDialog(undefined));
+    dispatch(setCurrentDialogInfo(null));
 
     let dialog = ChatService.findDialog(id, type, dialogs);
+    const index = dialogs.length;
+    if (dialog) { 
+      dispatch(setCurrentDialogInfo({ id: id, type: type, index: index }));
+      return;
+    }
     let dialogDTO: PrivateDialogDTO | GroupDialogDTO | null;
-    if (!dialog) {
-      switch (type) {
-        case DialogTypes.private: {
-          dialogDTO = await this.getPrivateDialogFromApi(id);
-          if (!dialogDTO) {
-            dialog = this.createEmptyDialogModel(id, type);
-            break;
-          }
-          dialog = ChatService.processPrivateDialogDTO(dialogDTO);
+    switch (type) {
+      case DialogTypes.private: {
+        dialogDTO = await this.getPrivateDialogFromApi(id);
+        if (!dialogDTO) {
+          dialog = this.createEmptyDialogModel(id, type);
           break;
         }
-        case DialogTypes.group: {
-          dialogDTO = await this.getGroupDialogFromApi(id);
-          if (!dialogDTO) {
-            dialog = this.createEmptyDialogModel(id, type);
-            break;
-          }
-          dialog = ChatService.processGroupDialogDTO(dialogDTO);
-          break;
-        }
-        default: { return; }
+        dialog = ChatService.processPrivateDialogDTO(dialogDTO);
+        break;
       }
+      case DialogTypes.group: {
+        dialogDTO = await this.getGroupDialogFromApi(id);
+        if (!dialogDTO) {
+          dialog = this.createEmptyDialogModel(id, type);
+          break;
+        }
+        dialog = ChatService.processGroupDialogDTO(dialogDTO);
+        break;
+      }
+      default: { return; }
     }
 
-    dispatch(setCurrentDialog(dialog));
+    dispatch(addDialog(dialog));
+    dispatch(setCurrentDialogInfo({ id: id, type: type, index: index }));
   }
   static createEmptyDialogModel(id: number, type: DialogTypes): DialogModel {
     return {
@@ -155,7 +157,7 @@ export default class ChatService {
 
   static processMessageDTO(dto: MessageDTO): Message {
     const att = dto.attachments?.map(a => {
-      return {id: uuid(), type: a.type, url: a.url}
+      return { id: uuid(), type: a.type, url: a.url }
     });
     return {
       id: uuid(),
@@ -164,7 +166,7 @@ export default class ChatService {
       senderUser: dto.senderUser,
       status: MessageSendingStatus.ok,
       timeMilliseconds: dto.sentAtTotalMilliseconds
-    } 
+    }
   }
 
   static processPrivateDialogDTO(dialog: PrivateDialogDTO): DialogModel {

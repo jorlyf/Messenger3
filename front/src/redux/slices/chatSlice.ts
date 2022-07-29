@@ -1,16 +1,40 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import DialogModel from "../../models/DialogModel";
+import DialogModel, { DialogTypes } from "../../models/DialogModel";
 import AttachmentDTO from "../../models/dtos/AttachmentDTO";
 import Message from "../../models/Message";
 import { uuid } from "../../utils";
 
+interface CurrentDialogInfo {
+  id: number;
+  type: DialogTypes;
+  index: number;
+}
+
 interface ChatState {
   dialogs: DialogModel[];
-  currentDialog?: DialogModel;
+  currentDialogInfo: CurrentDialogInfo | null;
+}
+
+export const findCurrentDialog = (dialogs: DialogModel[], current: CurrentDialogInfo): DialogModel | null => {
+  let dialog: DialogModel | null | undefined = findCurrentDialogByIndex(dialogs, current);
+  if (dialog) {
+    return dialog;
+  }
+  dialog = dialogs.find(x => x.id === current.id && x.type === current.type);
+  return dialog ? dialog : null;
+}
+const findCurrentDialogByIndex = (dialogs: DialogModel[], current: CurrentDialogInfo): DialogModel | null => {
+  if (current.index < 0) return null;
+
+  const dialog = dialogs.at(current.index);
+  if (!dialog) return null;
+  if (dialog.id !== current.id || dialog.type !== current.type) return null;
+  return dialog;
 }
 
 const initialState: ChatState = {
-  dialogs: []
+  dialogs: [],
+  currentDialogInfo: null
 }
 
 const chatSlice = createSlice({
@@ -20,8 +44,8 @@ const chatSlice = createSlice({
     setDialogs(state, action: PayloadAction<DialogModel[]>) {
       state.dialogs = action.payload;
     },
-    setCurrentDialog(state, action: PayloadAction<DialogModel | undefined>) {
-      state.currentDialog = action.payload;
+    setCurrentDialogInfo(state, action: PayloadAction<CurrentDialogInfo | null>) {
+      state.currentDialogInfo = action.payload;  
     },
     addDialog(state, action: PayloadAction<DialogModel>) {
       state.dialogs.push(action.payload);
@@ -29,34 +53,49 @@ const chatSlice = createSlice({
     removeDialogById(state, action: PayloadAction<number>) {
       state.dialogs = state.dialogs.filter(d => d.id !== action.payload);
     },
-    setTextInputMessage(state, action: PayloadAction<string>) {
-      if (state.currentDialog) {
-        state.currentDialog.inputMessage.text = action.payload;
+    setCurrentDialogInputMessageText(state, action: PayloadAction<string>) {
+      if (state.currentDialogInfo) {
+        const dialog = findCurrentDialog(state.dialogs, state.currentDialogInfo);
+        if (!dialog) return;
+
+        dialog.inputMessage.text = action.payload;
       }
     },
     clearCurrentDialogInputMessage(state) {
-      if (state.currentDialog) {
-        state.currentDialog.inputMessage = { id: uuid(), text: "", attachments: [] }
+      if (state.currentDialogInfo) {
+        const dialog = findCurrentDialog(state.dialogs, state.currentDialogInfo);
+        if (!dialog) return;
+
+        dialog.inputMessage = { id: uuid(), text: "", attachments: [] }
       }
     },
-    addInputMessageAttachment(state, action: PayloadAction<AttachmentDTO>) {
-      if (state.currentDialog) {
-        state.currentDialog.inputMessage.attachments.push(action.payload);
+    addCurrentDialogInputMessageAttachment(state, action: PayloadAction<AttachmentDTO>) {
+      if (state.currentDialogInfo) {
+        const dialog = findCurrentDialog(state.dialogs, state.currentDialogInfo);
+        if (!dialog) return;
+
+        dialog.inputMessage.attachments.push(action.payload);
       }
     },
     addCurrentDialogMessage(state, action: PayloadAction<Message>) {
-      if (state.currentDialog) {
-        state.currentDialog.messages.push(action.payload);
+      if (state.currentDialogInfo) {
+        const dialog = findCurrentDialog(state.dialogs, state.currentDialogInfo);
+        if (!dialog) return;
+
+        dialog.messages.push(action.payload);
       }
     },
     replaceCurrentDialogTempMessage(state, action: PayloadAction<{ message: Message, uuid: string }>) {
-      if (state.currentDialog) {
-        const filtered = state.currentDialog.messages.filter(x => x.id === action.payload.uuid);
-        if (!filtered) return;
-        const tempMessage = filtered[0];
-        const index = state.currentDialog.messages.indexOf(tempMessage);
+      if (state.currentDialogInfo) {
+        const dialog = findCurrentDialog(state.dialogs, state.currentDialogInfo);
+        if (!dialog) return;
+
+        const tempMessage = dialog.messages.find(x => x.id === action.payload.uuid);
+        if (!tempMessage) return;
+
+        const index = dialog.messages.indexOf(tempMessage);
         if (index > -1) {
-          state.currentDialog.messages[index] = action.payload.message;
+          dialog.messages[index] = action.payload.message;
         }
       }
     }
@@ -65,12 +104,12 @@ const chatSlice = createSlice({
 
 export const {
   setDialogs,
-  setCurrentDialog,
+  setCurrentDialogInfo,
   addDialog,
   removeDialogById,
-  setTextInputMessage,
+  setCurrentDialogInputMessageText,
   clearCurrentDialogInputMessage,
-  addInputMessageAttachment,
+  addCurrentDialogInputMessageAttachment,
   addCurrentDialogMessage,
   replaceCurrentDialogTempMessage
 } = chatSlice.actions;

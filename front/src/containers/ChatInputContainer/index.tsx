@@ -1,9 +1,9 @@
 import * as React from "react";
 import { useDispatch } from "react-redux";
-import ChatInput from "../../components/ChatInput";
+import { findCurrentDialog, setCurrentDialogInputMessageText } from "../../redux/slices/chatSlice";
 import useAppSelector from "../../hooks/useAppSelector";
-import MessageDTO from "../../models/dtos/SendMessageDTO";
-import { setTextInputMessage } from "../../redux/slices/chatSlice";
+import ChatInput from "../../components/ChatInput";
+import DialogModel from "../../models/DialogModel";
 
 interface ChatInputContainerProps {
   handleSubmit: () => void;
@@ -12,19 +12,29 @@ interface ChatInputContainerProps {
 const ChatInputContainer: React.FC<ChatInputContainerProps> = ({ handleSubmit }) => {
   const dispatch = useDispatch();
 
-  const inputMessage = useAppSelector(state => state.chat.currentDialog?.inputMessage);
+  const [currentDialog, setCurrentDialog] = React.useState<DialogModel | null>(null);
+
+  const allDialogs = useAppSelector(state => state.chat.dialogs);
+  const currentDialogInfo = useAppSelector(state => state.chat.currentDialogInfo);
 
   const handleAttach = () => {
 
   }
 
   const handleSetText = (value: string) => {
-    dispatch(setTextInputMessage(value));
+    dispatch(setCurrentDialogInputMessageText(value));
   }
+
+  React.useEffect(() => {
+    if (!currentDialogInfo) return;
+
+    const dialog = findCurrentDialog(allDialogs, currentDialogInfo);
+    setCurrentDialog(dialog);
+  }, [allDialogs, currentDialogInfo]);
 
   return (
     <ChatInput
-      value={inputMessage?.text || ""}
+      value={currentDialog?.inputMessage?.text || ""}
       setValue={handleSetText}
       handleSubmit={handleSubmit}
       handleAttach={handleAttach}

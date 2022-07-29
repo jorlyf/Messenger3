@@ -1,9 +1,10 @@
 import React from "react";
 import useAppSelector from "../../hooks/useAppSelector";
-import { DialogTypes } from "../../models/DialogModel";
+import DialogModel, { DialogTypes } from "../../models/DialogModel";
 import defaultAvatar from "../../../public/defaultAvatar.jpg";
 
 import styles from "./DialogListItem.module.css";
+import { findCurrentDialog } from "../../redux/slices/chatSlice";
 
 export interface DialogListItemProps {
   id: number;
@@ -17,9 +18,13 @@ export interface DialogListItemProps {
 }
 
 const DialogListItem: React.FC<DialogListItemProps> = (props) => {
-  const currentDialog = useAppSelector(state => state.chat.currentDialog);
+
+  const [currentDialog, setCurrentDialog] = React.useState<DialogModel | null>(null);
+
+  const allDialogs = useAppSelector(state => state.chat.dialogs);
+  const currentDialogInfo = useAppSelector(state => state.chat.currentDialogInfo);
   const isCurrentDialog: boolean = props.id === currentDialog?.id && props.type === currentDialog.type;
-  
+
   const getLastMessageText = (): string => {
     if (!props.lastMessageText) return "";
     if (props.lastMessageText.length > 25) {
@@ -27,6 +32,14 @@ const DialogListItem: React.FC<DialogListItemProps> = (props) => {
     }
     return props.lastMessageText;
   }
+
+  React.useEffect(() => {
+    if (!currentDialogInfo) return;
+
+    const dialog = findCurrentDialog(allDialogs, currentDialogInfo);
+    setCurrentDialog(dialog);
+  }, [currentDialogInfo]);
+
   return (
     <div className={`${styles.dialog} ${isCurrentDialog && styles.current}`}>
       <div className={styles.avatarContainer}>

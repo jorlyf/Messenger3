@@ -15,9 +15,7 @@ const DialogListContainer: React.FC = () => {
   const ownerUser = useAppSelector(state => state.profile.user);
 
   const dialogs = useAppSelector(state => state.chat.dialogs);
-
-  console.log(dialogs); // to delete
-  
+ 
   const getLastMessage = (messages: Message[]): Message | undefined => {
     return messages.reduce((x, y) => (x.timeMilliseconds > y.timeMilliseconds) ? x : y);
   }
