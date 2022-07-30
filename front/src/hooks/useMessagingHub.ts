@@ -4,6 +4,11 @@ import { HttpTransportType, HubConnection, HubConnectionBuilder, LogLevel } from
 import { AppDispatch } from "../redux/store";
 import useAppSelector from "./useAppSelector";
 import { useDispatch } from "react-redux";
+import NewMessageDTO from "../models/dtos/NewMessageDTO";
+import { DialogTypes } from "../models/DialogModel";
+import ChatService from "../services/ChatService";
+import Message from "../models/Message";
+import { addDialogMessage } from "../redux/slices/chatSlice";
 
 export enum MessagingHubMethods {
   ReceiveNewMessage = "ReceiveNewMessage"
@@ -30,11 +35,22 @@ const buildHubConnection = (token: string): HubConnection => {
 }
 
 const setClientHandlers = (connection: HubConnection, dispatch: AppDispatch) => {
-  connection.on(MessagingHubMethods.ReceiveNewMessage, (stringJsonMessage: string) => {
-    const jsonMessage = JSON.parse(stringJsonMessage);
+  connection.on(MessagingHubMethods.ReceiveNewMessage, (newMessageDTO: NewMessageDTO) => { 
+    switch (newMessageDTO.dialogType) { // convert backend int enum to string enum
+      case 0:
+        newMessageDTO.dialogType = DialogTypes.private;
+        break;
+      case 1:
+        newMessageDTO.dialogType = DialogTypes.group;
+        break;
 
-    console.log(jsonMessage);
+      default:
+        return;
+    }
+    
+    const message: Message = ChatService.processMessageDTO(newMessageDTO.messageDTO);
 
+    dispatch(addDialogMessage({ dialogId: newMessageDTO.dialogId, dialogType: newMessageDTO.dialogType, message }));
   });
 }
 
@@ -50,7 +66,7 @@ const useMessagingHub = () => {
 
     const connection: HubConnection = buildHubConnection(token);
     setClientHandlers(connection, dispatch);
-    
+
     connection.start();
     return () => {
       connection.stop();

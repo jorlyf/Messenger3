@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import DialogModel, { DialogTypes } from "../../models/DialogModel";
 import AttachmentDTO from "../../models/dtos/AttachmentDTO";
+import NewMessageDTO from "../../models/dtos/NewMessageDTO";
 import Message from "../../models/Message";
 import { uuid } from "../../utils";
 
@@ -32,6 +33,11 @@ const findCurrentDialogByIndex = (dialogs: DialogModel[], current: CurrentDialog
   return dialog;
 }
 
+export const findDialog = (dialogs: DialogModel[], id: number, type: DialogTypes): DialogModel | null => {
+  const dialog = dialogs.find(x => x.id === id && x.type === type);
+  return dialog ? dialog : null;
+}
+
 const initialState: ChatState = {
   dialogs: [],
   currentDialogInfo: null
@@ -45,7 +51,7 @@ const chatSlice = createSlice({
       state.dialogs = action.payload;
     },
     setCurrentDialogInfo(state, action: PayloadAction<CurrentDialogInfo | null>) {
-      state.currentDialogInfo = action.payload;  
+      state.currentDialogInfo = action.payload;
     },
     addDialog(state, action: PayloadAction<DialogModel>) {
       state.dialogs.push(action.payload);
@@ -79,7 +85,7 @@ const chatSlice = createSlice({
     },
     addCurrentDialogMessage(state, action: PayloadAction<Message>) {
       if (state.currentDialogInfo) {
-        const dialog = findCurrentDialog(state.dialogs, state.currentDialogInfo);
+        const dialog = findCurrentDialog(state.dialogs, state.currentDialogInfo);  
         if (!dialog) return;
 
         dialog.messages.push(action.payload);
@@ -98,6 +104,12 @@ const chatSlice = createSlice({
           dialog.messages[index] = action.payload.message;
         }
       }
+    },
+    addDialogMessage(state, action: PayloadAction<{ dialogId: number, dialogType: DialogTypes, message: Message }>) {
+      const dialog = findDialog(state.dialogs, action.payload.dialogId, action.payload.dialogType);      
+      if (!dialog) return;
+
+      dialog.messages.push(action.payload.message);
     }
   }
 });
@@ -111,7 +123,8 @@ export const {
   clearCurrentDialogInputMessage,
   addCurrentDialogInputMessageAttachment,
   addCurrentDialogMessage,
-  replaceCurrentDialogTempMessage
+  replaceCurrentDialogTempMessage,
+  addDialogMessage
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

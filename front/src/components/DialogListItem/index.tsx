@@ -27,8 +27,9 @@ const DialogListItem: React.FC<DialogListItemProps> = (props) => {
 
   const getLastMessageText = (): string => {
     if (!props.lastMessageText) return "";
-    if (props.lastMessageText.length > 25) {
-      return props.lastMessageText.slice(0, 25) + "...";
+    
+    if (props.lastMessageText.length > 15) {
+      return props.lastMessageText.slice(0, 15) + "...";
     }
     return props.lastMessageText;
   }
