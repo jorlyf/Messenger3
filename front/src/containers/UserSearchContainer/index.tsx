@@ -2,7 +2,7 @@ import * as React from 'react';
 import useDebounce from '../../hooks/useDebounce';
 import useAppSelector from '../../hooks/useAppSelector';
 import ChatService from '../../services/ChatService';
-import UserModel from '../../models/UserModel';
+import UserModel from '../../entities/db/UserModel';
 import Search from '../../components/Search';
 import UserSearchResult from '../../components/UserSearchResult';
 import { useNavigate } from 'react-router-dom';

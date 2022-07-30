@@ -1,6 +1,6 @@
 import * as React from "react";
 import useOutsideClick from "../../hooks/useOutsideClick";
-import UserModel from "../../models/UserModel";
+import UserModel from "../../entities/db/UserModel";
 
 import styles from "./UserSearchResult.module.css";
 

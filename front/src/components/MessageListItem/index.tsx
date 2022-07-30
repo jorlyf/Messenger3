@@ -1,6 +1,6 @@
 import * as React from "react";
 import useAppSelector from "../../hooks/useAppSelector";
-import Message, { MessageSendingStatus } from "../../models/Message";
+import Message, { MessageSendingStatus } from "../../entities/local/Message";
 import defaultAvatar from "../../../public/defaultAvatar.jpg";
 
 import styles from "./MessageListItem.module.css";
@@ -28,6 +28,9 @@ const MessageListItem: React.FC<MessageListItemProps> = ({ message }) => {
             <span className={styles.text}>{message.text}</span>
           </div>
           <img className={styles.avatar} src={getAvatarUrl()} />
+          {message.status === MessageSendingStatus.isSending &&
+            <IsLoad />
+          }
         </div>
         :
         <div className={styles.item}>

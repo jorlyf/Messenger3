@@ -4,8 +4,8 @@ import { useNavigate } from "react-router";
 import useAppSelector from "../../hooks/useAppSelector";
 import InputField from "../../components/InputField";
 import AuthService from "../../services/AuthService";
-import LoginDataDTO from "../../models/dtos/LoginDataDTO";
-import RegistrationDataDTO from "../../models/dtos/RegistrationDataDTO";
+import LoginDataDTO from "../../entities/dtos/LoginDataDTO";
+import RegistrationDataDTO from "../../entities/dtos/RegistrationDataDTO";
 
 import styles from "./Auth.module.css";
 

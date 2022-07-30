@@ -1,5 +1,5 @@
-import AttachmentModel from "../AttachmentModel";
-import UserModel from "../UserModel";
+import AttachmentModel from "../db/AttachmentModel";
+import UserModel from "../db/UserModel";
 
 export default interface MessageDTO {
   senderUser: UserModel;

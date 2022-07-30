@@ -1,4 +1,4 @@
-import AttachmentDTO from "./dtos/AttachmentDTO";
+import AttachmentDTO from "../dtos/AttachmentDTO";
 
 export default interface MessageInput {
   id: string;

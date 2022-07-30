@@ -1,5 +1,5 @@
-import Message from "./Message";
-import MessageInput from "./MessageInput";
+import Message from "../local/Message";
+import MessageInput from "../local/MessageInput";
 
 export enum DialogTypes {
   private = "user",

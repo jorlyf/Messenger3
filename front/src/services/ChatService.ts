@@ -2,14 +2,14 @@ import $api from "../http";
 import { AppDispatch } from "../redux/store";
 import { addDialog, findCurrentDialog, setCurrentDialogInfo, setDialogs } from "../redux/slices/chatSlice";
 import { uuid } from "../utils";
-import UserModel from "../models/UserModel";
-import DialogModel, { DialogTypes } from "../models/DialogModel";
-import PrivateDialogDTO from "../models/dtos/PrivateDialogDTO";
-import GroupDialogDTO from "../models/dtos/GroupDialogDTO";
-import Message, { MessageSendingStatus } from "../models/Message";
-import MessageDTO from "../models/dtos/MessageDTO";
-import SendMessageContainerDTO from "../models/dtos/SendMessageContainerDTO";
-import DialogsDTO from "../models/dtos/DialogsDTO";
+import UserModel from "../entities/db/UserModel";
+import DialogModel, { DialogTypes } from "../entities/db/DialogModel";
+import PrivateDialogDTO from "../entities/dtos/PrivateDialogDTO";
+import GroupDialogDTO from "../entities/dtos/GroupDialogDTO";
+import Message, { MessageSendingStatus } from "../entities/local/Message";
+import MessageDTO from "../entities/dtos/MessageDTO";
+import SendMessageContainerDTO from "../entities/dtos/SendMessageContainerDTO";
+import DialogsDTO from "../entities/dtos/DialogsDTO";
 
 export default class ChatService {
   static async searchGroupDialogsByNameContains(name: string): Promise<GroupDialogDTO[]> {

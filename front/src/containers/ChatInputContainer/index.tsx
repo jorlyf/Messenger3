@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { findCurrentDialog, setCurrentDialogInputMessageText } from "../../redux/slices/chatSlice";
 import useAppSelector from "../../hooks/useAppSelector";
 import ChatInput from "../../components/ChatInput";
-import DialogModel from "../../models/DialogModel";
+import DialogModel from "../../entities/db/DialogModel";
 
 interface ChatInputContainerProps {
   handleSubmit: () => void;

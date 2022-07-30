@@ -1,5 +1,5 @@
 import $api from "../http";
-import UserModel from "../models/UserModel";
+import UserModel from "../entities/db/UserModel";
 import { loadProfile, unloadProfile } from "../redux/slices/profileSlice";
 import { AppDispatch } from "../redux/store";
 

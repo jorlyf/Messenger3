@@ -1,5 +1,5 @@
 import Attachment from "./Attachment";
-import UserModel from "./UserModel";
+import UserModel from "../db/UserModel";
 
 export enum MessageSendingStatus {
   ok,

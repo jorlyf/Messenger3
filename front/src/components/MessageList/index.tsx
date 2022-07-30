@@ -1,5 +1,5 @@
 import * as React from "react";
-import Message from "../../models/Message";
+import Message from "../../entities/local/Message";
 import MessageListItem from "../MessageListItem";
 
 import styles from "./MessageList.module.css";

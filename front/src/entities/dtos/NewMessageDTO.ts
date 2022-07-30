@@ -1,4 +1,4 @@
-import { DialogTypes } from "../DialogModel";
+import { DialogTypes } from "../db/DialogModel";
 import MessageDTO from "./MessageDTO";
 
 export default interface NewMessageDTO {

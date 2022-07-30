@@ -4,10 +4,10 @@ import { HttpTransportType, HubConnection, HubConnectionBuilder, LogLevel } from
 import { AppDispatch } from "../redux/store";
 import useAppSelector from "./useAppSelector";
 import { useDispatch } from "react-redux";
-import NewMessageDTO from "../models/dtos/NewMessageDTO";
-import { DialogTypes } from "../models/DialogModel";
+import NewMessageDTO from "../entities/dtos/NewMessageDTO";
+import { DialogTypes } from "../entities/db/DialogModel";
 import ChatService from "../services/ChatService";
-import Message from "../models/Message";
+import Message from "../entities/local/Message";
 import { addDialogMessage } from "../redux/slices/chatSlice";
 
 export enum MessagingHubMethods {

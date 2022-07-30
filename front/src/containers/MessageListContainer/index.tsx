@@ -1,6 +1,6 @@
 import * as React from "react";
 import MessageList from "../../components/MessageList";
-import Message from "../../models/Message";
+import Message from "../../entities/local/Message";
 
 export interface MessageListContainerProps {
   messages: Message[];

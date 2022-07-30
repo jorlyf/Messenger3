@@ -1,6 +1,6 @@
 import React from "react";
 import useAppSelector from "../../hooks/useAppSelector";
-import DialogModel, { DialogTypes } from "../../models/DialogModel";
+import DialogModel, { DialogTypes } from "../../entities/db/DialogModel";
 import defaultAvatar from "../../../public/defaultAvatar.jpg";
 
 import styles from "./DialogListItem.module.css";

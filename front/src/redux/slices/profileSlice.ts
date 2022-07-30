@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import UserModel from "../../models/UserModel";
+import UserModel from "../../entities/db/UserModel";
 
 interface ProfileState {
   isLoaded: boolean;

@@ -1,8 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import DialogModel, { DialogTypes } from "../../models/DialogModel";
-import AttachmentDTO from "../../models/dtos/AttachmentDTO";
-import NewMessageDTO from "../../models/dtos/NewMessageDTO";
-import Message from "../../models/Message";
+import DialogModel, { DialogTypes } from "../../entities/db/DialogModel";
+import AttachmentDTO from "../../entities/dtos/AttachmentDTO";
+import Message from "../../entities/local/Message";
 import { uuid } from "../../utils";
 
 interface CurrentDialogInfo {

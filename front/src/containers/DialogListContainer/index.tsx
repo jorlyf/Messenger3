@@ -4,7 +4,7 @@ import useAppSelector from "../../hooks/useAppSelector";
 import ChatService from "../../services/ChatService";
 import DialogList from "../../components/DialogList";
 import { DialogListItemProps } from "../../components/DialogListItem";
-import Message from "../../models/Message";
+import Message from "../../entities/local/Message";
 import { useNavigate } from "react-router-dom";
 
 const DialogListContainer: React.FC = () => {
