@@ -13,5 +13,5 @@ export default interface DialogModel {
   messages: Message[];
   userIds: number[];
   inputMessage: MessageInput;
-  avatarUrl?: string;
+  avatarUrl: string | null;
 }

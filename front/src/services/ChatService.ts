@@ -91,7 +91,7 @@ export default class ChatService {
 
     let dialog = ChatService.findDialog(id, type, dialogs);
     const index = dialogs.length;
-    if (dialog) { 
+    if (dialog) {
       dispatch(setCurrentDialogInfo({ id: id, type: type, index: index }));
       return;
     }
@@ -128,6 +128,7 @@ export default class ChatService {
       userIds: [],
       messages: [],
       name: "",
+      avatarUrl: null,
       inputMessage: { id: uuid(), text: "", attachments: [] }
     }
   }
@@ -156,7 +157,7 @@ export default class ChatService {
   }
 
   static processMessageDTO(dto: MessageDTO): Message {
-    const att = dto.attachments?.map(a => {
+    const att = dto.attachments.map(a => {
       return { id: uuid(), type: a.type, url: a.url }
     });
     return {

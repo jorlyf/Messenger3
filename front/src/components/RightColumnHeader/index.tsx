@@ -2,10 +2,21 @@ import React from "react";
 
 import styles from "./RightColumnHeader.module.css";
 
-const RightColumnHeader: React.FC = () => {
+interface RightColumnHeaderProps {
+  dialog: boolean;
+  dialogName?: string;
+  dialogAvatarUrl?: string;
+}
+
+const RightColumnHeader: React.FC<RightColumnHeaderProps> = (props) => {
   return (
     <header className={styles.header}>
-      
+      {props.dialog &&
+        <div className={styles.currentDialog}>
+          <img className={styles.currentDialogAvatar} src={props.dialogAvatarUrl} />
+          <span className={styles.currentDialogName}>{props.dialogName}</span>
+        </div>
+      }
     </header>
   )
 }

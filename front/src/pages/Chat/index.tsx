@@ -2,19 +2,20 @@ import * as React from "react";
 import { useParams } from "react-router";
 import MessageListContainer from "../../containers/MessageListContainer";
 import ChatInputContainer from "../../containers/ChatInputContainer";
+import useChatPage from "./useChatPage";
 
 import styles from "./Chat.module.css";
-import useChat from "./useChat";
 
 const Chat: React.FC = () => {
   const { chatId } = useParams();
-  const { currentDialog, handleSendMessage } = useChat(chatId);
+  const { currentDialog, handleSendMessage } = useChatPage(chatId);
 
   return (
     <div className={styles.chat}>
       {currentDialog &&
         <>
           <MessageListContainer
+            dialog={currentDialog}
             messages={currentDialog.messages}
           />
           <ChatInputContainer

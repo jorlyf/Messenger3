@@ -4,6 +4,6 @@ export default interface PrivateDialogDTO {
   userId: number;
   messages: MessageDTO[];
   name: string;
-  userAvatarUrl?: string;
-  LastUpdateTotalMilliseconds: number;
+  userAvatarUrl: string | null;
+  lastUpdateTotalMilliseconds: number;
 }

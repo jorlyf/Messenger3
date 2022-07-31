@@ -1,13 +1,14 @@
 import * as React from "react";
 import { useDispatch } from "react-redux";
 import useAppSelector from "../../hooks/useAppSelector";
-import { addCurrentDialogMessage, clearCurrentDialogInputMessage, findCurrentDialog, replaceCurrentDialogTempMessage } from "../../redux/slices/chatSlice";
+import { clearCurrentDialogInputMessage, findCurrentDialog } from "../../redux/slices/chatSlice";
 import ChatService from "../../services/ChatService";
 import DialogModel, { DialogTypes } from "../../entities/db/DialogModel";
 import Message, { MessageSendingStatus } from "../../entities/local/Message";
 import SendMessageContainerDTO from "../../entities/dtos/SendMessageContainerDTO";
 import MessageDTO from "../../entities/dtos/MessageDTO";
 import { uuid } from "../../utils";
+import MessageService from "../../services/MessageService";
 
 const useChat = (chatId?: string) => {
   const dispatch = useDispatch();
@@ -31,7 +32,7 @@ const useChat = (chatId?: string) => {
       status: MessageSendingStatus.isSending,
       timeMilliseconds: new Date().getTime()
     }
-    dispatch(addCurrentDialogMessage(tempMessage));
+    MessageService.addSendingMessage(dispatch, tempMessage);
     dispatch(clearCurrentDialogInputMessage());
 
     const sendMessageDTO: SendMessageContainerDTO = {
@@ -42,10 +43,13 @@ const useChat = (chatId?: string) => {
       }
     }
     const apiMessageDTO: MessageDTO | null = await ChatService.sendMessage(currentDialog, sendMessageDTO);
-    if (!apiMessageDTO) return;
+    if (!apiMessageDTO) {
+      MessageService.changeStatusSendingMessage(dispatch, currentDialog.id, currentDialog.type, tempMessage.id, MessageSendingStatus.error);
+      return;
+    }
 
     const toReplaceTempMessage: Message = ChatService.processMessageDTO(apiMessageDTO);
-    dispatch(replaceCurrentDialogTempMessage({ message: toReplaceTempMessage, uuid: tempMessage.id }));
+    MessageService.replaceSendingMessageByUuid(dispatch, currentDialog.id, currentDialog.type, toReplaceTempMessage, tempMessage.id);
   }
 
   const handleChangeCurrentDialog = (id: number, type: DialogTypes) => {

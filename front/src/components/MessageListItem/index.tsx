@@ -31,6 +31,9 @@ const MessageListItem: React.FC<MessageListItemProps> = ({ message }) => {
           {message.status === MessageSendingStatus.isSending &&
             <IsLoad />
           }
+          {message.status === MessageSendingStatus.error &&
+            <span>ОШИБКА</span>
+          }
         </div>
         :
         <div className={styles.item}>

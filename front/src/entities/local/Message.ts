@@ -9,8 +9,8 @@ export enum MessageSendingStatus {
 
 export default interface Message {
   id: string,
-  text?: string;
-  attachments?: Attachment[];
+  text: string | null;
+  attachments: Attachment[];
   senderUser: UserModel;
   status: MessageSendingStatus;
   timeMilliseconds: number;

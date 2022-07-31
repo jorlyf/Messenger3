@@ -6,5 +6,5 @@ export default interface GroupDialogDTO {
   messages: MessageDTO[];
   name: string;
   lastUpdateTotalSeconds: number;
-  groupAvatarUrl?: string;
+  groupAvatarUrl: string | null;
 }

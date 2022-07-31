@@ -3,7 +3,7 @@ import UserModel from "../db/UserModel";
 
 export default interface MessageDTO {
   senderUser: UserModel;
-  text?: string;
-  attachments?: AttachmentModel[];
+  text: string | null;
+  attachments: AttachmentModel[];
   sentAtTotalMilliseconds: number;
 }

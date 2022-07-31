@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import DialogModel, { DialogTypes } from "../../entities/db/DialogModel";
 import AttachmentDTO from "../../entities/dtos/AttachmentDTO";
-import Message from "../../entities/local/Message";
+import Message, { MessageSendingStatus } from "../../entities/local/Message";
 import { uuid } from "../../utils";
 
 interface CurrentDialogInfo {
@@ -84,15 +84,15 @@ const chatSlice = createSlice({
     },
     addCurrentDialogMessage(state, action: PayloadAction<Message>) {
       if (state.currentDialogInfo) {
-        const dialog = findCurrentDialog(state.dialogs, state.currentDialogInfo);  
+        const dialog = findCurrentDialog(state.dialogs, state.currentDialogInfo);
         if (!dialog) return;
 
         dialog.messages.push(action.payload);
       }
     },
-    replaceCurrentDialogTempMessage(state, action: PayloadAction<{ message: Message, uuid: string }>) {
+    replaceDialogTempMessage(state, action: PayloadAction<{ dialogId: number, dialogType: DialogTypes, message: Message, uuid: string }>) {
       if (state.currentDialogInfo) {
-        const dialog = findCurrentDialog(state.dialogs, state.currentDialogInfo);
+        const dialog = findDialog(state.dialogs, action.payload.dialogId, action.payload.dialogType);
         if (!dialog) return;
 
         const tempMessage = dialog.messages.find(x => x.id === action.payload.uuid);
@@ -105,10 +105,19 @@ const chatSlice = createSlice({
       }
     },
     addDialogMessage(state, action: PayloadAction<{ dialogId: number, dialogType: DialogTypes, message: Message }>) {
-      const dialog = findDialog(state.dialogs, action.payload.dialogId, action.payload.dialogType);      
+      const dialog = findDialog(state.dialogs, action.payload.dialogId, action.payload.dialogType);
       if (!dialog) return;
 
       dialog.messages.push(action.payload.message);
+    },
+    setMessageSendingStatus(state, action: PayloadAction<{ dialogId: number, dialogType: DialogTypes, uuid: string, status: MessageSendingStatus }>) {
+      const dialog = findDialog(state.dialogs, action.payload.dialogId, action.payload.dialogType);
+      if (!dialog) return;
+
+      const message = dialog.messages.find(x => x.id === action.payload.uuid);
+      if (!message) return;
+
+      message.status = action.payload.status;
     }
   }
 });
@@ -122,8 +131,9 @@ export const {
   clearCurrentDialogInputMessage,
   addCurrentDialogInputMessageAttachment,
   addCurrentDialogMessage,
-  replaceCurrentDialogTempMessage,
-  addDialogMessage
+  replaceDialogTempMessage,
+  addDialogMessage,
+  setMessageSendingStatus
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

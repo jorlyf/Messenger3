@@ -10,9 +10,9 @@ export interface DialogListItemProps {
   id: number;
   type: DialogTypes;
   name: string;
-  avatarUrl?: string;
+  avatarUrl: string | null;
   onClick?: () => void;
-  lastMessageText?: string;
+  lastMessageText?: string | null;
   isLastMessageMy?: boolean;
   notificationCount?: number;
 }
