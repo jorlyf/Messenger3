@@ -50,6 +50,7 @@ const useAuthPage = () => {
   return {
     mode,
     wasInitAuthAttempt,
+    isAuthorized,
     isLogging,
     login,
     setLogin,

@@ -9,6 +9,7 @@ const Auth: React.FC = () => {
   const {
     mode,
     wasInitAuthAttempt,
+    isAuthorized,
     login,
     setLogin,
     isLogging,
@@ -29,25 +30,25 @@ const Auth: React.FC = () => {
               setValue={setLogin}
               placeholder={"Логин"}
               isOneRow={true}
-              disabled={isLogging}
+              disabled={isLogging || isAuthorized}
             />
             <InputField
               value={password}
               setValue={setPassword}
               placeholder={"Пароль"}
               isOneRow={true}
-              disabled={isLogging}
+              disabled={isLogging || isAuthorized}
             />
           </div>
           {mode === Mode.login &&
             <>
-              <button onClick={handleSubmitLogin} className={styles.submit}>Войти</button>
+              <button disabled={isLogging || isAuthorized} onClick={handleSubmitLogin} className={styles.submit}>Войти</button>
               <a onClick={() => handleChangeMode(Mode.registrate)} className={styles.changeMode}>У меня нет аккаунта</a>
             </>
           }
           {mode === Mode.registrate &&
             <>
-              <button onClick={handleSubmitRegistrate} className={styles.submit}>Зарегистрироваться</button>
+              <button disabled={isLogging || isAuthorized} onClick={handleSubmitRegistrate} className={styles.submit}>Зарегистрироваться</button>
               <a onClick={() => handleChangeMode(Mode.login)} className={styles.changeMode}>У меня есть аккаунт</a>
             </>
           }

@@ -24,11 +24,13 @@ const useChat = (chatId?: string) => {
     if (!ownerUser) return;
 
     if (!currentDialog.inputMessage.text && currentDialog.inputMessage.attachments.length === 0) return;
+    if (currentDialog.inputMessage.text.length > 4096) return;
 
     const tempMessage: Message = { // to display, will replaced by message from api
       id: uuid(),
       text: currentDialog.inputMessage.text,
       senderUser: ownerUser,
+      attachments: [],
       status: MessageSendingStatus.isSending,
       timeMilliseconds: new Date().getTime()
     }
@@ -37,6 +39,7 @@ const useChat = (chatId?: string) => {
 
     const sendMessageDTO: SendMessageContainerDTO = {
       toId: currentDialog.id,
+      type: currentDialog.type,
       message: {
         text: currentDialog.inputMessage.text,
         attachments: currentDialog.inputMessage.attachments
