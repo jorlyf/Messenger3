@@ -1,7 +1,7 @@
 :root {
-  --app-color: #FFFFFF;
+  --app-color       : #FFFFFF;
   --background-color: #F1F1F1;
-  --dark-blue-color: #3C4387;
+  --dark-blue-color : #3C4387;
 }
 
 body,
@@ -17,10 +17,10 @@ body,
 }
 
 textarea {
-  resize: none;
-  font-size  : 20px;
-  border: none;
-  width: 100%;
+  resize   : none;
+  font-size: 20px;
+  border   : none;
+  width    : 100%;
 }
 
 textarea:focus-visible {

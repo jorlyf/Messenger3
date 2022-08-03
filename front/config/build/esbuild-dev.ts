@@ -17,7 +17,7 @@ const getExtension = (fileName: string) => (
 
 app.get("/subscribe", (req, res) => {
   emitter.removeAllListeners("refresh");
-  
+
   const headers = {
     "Content-Type": "text/event-stream",
     "Connection": "keep-alive",
@@ -65,9 +65,6 @@ ESBuild.build({
     }
   }
 })
-  .then(result => {
-
-  })
   .catch(error => {
     console.log(error);
   });

@@ -12,4 +12,12 @@ export default class ProfileService {
       dispatch(unloadProfile());
     }
   }
+  static async GetUser(userId: number): Promise<UserModel | null> {
+    try {
+      const response = await $api.get<UserModel>(`/Profile/GetUser?id=${userId}`);
+      return response.data;
+    } catch (error) {
+      return null;
+    }
+  }
 }

@@ -1,11 +1,11 @@
 import * as React from 'react';
+import { useNavigate } from 'react-router-dom';
 import useDebounce from '../../hooks/useDebounce';
 import useAppSelector from '../../hooks/useAppSelector';
 import ChatService from '../../services/ChatService';
-import UserModel from '../../entities/db/UserModel';
 import Search from '../../components/Search';
 import UserSearchResult from '../../components/UserSearchResult';
-import { useNavigate } from 'react-router-dom';
+import UserModel from '../../entities/db/UserModel';
 
 const UserSearchContainer: React.FC = () => {
   const navigate = useNavigate();
@@ -71,13 +71,11 @@ const UserSearchContainer: React.FC = () => {
         disabled={!ownerUser}
       />
       {isActive && searchResult &&
-        <>
-          <UserSearchResult
-            items={searchResult}
-            handleUserItemClick={handleUserItemClick}
-            handleOutsideClick={handleOutsideClick}
-          />
-        </>
+        <UserSearchResult
+          items={searchResult}
+          handleUserItemClick={handleUserItemClick}
+          handleOutsideClick={handleOutsideClick}
+        />
       }
     </>
   );

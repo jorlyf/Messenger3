@@ -14,6 +14,8 @@ import NotFound from "./pages/NotFound";
 import Home from "./pages/Home";
 
 import styles from "./App.module.css";
+import CreateGroupDialogButtonContainer from "./containers/CreateGroupDialogButtonContainer";
+import Modals from "./modals";
 
 const App: React.FC = () => {
 
@@ -28,7 +30,11 @@ const App: React.FC = () => {
       <div className={styles.leftColumn}>
         <LeftColumnHeaderContainer />
         {wasInitAuthAttempt &&
-          <DialogListContainer />}
+          <>
+            <DialogListContainer />
+            <CreateGroupDialogButtonContainer />
+          </>
+        }
       </div>
 
       <div className={styles.rightColumn}>
@@ -42,6 +48,8 @@ const App: React.FC = () => {
             <Route element={<NotFound />} path="*" />
           </Routes>}
       </div>
+
+      <Modals />
     </div>
   );
 }

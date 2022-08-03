@@ -9,7 +9,7 @@
 
 .leftColumn {
   display           : grid;
-  grid-template-rows: 70px 1fr;
+  grid-template-rows: 70px 1fr 50px;
   background-color  : var(--app-color);
   height            : 100vh;
 }

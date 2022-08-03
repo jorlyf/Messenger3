@@ -1,0 +1,13 @@
+.container {
+  border-top: 1px solid var(--background-color);
+}
+
+.button {
+  height          : 100%;
+  background-color: var(--app-color);
+  margin-left     : 15px;
+}
+
+.button:hover {
+  background-color: var(--background-color);
+}
