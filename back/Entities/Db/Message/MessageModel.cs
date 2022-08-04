@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using back.Entities.Db.User;
 
-namespace back.Models
+namespace back.Entities.Db.Message
 {
 	public class MessageModel
 	{
@@ -10,11 +11,12 @@ namespace back.Models
 		[Required]
 		public UserModel SenderUser { get; set; }
 
-		[MaxLength(1024)]
+		[StringLength(4096)]
 		public string? Text { get; set; }
 
 		//[Range(0, 10)]
-		public IEnumerable<AttachmentModel?>? Attachments { get; set; }
+		[Required]
+		public IEnumerable<AttachmentModel> Attachments { get; set; }
 
 		[Required]
 		public DateTime SentAt { get; set; }

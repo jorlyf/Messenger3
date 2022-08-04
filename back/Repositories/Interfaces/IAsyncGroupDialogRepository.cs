@@ -1,4 +1,4 @@
-﻿using back.Models;
+﻿using back.Entities.Db.Dialog;
 
 namespace back.Repositories.Interfaces
 {

@@ -7,5 +7,8 @@
 		LoginIsNotUnique,
 		SenderUserIsReceiver,
 		DialogIsNotFound,
+		UserAlreadyConnected,
+		MessageIsNotValid,
+		PrivateDialogExists
 	}
 }

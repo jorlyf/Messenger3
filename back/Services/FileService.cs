@@ -1,6 +1,6 @@
-﻿using back.Infrastructure;
-using back.Models;
-using back.Models.DTOs.Chat;
+﻿using back.Entities.Db.Message;
+using back.Infrastructure;
+using back.Entities.DTOs.Chat;
 
 namespace back.Services
 {

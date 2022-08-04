@@ -4,17 +4,24 @@ import MenuContainer from "../../containers/MenuContainer";
 
 import styles from "./LeftColumnHeader.module.css";
 
-const Header: React.FC = () => {
+interface LeftColumnHeaderProps {
+  handleSearchResultUserItemClick: (userId: number) => void;
+}
+
+const LeftColumnHeader: React.FC<LeftColumnHeaderProps> = ({ handleSearchResultUserItemClick }) => {
   return (
     <header className={styles.header}>
       <div className={styles.menu}>
         <MenuContainer />
       </div>
       <div className={styles.search}>
-        <DialogAndUserSearchContainer />
+        <DialogAndUserSearchContainer
+          handleUserItemClick={handleSearchResultUserItemClick}
+          clearAfterUserItemClick={true}
+        />
       </div>
     </header>
   );
 }
 
-export default Header;
+export default LeftColumnHeader;

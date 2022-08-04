@@ -1,4 +1,4 @@
-﻿using back.Models;
+﻿using back.Entities.Db.User;
 using back.Repositories;
 
 namespace back.Services
@@ -13,7 +13,7 @@ namespace back.Services
 		}
 
 
-		public Task<UserModel?> LoadUserAsync(int id)
+		public Task<UserModel?> GetUserAsync(int id)
 		{
 			return this.UoW.UserRepository.GetByIdAsync(id);
 		}

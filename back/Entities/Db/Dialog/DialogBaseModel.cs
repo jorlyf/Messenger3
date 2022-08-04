@@ -1,7 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using back.Entities.Db.Message;
 
-namespace back.Models
+namespace back.Entities.Db.Dialog
 {
+	public enum DialogTypes : byte
+	{
+		Private,
+		Group
+	}
 	public abstract class DialogBaseModel
 	{
 		[Key]

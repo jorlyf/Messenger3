@@ -1,5 +1,7 @@
-﻿using back.Models;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using back.Entities.Db.Dialog;
+using back.Entities.Db.Message;
+using back.Entities.Db.User;
 
 namespace back.Contexts
 {

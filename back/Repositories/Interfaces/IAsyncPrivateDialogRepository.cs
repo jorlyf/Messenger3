@@ -1,4 +1,5 @@
-﻿using back.Models;
+﻿using back.Entities.Db.Dialog;
+using back.Entities.Db.User;
 
 namespace back.Repositories.Interfaces
 {

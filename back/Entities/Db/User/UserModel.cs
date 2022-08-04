@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
-namespace back.Models
+namespace back.Entities.Db.User
 {
 	[Index(nameof(Login), IsUnique = true)]
 	public class UserModel

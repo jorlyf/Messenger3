@@ -1,25 +1,73 @@
-.container {
+.modal {
+  margin       : 0 auto;
+  margin-top   : 100px;
+  border       : 3px solid var(--background-color);
+  border-radius: 5px;
+  width        : max-content;
+  max-height   : 500px;
+
   background-color: var(--app-color);
-  width           : max-content;
-  margin          : 0 auto;
-  margin-top      : 200px;
-  border          : 3px solid var(--background-color);
-  border-radius   : 5px;
+}
+
+.container {
+  display              : grid;
+  grid-template-columns: 250px 1fr;
+  grid-column-gap      : 20px;
+
+  max-height: 400px;
 }
 
 .userList {
   display       : flex;
   flex-direction: column;
+  border-right  : 2px solid var(--background-color);
+}
+
+.userListHeader {
+  padding: 0px 15px;
 }
 
 .userListItem {
+  display    : flex;
+  align-items: center;
+}
 
+.userListItemAvatarContainer {
+  width : 60px;
+  height: 60px;
 }
 
 .userListItemAvatar {
-  
+  max-width : 100%;
+  max-height: 100%;
 }
 
 .userListItemLogin {
+  font-size  : 20px;
+  font-weight: 600;
+}
 
+.userListItemDeleteButton {
+  width      : 32px;
+  margin-left: auto;
+  cursor     : pointer;
+}
+
+.userListItemDeleteButton:hover {
+  transform : scale(1.05);
+  transition: 100ms;
+}
+
+.userSearch {
+  margin: 10px;
+}
+
+.submitContainer {
+  border-top: 2px solid var(--background-color);
+  width     : max-content;
+  margin    : 5px auto;
+}
+
+.submitButton:disabled {
+  cursor : auto;
 }

@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using back.Entities.Db.Message;
+using back.Entities.Db.User;
 
-namespace back.Models.DTOs.Chat
+namespace back.Entities.DTOs.Chat
 {
 	public class MessageDTO
 	{
@@ -9,7 +11,8 @@ namespace back.Models.DTOs.Chat
 
 		public string? Text { get; set; }
 
-		public IEnumerable<AttachmentModel>? Attachments { get; set; }
+		[Required]
+		public IEnumerable<AttachmentModel> Attachments { get; set; }
 
 		[Required]
 		public long SentAtTotalMilliseconds { get; set; }

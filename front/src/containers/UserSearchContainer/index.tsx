@@ -7,7 +7,12 @@ import Search from '../../components/Search';
 import UserSearchResult from '../../components/UserSearchResult';
 import UserModel from '../../entities/db/UserModel';
 
-const UserSearchContainer: React.FC = () => {
+interface UserSearchContainerProps {
+  handleUserItemClick: (userId: number) => void;
+  clearAfterUserItemClick: boolean;
+}
+
+const UserSearchContainer: React.FC<UserSearchContainerProps> = ({ handleUserItemClick, clearAfterUserItemClick }) => {
   const navigate = useNavigate();
 
   const ownerUser = useAppSelector(state => state.profile.user);
@@ -20,11 +25,12 @@ const UserSearchContainer: React.FC = () => {
 
   const search = useDebounce(async (value: string) => {
     if (!ownerUser) return;
+
     let users = await ChatService.searchUsersByLoginContains(value);
     users = users.filter(u => u.id !== ownerUser.id);
 
     setSearchResult(users);
-  }, 250);
+  }, 200);
 
   const handleChangeValue = (newValue: string) => {
     setInputValue(newValue);
@@ -50,9 +56,11 @@ const UserSearchContainer: React.FC = () => {
     setIsActive(false);
   }
 
-  const handleUserItemClick = (userId: number) => {
-    navigate(`/user=${userId}`);
-    clear();
+  const localHandleUserItemClick = (userId: number) => {
+    handleUserItemClick(userId);
+    if (clearAfterUserItemClick) {
+      clear();
+    }
   }
 
   React.useEffect(() => {
@@ -73,7 +81,7 @@ const UserSearchContainer: React.FC = () => {
       {isActive && searchResult &&
         <UserSearchResult
           items={searchResult}
-          handleUserItemClick={handleUserItemClick}
+          handleUserItemClick={localHandleUserItemClick}
           handleOutsideClick={handleOutsideClick}
         />
       }

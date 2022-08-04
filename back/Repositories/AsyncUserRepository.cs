@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using back.Contexts;
-using back.Models;
 using back.Repositories.Interfaces;
+using back.Entities.Db.User;
 
 namespace back.Repositories
 {

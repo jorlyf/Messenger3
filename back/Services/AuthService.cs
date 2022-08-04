@@ -2,11 +2,10 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using back.Models;
-using back.Repositories.Interfaces;
 using back.Infrastructure.Exceptions;
-using back.Models.DTOs.Auth;
+using back.Entities.DTOs.Auth;
 using back.Repositories;
+using back.Entities.Db.User;
 
 namespace back.Services
 {
@@ -47,7 +46,7 @@ namespace back.Services
 				Password = registrationData.Password
 			};
 
-			if (await this.UoW.UserRepository.GetByLoginAsync(registrationData.Login) != null)
+			if (await this.UoW.UserRepository.GetByLoginAsync(user.Login) != null)
 			{
 				throw new ApiException(ApiExceptionReason.LoginIsNotUnique);
 			}
@@ -61,14 +60,15 @@ namespace back.Services
 
 		private string GenerateToken(UserModel user)
 		{
-			Claim[] claims = new[] {
-						new Claim("id", user.Id.ToString()),
-						new Claim("login", user.Login)
-					};
+			Claim[] claims = new[]
+			{
+				new Claim("id", user.Id.ToString()),
+				new Claim("login", user.Login)
+			};
 
-			var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(this.Configuration["Jwt:Key"]));
-			var signIn = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-			var token = new JwtSecurityToken(
+			SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(this.Configuration["Jwt:Key"]));
+			SigningCredentials signIn = new(key, SecurityAlgorithms.HmacSha256);
+			JwtSecurityToken token = new(
 				claims: claims,
 				expires: DateTime.UtcNow.AddDays(30),
 				signingCredentials: signIn);

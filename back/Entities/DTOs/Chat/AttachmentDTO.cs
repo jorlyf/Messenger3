@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using back.Entities.Db.Message;
 
-namespace back.Models.DTOs.Chat
+namespace back.Entities.DTOs.Chat
 {
 	public class AttachmentDTO
 	{

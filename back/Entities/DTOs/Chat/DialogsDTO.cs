@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace back.Models.DTOs.Chat
+namespace back.Entities.DTOs.Chat
 {
 	public class DialogsDTO
 	{

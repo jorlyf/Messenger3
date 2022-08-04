@@ -1,45 +1,59 @@
 import * as React from "react";
 import useCreateGroupDialogModal from "./useCreateGroupDialogModal";
+import UserSearchContainer from "../../containers/UserSearchContainer";
 import defaultAvatar from "../../../public/defaultAvatar.jpg";
+import deleteIcon from "../../../public/icons/Delete.png";
 
 import styles from "./CreateGroupDialogModal.module.css";
 import { overlay } from "../overlay.module.css";
-import UserSearchContainer from "../../containers/UserSearchContainer";
 
 const CreateGroupDialogModal: React.FC = () => {
-
   const {
     open,
     users,
     handleAddUserId,
     handleRemoveUserId,
     handleClearUserIds,
-    handleSubmitCreate
+    handleSubmitCreate,
+    submitActive
   } = useCreateGroupDialogModal();
 
   return (
     <>
       {open &&
         <div className={overlay}>
-          <div className={styles.container}>
-            <div className={styles.userList}>
-              {users.map(x => (
-                <div className={styles.userListItem}>
-                  <div className={styles.userListItemAvatar}>
-                    {x.avatarUrl ?
-                      <img src={x.avatarUrl} />
-                      :
-                      <img src={defaultAvatar} />
-                    }
+          <div className={styles.modal}>
+
+            <div className={styles.container}>
+              <div className={styles.userList}>
+                <h3 className={styles.userListHeader}>Список участников</h3>
+                {users.map(x => (
+                  <div key={x.id} className={styles.userListItem}>
+                    <div className={styles.userListItemAvatarContainer}>
+                      {x.avatarUrl ?
+                        <img className={styles.userListItemAvatar} src={x.avatarUrl} />
+                        :
+                        <img className={styles.userListItemAvatar} src={defaultAvatar} />
+                      }
+                    </div>
+                    <span className={styles.userListItemLogin}>{x.login}</span>
+                    <img className={styles.userListItemDeleteButton} src={deleteIcon} onClick={() => handleRemoveUserId(x.id)} alt="remove" />
                   </div>
-                  <span className={styles.userListItemLogin}>{x.login}</span>
-                </div>
-              ))}
+                ))}
+              </div>
+
+              <div className={styles.userSearch}>
+                <UserSearchContainer
+                  handleUserItemClick={handleAddUserId}
+                  clearAfterUserItemClick={false}
+                />
+              </div>
             </div>
 
-            <div>
-              <UserSearchContainer /> 
+            <div className={styles.submitContainer}>
+              <button className={styles.submitButton} onClick={handleSubmitCreate} disabled={!submitActive}>Создать</button>
             </div>
+
           </div>
         </div>
       }

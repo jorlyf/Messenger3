@@ -1,5 +1,5 @@
 ﻿using back.Contexts;
-using back.Models;
+using back.Entities.Db.Message;
 using back.Repositories.Interfaces;
 
 namespace back.Repositories

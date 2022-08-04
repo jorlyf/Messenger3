@@ -34,6 +34,13 @@ const DialogListItem: React.FC<DialogListItemProps> = (props) => {
     return props.lastMessageText;
   }
 
+  const getName = (): string => {
+    if (props.name.length > 14) {
+      return props.name.slice(0, 14) + "...";
+    }
+    return props.name;
+  }
+
   React.useEffect(() => {
     if (!currentDialogInfo) return;
 
@@ -51,7 +58,7 @@ const DialogListItem: React.FC<DialogListItemProps> = (props) => {
         }
       </div>
       <div onClick={props.onClick} className={styles.container}>
-        <span className={styles.name}>{props.name}</span>
+        <span className={styles.name}>{getName()}</span>
         <span className={styles.lastMessageText}>{props.isLastMessageMy && "Вы: "}{getLastMessageText()}</span>
       </div>
     </div>

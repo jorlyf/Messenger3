@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using back.Entities.Db.User;
 
-namespace back.Models
+namespace back.Entities.Db.Dialog
 {
 	public class PrivateDialogModel : DialogBaseModel
 	{

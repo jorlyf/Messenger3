@@ -10,6 +10,7 @@ import Message, { MessageSendingStatus } from "../entities/local/Message";
 import MessageDTO from "../entities/dtos/MessageDTO";
 import SendMessageContainerDTO from "../entities/dtos/SendMessageContainerDTO";
 import DialogsDTO from "../entities/dtos/DialogsDTO";
+import GroupDialogCreatingDataDTO from "../entities/dtos/GroupDialogCreatingDataDTO";
 
 export default class ChatService {
   static async searchGroupDialogsByNameContains(name: string): Promise<GroupDialogDTO[]> {
@@ -62,11 +63,10 @@ export default class ChatService {
   static async sendMessage(dialog: DialogModel, message: SendMessageContainerDTO): Promise<MessageDTO | null> {
     try {
       if (dialog.type === DialogTypes.private) {
-        return await ChatService.sendMessageToUser(dialog.id, message);
+        return await ChatService.sendMessageToUser(message);
       }
       else if (dialog.type === DialogTypes.group) {
-        return null;
-        //return await ChatService.sendMessageToGroup(dialog.id, message);
+        return await ChatService.sendMessageToGroup(message);
       }
       else { return null; }
     } catch (error) {
@@ -74,13 +74,14 @@ export default class ChatService {
     }
   }
 
-  static async sendMessageToUser(userId: number, message: SendMessageContainerDTO): Promise<MessageDTO | null> {
+  static async sendMessageToUser(message: SendMessageContainerDTO): Promise<MessageDTO | null> {
     const response = await $api.post<MessageDTO>("/Chat/SendMessageToUser", message);
     return response.data;
   }
-  // static async sendMessageToGroup(groupId: number, message: SendMessageContainerDTO): Promise<MessageDTO | null> {
-
-  // }
+  static async sendMessageToGroup(message: SendMessageContainerDTO): Promise<MessageDTO | null> {
+    const response = await $api.post<MessageDTO>("/Chat/SendMessageToGroup", message);
+    return response.data;
+  }
 
   static findDialog(id: number, type: DialogTypes, dialogs: DialogModel[]): DialogModel | null {
     const dialog = findCurrentDialog(dialogs, { id: id, type: type, index: -1 });
@@ -150,6 +151,20 @@ export default class ChatService {
     }
   }
 
+  static async createGroupDialog(ownerUserId: number, userIds: number[]): Promise<GroupDialogDTO | null> {
+    const dto: GroupDialogCreatingDataDTO = {
+      userCreatorId: ownerUserId,
+      userIds: userIds
+    }
+
+    try {
+      const response = await $api.post<GroupDialogDTO>("/Chat/CreateGroupDialog", dto);
+      return response.data;
+    } catch (error) {
+      return null;
+    }
+  }
+
   static processMessageDTOs(dtos: MessageDTO[]): Message[] {
     return dtos.map(dto => {
       return this.processMessageDTO(dto);
@@ -182,7 +197,7 @@ export default class ChatService {
       avatarUrl: dialog.userAvatarUrl
     };
   }
-  static processGroupDialogDTO(dialog: GroupDialogDTO): DialogModel {
+  static processGroupDialogDTO(dialog: GroupDialogDTO): DialogModel { 
     const messages = ChatService.processMessageDTOs(dialog.messages);
     return {
       id: dialog.groupId,

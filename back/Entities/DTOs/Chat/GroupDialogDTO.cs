@@ -1,11 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace back.Models.DTOs.Chat
+namespace back.Entities.DTOs.Chat
 {
-	public class PrivateDialogDTO
+	public class GroupDialogDTO
 	{
 		[Required]
-		public int UserId { get; set; }
+		public int GroupId { get; set; }
+
+		[Required]
+		public IEnumerable<int> UserIds { get; set; }
 
 		[Required]
 		public IEnumerable<MessageDTO> Messages { get; set; }
@@ -13,7 +16,7 @@ namespace back.Models.DTOs.Chat
 		[Required]
 		public string Name { get; set; }
 
-		public string? UserAvatarUrl { get; set; }
+		public string? GroupAvatarUrl { get; set; }
 
 		[Required]
 		public long LastUpdateTotalMilliseconds { get; set; }

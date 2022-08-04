@@ -16,7 +16,7 @@ namespace back.Repositories
 		}
 
 
-		public async Task<T?> GetByIdAsync(int id)
+		public virtual async Task<T?> GetByIdAsync(int id)
 		{
 			return await this.Set.FindAsync(id);
 		}
@@ -31,7 +31,7 @@ namespace back.Repositories
 			return await this.Set.Where(where).ToListAsync();
 		}
 
-		public async Task<IEnumerable<T?>> GetAllAsync()
+		public virtual async Task<IEnumerable<T?>> GetAllAsync()
 		{
 			return await this.Set.ToListAsync();
 		}

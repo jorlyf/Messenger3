@@ -18,6 +18,7 @@ const DialogListContainer: React.FC = () => {
   const dialogs = useAppSelector(state => state.chat.dialogs);
 
   const getLastMessage = (messages: Message[]): Message | undefined => {
+    if (messages.length === 0) return undefined;
     return messages.reduce((x, y) => (x.timeMilliseconds > y.timeMilliseconds) ? x : y);
   }
 

@@ -1,4 +1,4 @@
-﻿namespace back.Models.DTOs.Auth
+﻿namespace back.Entities.DTOs.Auth
 {
 	public class RegistrationAnswerDataDTO
 	{

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace back.Models
+namespace back.Entities.Db.Message
 {
 	public enum AttachmentTypes: byte
 	{

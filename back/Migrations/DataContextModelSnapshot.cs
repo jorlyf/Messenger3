@@ -17,7 +17,7 @@ namespace back.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.7");
 
-            modelBuilder.Entity("back.Models.AttachmentModel", b =>
+            modelBuilder.Entity("back.Entities.AttachmentModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -40,7 +40,7 @@ namespace back.Migrations
                     b.ToTable("Attachments");
                 });
 
-            modelBuilder.Entity("back.Models.GroupDialogModel", b =>
+            modelBuilder.Entity("back.Entities.GroupDialogModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -61,7 +61,7 @@ namespace back.Migrations
                     b.ToTable("GroupDialogs");
                 });
 
-            modelBuilder.Entity("back.Models.MessageModel", b =>
+            modelBuilder.Entity("back.Entities.MessageModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -94,7 +94,7 @@ namespace back.Migrations
                     b.ToTable("Messages");
                 });
 
-            modelBuilder.Entity("back.Models.PrivateDialogModel", b =>
+            modelBuilder.Entity("back.Entities.PrivateDialogModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -118,7 +118,7 @@ namespace back.Migrations
                     b.ToTable("PrivateDialogs");
                 });
 
-            modelBuilder.Entity("back.Models.UserModel", b =>
+            modelBuilder.Entity("back.Entities.UserModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -150,24 +150,24 @@ namespace back.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("back.Models.AttachmentModel", b =>
+            modelBuilder.Entity("back.Entities.AttachmentModel", b =>
                 {
-                    b.HasOne("back.Models.MessageModel", null)
+                    b.HasOne("back.Entities.MessageModel", null)
                         .WithMany("Attachments")
                         .HasForeignKey("MessageModelId");
                 });
 
-            modelBuilder.Entity("back.Models.MessageModel", b =>
+            modelBuilder.Entity("back.Entities.MessageModel", b =>
                 {
-                    b.HasOne("back.Models.GroupDialogModel", null)
+                    b.HasOne("back.Entities.GroupDialogModel", null)
                         .WithMany("Messages")
                         .HasForeignKey("GroupDialogModelId");
 
-                    b.HasOne("back.Models.PrivateDialogModel", null)
+                    b.HasOne("back.Entities.PrivateDialogModel", null)
                         .WithMany("Messages")
                         .HasForeignKey("PrivateDialogModelId");
 
-                    b.HasOne("back.Models.UserModel", "SenderUser")
+                    b.HasOne("back.Entities.UserModel", "SenderUser")
                         .WithMany()
                         .HasForeignKey("SenderUserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -176,15 +176,15 @@ namespace back.Migrations
                     b.Navigation("SenderUser");
                 });
 
-            modelBuilder.Entity("back.Models.PrivateDialogModel", b =>
+            modelBuilder.Entity("back.Entities.PrivateDialogModel", b =>
                 {
-                    b.HasOne("back.Models.UserModel", "FirstUser")
+                    b.HasOne("back.Entities.UserModel", "FirstUser")
                         .WithMany()
                         .HasForeignKey("FirstUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("back.Models.UserModel", "SecondUser")
+                    b.HasOne("back.Entities.UserModel", "SecondUser")
                         .WithMany()
                         .HasForeignKey("SecondUserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -195,26 +195,26 @@ namespace back.Migrations
                     b.Navigation("SecondUser");
                 });
 
-            modelBuilder.Entity("back.Models.UserModel", b =>
+            modelBuilder.Entity("back.Entities.UserModel", b =>
                 {
-                    b.HasOne("back.Models.GroupDialogModel", null)
+                    b.HasOne("back.Entities.GroupDialogModel", null)
                         .WithMany("Users")
                         .HasForeignKey("GroupDialogModelId");
                 });
 
-            modelBuilder.Entity("back.Models.GroupDialogModel", b =>
+            modelBuilder.Entity("back.Entities.GroupDialogModel", b =>
                 {
                     b.Navigation("Messages");
 
                     b.Navigation("Users");
                 });
 
-            modelBuilder.Entity("back.Models.MessageModel", b =>
+            modelBuilder.Entity("back.Entities.MessageModel", b =>
                 {
                     b.Navigation("Attachments");
                 });
 
-            modelBuilder.Entity("back.Models.PrivateDialogModel", b =>
+            modelBuilder.Entity("back.Entities.PrivateDialogModel", b =>
                 {
                     b.Navigation("Messages");
                 });

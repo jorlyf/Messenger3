@@ -1,10 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using back.Services;
-using back.Models;
 using back.Infrastructure;
 using back.Infrastructure.Exceptions;
-using back.Models.DTOs.Chat;
+using back.Entities.DTOs.Chat;
+using back.Entities.Db.User;
+using back.Entities.Db.Dialog;
 
 namespace back.Controllers
 {
@@ -21,7 +22,7 @@ namespace back.Controllers
 
 		[HttpPost]
 		[Route("SendMessageToUser")]
-		public async Task<ActionResult<MessageModel>> SendMessageToUserAsync(SendMessageContainerDTO messageContainerDTO)
+		public async Task<ActionResult<MessageDTO>> SendMessageToUserAsync([FromBody] SendMessageContainerDTO messageContainerDTO)
 		{
 			try
 			{
@@ -35,6 +36,45 @@ namespace back.Controllers
 			catch (Exception ex)
 			{
 				Console.WriteLine(ex.Message);
+				return StatusCode(500);
+			}
+		}
+
+		[HttpPost]
+		[Route("SendMessageToGroup")]
+		public async Task<ActionResult<MessageDTO>> SendMessageToGroupAsync([FromBody] SendMessageContainerDTO messageContainerDTO)
+		{
+			try
+			{
+				int senderId = Utils.GetAuthorizedUserId(this.User);
+				return await this.ChatService.SendMessageToGroupAsync(senderId, messageContainerDTO);
+			}
+			catch (ApiException ex)
+			{
+				return BadRequest(ex.Reason);
+			}
+			catch (Exception)
+			{
+				return StatusCode(500);
+			}
+		}
+
+		[HttpPost]
+		[Route("CreateGroupDialog")]
+		public async Task<ActionResult<GroupDialogDTO>> CreateGroupDialogAsync([FromBody] GroupDialogCreatingDataDTO data)
+		{
+			try
+			{
+				GroupDialogModel model = await this.ChatService.CreateGroupDialogAsync(data.UserIds);
+				GroupDialogDTO groupDialogDTO = this.ChatService.GroupDialogModelToDTO(model);
+				return Ok(groupDialogDTO);
+			}
+			catch (ApiException ex)
+			{
+				return BadRequest(ex.Reason);
+			}
+			catch (Exception)
+			{
 				return StatusCode(500);
 			}
 		}
