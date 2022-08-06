@@ -98,7 +98,7 @@ export default class ChatService {
       return;
     }
 
-    if (dialogsFetched) {
+    if (!dialogsFetched) {
       return;
     }
 
