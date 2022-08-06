@@ -51,6 +51,6 @@ export default class AuthService {
     AuthService.loadAfterLogin(dispatch);
   }
   private static loadAfterLogin(dispatch: AppDispatch) {
-    ProfileService.LoadProfile(dispatch);
+    ProfileService.loadProfile(dispatch);
   }
 }

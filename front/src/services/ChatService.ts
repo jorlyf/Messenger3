@@ -1,6 +1,6 @@
-import $api from "../http";
+import $api, { BASE_URL } from "../http";
 import { AppDispatch } from "../redux/store";
-import { addDialog, findCurrentDialog, setCurrentDialogInfo, setDialogs } from "../redux/slices/chatSlice";
+import { addDialog, findCurrentDialog, setCurrentDialogInfo, setDialogs, setDialogsFetched } from "../redux/slices/chatSlice";
 import { uuid } from "../utils";
 import UserModel from "../entities/db/UserModel";
 import DialogModel, { DialogTypes } from "../entities/db/DialogModel";
@@ -55,6 +55,7 @@ export default class ChatService {
       });
 
       dispatch(setDialogs(dialogs));
+      dispatch(setDialogsFetched(true));
     } catch (error) {
       console.log(error);
     }
@@ -87,7 +88,7 @@ export default class ChatService {
     const dialog = findCurrentDialog(dialogs, { id: id, type: type, index: -1 });
     return dialog ? dialog : null;
   }
-  static async changeCurrentDialog(dispatch: AppDispatch, id: number, type: DialogTypes, dialogs: DialogModel[]) {
+  static async changeCurrentDialog(dispatch: AppDispatch, id: number, type: DialogTypes, dialogs: DialogModel[], dialogsFetched: boolean) {
     dispatch(setCurrentDialogInfo(null));
 
     let dialog = ChatService.findDialog(id, type, dialogs);
@@ -96,6 +97,11 @@ export default class ChatService {
       dispatch(setCurrentDialogInfo({ id: id, type: type, index: index }));
       return;
     }
+
+    if (dialogsFetched) {
+      return;
+    }
+
     let dialogDTO: PrivateDialogDTO | GroupDialogDTO | null;
     switch (type) {
       case DialogTypes.private: {
@@ -197,7 +203,7 @@ export default class ChatService {
       avatarUrl: dialog.userAvatarUrl
     };
   }
-  static processGroupDialogDTO(dialog: GroupDialogDTO): DialogModel { 
+  static processGroupDialogDTO(dialog: GroupDialogDTO): DialogModel {
     const messages = ChatService.processMessageDTOs(dialog.messages);
     return {
       id: dialog.groupId,

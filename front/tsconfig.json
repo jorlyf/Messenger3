@@ -16,7 +16,7 @@
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     // Обязательное поле при использовании с esbuild
-    "isolatedModules": true
+    "isolatedModules": true,
   },
   "ts-node": {
     "compilerOptions": {

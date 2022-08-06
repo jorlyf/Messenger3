@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { useNavigate } from 'react-router-dom';
 import useDebounce from '../../hooks/useDebounce';
 import useAppSelector from '../../hooks/useAppSelector';
 import ChatService from '../../services/ChatService';
@@ -13,8 +12,6 @@ interface UserSearchContainerProps {
 }
 
 const UserSearchContainer: React.FC<UserSearchContainerProps> = ({ handleUserItemClick, clearAfterUserItemClick }) => {
-  const navigate = useNavigate();
-
   const ownerUser = useAppSelector(state => state.profile.user);
 
   const [inputValue, setInputValue] = React.useState<string>("");

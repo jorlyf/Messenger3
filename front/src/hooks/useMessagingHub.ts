@@ -1,14 +1,14 @@
 import * as React from "react";
-import { BASE_URL, NodeEnv } from "../http";
-import { HttpTransportType, HubConnection, HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
-import { AppDispatch } from "../redux/store";
-import useAppSelector from "./useAppSelector";
 import { useDispatch } from "react-redux";
+import { HttpTransportType, HubConnection, HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
+import { BASE_URL, NodeEnv } from "../http";
+import useAppSelector from "./useAppSelector";
+import { AppDispatch } from "../redux/store";
+import { addDialogMessage } from "../redux/slices/chatSlice";
+import ChatService from "../services/ChatService";
 import NewMessageDTO from "../entities/dtos/NewMessageDTO";
 import { DialogTypes } from "../entities/db/DialogModel";
-import ChatService from "../services/ChatService";
 import Message from "../entities/local/Message";
-import { addDialogMessage } from "../redux/slices/chatSlice";
 
 export enum MessagingHubMethods {
   ReceiveNewMessage = "ReceiveNewMessage"
@@ -35,7 +35,7 @@ const buildHubConnection = (token: string): HubConnection => {
 }
 
 const setClientHandlers = (connection: HubConnection, dispatch: AppDispatch) => {
-  connection.on(MessagingHubMethods.ReceiveNewMessage, (newMessageDTO: NewMessageDTO) => { 
+  connection.on(MessagingHubMethods.ReceiveNewMessage, (newMessageDTO: NewMessageDTO) => {
     switch (newMessageDTO.dialogType) { // convert backend int enum to string enum
       case 0:
         newMessageDTO.dialogType = DialogTypes.private;
@@ -47,7 +47,7 @@ const setClientHandlers = (connection: HubConnection, dispatch: AppDispatch) => 
       default:
         return;
     }
-    
+
     const message: Message = ChatService.processMessageDTO(newMessageDTO.messageDTO);
 
     dispatch(addDialogMessage({ dialogId: newMessageDTO.dialogId, dialogType: newMessageDTO.dialogType, message }));
@@ -61,11 +61,15 @@ const useMessagingHub = () => {
   const token = useAppSelector(state => state.auth.token);
   const ownerUser = useAppSelector(state => state.profile.user);
 
+  const connectionRef = React.useRef<HubConnection | null>(null);
+
   React.useEffect(() => {
-    if (!isAuthorized || !token || !ownerUser || !dispatch) return;
+    if (!isAuthorized || !token || !ownerUser || !dispatch || connectionRef.current) return;
 
     const connection: HubConnection = buildHubConnection(token);
     setClientHandlers(connection, dispatch);
+
+    connectionRef.current = connection;
 
     connection.start();
     return () => {

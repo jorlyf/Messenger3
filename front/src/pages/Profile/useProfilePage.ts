@@ -1,7 +1,11 @@
+import { useDispatch } from "react-redux";
+import { setAvatarUrl } from "../../redux/slices/profileSlice";
 import useAppSelector from "../../hooks/useAppSelector";
-import defaultAvatar from "../../../public/defaultAvatar.jpg";
+import ProfileService from "../../services/ProfileService";
 
 const useProfilePage = () => {
+  const dispatch = useDispatch();
+
   const ownerUser = useAppSelector(state => state.profile.user);
 
   let login: string | null = null;
@@ -11,18 +15,29 @@ const useProfilePage = () => {
     avatarUrl = ownerUser.avatarUrl;
   }
 
-  if (!avatarUrl) {
-    avatarUrl = defaultAvatar;
+  const handleUploadAvatar = () => {
+    const input = document.createElement("input");
+
+    input.type = "file";
+    input.multiple = false;
+    input.accept = ".jpg, .png, .jpeg";
+    input.onchange = (e) => handleSubmitUploadAvatar(e);
+
+    input.click();
   }
-  
-  const handleChangeAvatar = () => {
-    
+
+  const handleSubmitUploadAvatar = async (e: any) => {
+    const file: File = e.path[0].files[0];
+    const avatarUrl = await ProfileService.uploadAvatar(file);
+    if (!avatarUrl) return;
+
+    dispatch(setAvatarUrl(avatarUrl));
   }
 
   return {
     login,
     avatarUrl,
-    handleChangeAvatar
+    handleUploadAvatar
   }
 }
 

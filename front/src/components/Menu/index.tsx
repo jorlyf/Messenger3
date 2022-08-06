@@ -24,10 +24,10 @@ const Menu: React.FC<IMenuProps> = ({ items }) => {
 
       {isIpen && items?.length > 0 &&
         <div className={styles.content}>
-          {items?.map(e => (
-            <div key={e.text} className={styles.item}>
-              {e.iconUrl && <img src={e.iconUrl} className={styles.icon} alt="" />}
-              <span onClick={e.onClick} className={styles.text}>{e.text}</span>
+          {items?.map(item => (
+            <div key={item.text} className={styles.item}>
+              {item.iconUrl && <img src={item.iconUrl} className={styles.icon} alt="" />}
+              <span onClick={() => { item.onClick(); setIsOpen(false); }} className={styles.text}>{item.text}</span>
             </div>
           ))}
         </div>

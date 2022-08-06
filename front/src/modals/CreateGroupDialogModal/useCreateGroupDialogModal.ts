@@ -12,6 +12,7 @@ const useCreateGroupDialogModal = () => {
 
   const ownerUserId = useAppSelector(state => state.profile.user?.id);
   const allDialogs = useAppSelector(state => state.chat.dialogs);
+  const dialogsFetched = useAppSelector(state => state.chat.dialogsFetched);
 
   const open = useAppSelector(state => state.createGroupDialog.open);
   const userIds = useAppSelector(state => state.createGroupDialog.userIds);
@@ -21,7 +22,7 @@ const useCreateGroupDialogModal = () => {
     if (userIds.includes(userId)) return;
 
     dispatch(addUserId(userId));
-    const user = await ProfileService.GetUser(userId);
+    const user = await ProfileService.getUser(userId);
     if (user === null) {
       handleRemoveUserId(userId);
       return;
@@ -45,7 +46,7 @@ const useCreateGroupDialogModal = () => {
       return;
     }
 
-    ChatService.changeCurrentDialog(dispatch, dialog.groupId, DialogTypes.group, allDialogs);
+    ChatService.changeCurrentDialog(dispatch, dialog.groupId, DialogTypes.group, allDialogs, dialogsFetched);
   }
   const validateSubmit = (): boolean => {
     if (userIds.length === 0) return false;

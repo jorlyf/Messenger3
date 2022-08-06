@@ -12,6 +12,7 @@ interface CurrentDialogInfo {
 
 interface ChatState {
   dialogs: DialogModel[];
+  dialogsFetched: boolean;
   currentDialogInfo: CurrentDialogInfo | null;
 }
 
@@ -39,6 +40,7 @@ export const findDialog = (dialogs: DialogModel[], id: number, type: DialogTypes
 
 const initialState: ChatState = {
   dialogs: [],
+  dialogsFetched: false,
   currentDialogInfo: null
 }
 
@@ -48,6 +50,9 @@ const chatSlice = createSlice({
   reducers: {
     setDialogs(state, action: PayloadAction<DialogModel[]>) {
       state.dialogs = action.payload;
+    },
+    setDialogsFetched(state, action: PayloadAction<boolean>) {
+      state.dialogsFetched = action.payload;
     },
     setCurrentDialogInfo(state, action: PayloadAction<CurrentDialogInfo | null>) {
       state.currentDialogInfo = action.payload;
@@ -124,6 +129,7 @@ const chatSlice = createSlice({
 
 export const {
   setDialogs,
+  setDialogsFetched,
   setCurrentDialogInfo,
   addDialog,
   removeDialogById,

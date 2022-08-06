@@ -14,8 +14,9 @@ const DialogListContainer: React.FC = () => {
 
   const isAuthorized = useAppSelector(state => state.auth.isAuthorized);
   const ownerUser = useAppSelector(state => state.profile.user);
-
+  
   const dialogs = useAppSelector(state => state.chat.dialogs);
+  const dialogsFetched = useAppSelector(state => state.chat.dialogsFetched);
 
   const getLastMessage = (messages: Message[]): Message | undefined => {
     if (messages.length === 0) return undefined;
@@ -51,11 +52,11 @@ const DialogListContainer: React.FC = () => {
   }, [dialogs, navigate]);
 
   React.useEffect(() => {
-    if (!isAuthorized || !ownerUser || dialogs.length > 0) return;
+    if (!isAuthorized || !ownerUser || dialogsFetched) return;
 
     ChatService.loadDialogs(dispatch);
 
-  }, [isAuthorized, ownerUser]);
+  }, [isAuthorized, ownerUser, dialogsFetched]);
 
   return (
     <DialogList items={items} />

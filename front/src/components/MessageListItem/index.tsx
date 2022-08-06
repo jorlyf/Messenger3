@@ -5,6 +5,7 @@ import defaultAvatar from "../../../public/defaultAvatar.jpg";
 
 import styles from "./MessageListItem.module.css";
 import IsLoad from "../IsLoad";
+import { getUserDataUrl } from "../../utils";
 
 interface MessageListItemProps {
   message: Message;
@@ -15,10 +16,6 @@ const MessageListItem: React.FC<MessageListItemProps> = ({ message }) => {
   const ownerUser = useAppSelector(state => state.profile.user);
   const isMessageMy: boolean = message.senderUser.id === ownerUser?.id;
 
-  const getAvatarUrl = () => {
-    return message.senderUser.avatarUrl ? message.senderUser.avatarUrl : defaultAvatar;
-  }
-
   return (
     <>
       {isMessageMy ?
@@ -27,7 +24,11 @@ const MessageListItem: React.FC<MessageListItemProps> = ({ message }) => {
             <span className={styles.login + " " + styles.my}>{message.senderUser.login}</span>
             <span className={styles.text}>{message.text}</span>
           </div>
-          <img className={styles.avatar} src={getAvatarUrl()} />
+          {message.senderUser.avatarUrl ?
+            <img className={styles.avatar} src={getUserDataUrl(message.senderUser.avatarUrl)} />
+            :
+            <img className={styles.avatar} src={defaultAvatar} />
+          }
           {message.status === MessageSendingStatus.isSending &&
             <IsLoad />
           }
@@ -37,7 +38,11 @@ const MessageListItem: React.FC<MessageListItemProps> = ({ message }) => {
         </div>
         :
         <div className={styles.item}>
-          <img className={styles.avatar} src={getAvatarUrl()} />
+          {message.senderUser.avatarUrl ?
+            <img className={styles.avatar} src={getUserDataUrl(message.senderUser.avatarUrl)} />
+            :
+            <img className={styles.avatar} src={defaultAvatar} />
+          }
           <div className={styles.loginAndText}>
             <span className={styles.login}>{message.senderUser.login}</span>
             <span className={styles.text}>{message.text}</span>

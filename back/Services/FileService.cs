@@ -6,6 +6,7 @@ namespace back.Services
 {
 	public class FileService
 	{
+		#region MessageAttachments
 		public async Task<IEnumerable<AttachmentModel>> SaveMessageAttachmentsAsync(IEnumerable<AttachmentDTO> attachments)
 		{
 			List<Task<AttachmentModel>> tasks = new();
@@ -17,24 +18,23 @@ namespace back.Services
 			await Task.WhenAll(tasks);
 			return tasks.Select(task => task.Result);
 		}
-
 		public Task<AttachmentModel> SaveMessageAttachmentAsync(AttachmentDTO attachment)
 		{
 			switch (attachment.Type)
 			{
 				case AttachmentTypes.Photo:
-					return SavePhotoAsync(attachment.FormFile);
+					return SavePhotoAttachmentAsync(attachment.FormFile);
 				case AttachmentTypes.Video:
-					return SaveVideoAsync(attachment.FormFile);
+					return SaveVideoAttachmentAsync(attachment.FormFile);
 				case AttachmentTypes.File:
-					return SaveFileAsync(attachment.FormFile);
+					return SaveFileAttachmentAsync(attachment.FormFile);
 
 				default:
 					throw new ArgumentException("attachment type is not supported");
 			}
 		}
 
-		private async Task<AttachmentModel> SavePhotoAsync(IFormFile file)
+		private async Task<AttachmentModel> SavePhotoAttachmentAsync(IFormFile file)
 		{
 			string fileExtension = file.FileName.Split(".").Last();
 			string savePath = Path.Combine(MessageAttachmentDirectories.Photo, GetRandomFilename(fileExtension));
@@ -43,10 +43,10 @@ namespace back.Services
 			return new AttachmentModel
 			{
 				Type = AttachmentTypes.Photo,
-				Url = savePath,
+				Url = GetUrl(savePath),
 			};
 		}
-		private async Task<AttachmentModel> SaveVideoAsync(IFormFile file)
+		private async Task<AttachmentModel> SaveVideoAttachmentAsync(IFormFile file)
 		{
 			string fileExtension = file.FileName.Split(".").Last();
 			string savePath = Path.Combine(MessageAttachmentDirectories.Video, GetRandomFilename(fileExtension));
@@ -55,10 +55,10 @@ namespace back.Services
 			return new AttachmentModel
 			{
 				Type = AttachmentTypes.Video,
-				Url = savePath,
+				Url = GetUrl(savePath),
 			};
 		}
-		private async Task<AttachmentModel> SaveFileAsync(IFormFile file)
+		private async Task<AttachmentModel> SaveFileAttachmentAsync(IFormFile file)
 		{
 			string fileExtension = file.FileName.Split(".").Last();
 			string savePath = Path.Combine(MessageAttachmentDirectories.File, GetRandomFilename(fileExtension));
@@ -67,27 +67,44 @@ namespace back.Services
 			return new AttachmentModel
 			{
 				Type = AttachmentTypes.File,
-				Url = savePath,
+				Url = GetUrl(savePath),
 			};
 		}
+		#endregion
 
-		private Task SaveAsync(IFormFile file, string path)
+		public async Task<string> SaveAvatar(IFormFile file)
+		{
+			string fileExtension = file.FileName.Split(".").Last();
+			string avatarsPath = Path.Combine(Utils.UserDataPath, "Avatars");
+			string savePath = Path.Combine(avatarsPath, GetRandomFilename(fileExtension));
+			await SaveAsync(file, savePath);
+			return GetUrl(savePath);
+		}
+
+		private async Task SaveAsync(IFormFile file, string path)
 		{
 			using (FileStream fs = new(path, FileMode.Create))
 			{
-				return file.CopyToAsync(fs);
+				await file.CopyToAsync(fs);
+				await fs.FlushAsync();
 			}
 		}
 
 		private string GetRandomFilename(string extension)
 		{
-			return Path.Combine(Path.GetRandomFileName(), extension);
+			return $"{Path.GetRandomFileName()}.{extension}";
+		}
+
+		private string GetUrl(string path)
+		{
+			int userDataIndex = path.IndexOf("UserData");
+			return path.Substring(userDataIndex);
 		}
 	}
 
 	public static class MessageAttachmentDirectories
 	{
-		private static string BaseFolder { get => Path.Combine(Utils.RootPath, "MessageAttachments"); }
+		private static string BaseFolder { get => Path.Combine(Utils.UserDataPath, "MessageAttachments"); }
 		public static string Photo { get => Path.Combine(BaseFolder, "Photos"); }
 		public static string Video { get => Path.Combine(BaseFolder, "Videos"); }
 		public static string File { get => Path.Combine(BaseFolder, "Files"); }

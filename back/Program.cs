@@ -1,12 +1,13 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Primitives;
+using Microsoft.Extensions.FileProviders;
 using System.Text;
 using back.Contexts;
 using back.Repositories;
 using back.Services;
 using back.Hubs;
-using Microsoft.Extensions.Primitives;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -95,6 +96,13 @@ else
 {
 	app.UseCors("Production");
 }
+
+app.UseStaticFiles(new StaticFileOptions
+{
+	FileProvider = new PhysicalFileProvider(
+		   Path.Combine(builder.Environment.ContentRootPath, "UserData")),
+	RequestPath = "/api/UserData"
+});
 
 app.UseHttpsRedirection();
 

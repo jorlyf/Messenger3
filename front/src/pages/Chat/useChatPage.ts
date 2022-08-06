@@ -2,12 +2,12 @@ import * as React from "react";
 import { useDispatch } from "react-redux";
 import useAppSelector from "../../hooks/useAppSelector";
 import { clearCurrentDialogInputMessage, findCurrentDialog } from "../../redux/slices/chatSlice";
+import { uuid } from "../../utils";
 import ChatService from "../../services/ChatService";
 import DialogModel, { DialogTypes } from "../../entities/db/DialogModel";
 import Message, { MessageSendingStatus } from "../../entities/local/Message";
 import SendMessageContainerDTO from "../../entities/dtos/SendMessageContainerDTO";
 import MessageDTO from "../../entities/dtos/MessageDTO";
-import { uuid } from "../../utils";
 import MessageService from "../../services/MessageService";
 
 const useChat = (chatId?: string) => {
@@ -16,6 +16,7 @@ const useChat = (chatId?: string) => {
   const [currentDialog, setCurrentDialog] = React.useState<DialogModel | null>(null);
 
   const allDialogs = useAppSelector(state => state.chat.dialogs);
+  const dialogsFetched = useAppSelector(state => state.chat.dialogsFetched);
   const currentDialogInfo = useAppSelector(state => state.chat.currentDialogInfo);
   const ownerUser = useAppSelector(state => state.profile.user);
 
@@ -56,7 +57,7 @@ const useChat = (chatId?: string) => {
   }
 
   const handleChangeCurrentDialog = (id: number, type: DialogTypes) => {
-    ChatService.changeCurrentDialog(dispatch, id, type, allDialogs);
+    ChatService.changeCurrentDialog(dispatch, id, type, allDialogs, dialogsFetched);
   }
 
   React.useEffect(() => {

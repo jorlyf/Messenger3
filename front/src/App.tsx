@@ -7,15 +7,15 @@ import useMessagingHub from "./hooks/useMessagingHub";
 import DialogListContainer from "./containers/DialogListContainer";
 import LeftColumnHeaderContainer from "./containers/LeftColumnHeaderContainer";
 import RightColumnHeaderContainer from "./containers/RightColumnHeaderContainer";
+import CreateGroupDialogButtonContainer from "./containers/CreateGroupDialogButtonContainer";
 import Auth from "./pages/Auth";
 import Chat from "./pages/Chat";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import Home from "./pages/Home";
+import Modals from "./modals";
 
 import styles from "./App.module.css";
-import CreateGroupDialogButtonContainer from "./containers/CreateGroupDialogButtonContainer";
-import Modals from "./modals";
 
 const App: React.FC = () => {
 

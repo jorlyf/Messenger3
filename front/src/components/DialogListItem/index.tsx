@@ -5,6 +5,7 @@ import defaultAvatar from "../../../public/defaultAvatar.jpg";
 
 import styles from "./DialogListItem.module.css";
 import { findCurrentDialog } from "../../redux/slices/chatSlice";
+import { getUserDataUrl } from "../../utils";
 
 export interface DialogListItemProps {
   id: number;
@@ -52,7 +53,7 @@ const DialogListItem: React.FC<DialogListItemProps> = (props) => {
     <div className={`${styles.dialog} ${isCurrentDialog && styles.current}`}>
       <div className={styles.avatarContainer}>
         {props.avatarUrl ?
-          <img src="" className={styles.avatar} />
+          <img src={getUserDataUrl(props.avatarUrl)} className={styles.avatar} />
           :
           <img src={defaultAvatar} className={styles.avatar} />
         }

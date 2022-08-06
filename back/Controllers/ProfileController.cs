@@ -62,5 +62,25 @@ namespace back.Controllers
 				return StatusCode(500);
 			}
 		}
+
+		[HttpPost]
+		[Route("UploadAvatar")]
+		public async Task<ActionResult<string>> UploadAvatarAsync([FromForm] IFormFile avatar)
+		{
+			try
+			{
+				int id = Utils.GetAuthorizedUserId(this.User);
+				string avatarUrl = await ProfileService.UploadAvatarAsync(id, avatar);
+				return avatarUrl;
+			}
+			catch (ApiException ex)
+			{
+				return BadRequest(ex.Reason);
+			}
+			catch (Exception)
+			{
+				return StatusCode(500);
+			}
+		}
 	}
 }

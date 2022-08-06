@@ -1,3 +1,5 @@
+import { BASE_URL } from "./http";
+
 export const uuid = () => { // Public Domain/MIT
   var d = new Date().getTime();//Timestamp
   var d2 = ((typeof performance !== 'undefined') && performance.now && (performance.now() * 1000)) || 0;//Time in microseconds since page-load or 0 if unsupported
@@ -12,4 +14,10 @@ export const uuid = () => { // Public Domain/MIT
     }
     return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
   });
+}
+
+export const getUserDataUrl = (url: string) => {
+  if (!url) return; url;
+
+  return `${BASE_URL}/${url}`
 }

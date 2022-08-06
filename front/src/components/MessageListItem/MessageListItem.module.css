@@ -1,7 +1,7 @@
 .item {
   max-width: 80%;
-  width: max-content;
-  display: flex;
+  width    : max-content;
+  display  : flex;
 }
 
 .my {
@@ -10,17 +10,18 @@
 
 .avatar {
   max-height: 50px;
-  max-width: 50px;
+  max-width : 50px;
+  margin    : 0px 10px;
 }
 
 .login {
-  display: block;
-  width: max-content;
+  display    : block;
+  width      : max-content;
   font-weight: 600;
 }
 
 .text {
-  display: block;
+  display   : block;
   word-break: break-word;
 }
 
