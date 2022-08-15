@@ -4,11 +4,11 @@ import useAppSelector from "../../hooks/useAppSelector";
 import { clearCurrentDialogInputMessage, findCurrentDialog } from "../../redux/slices/chatSlice";
 import { uuid } from "../../utils";
 import ChatService from "../../services/ChatService";
+import MessageService from "../../services/MessageService";
 import DialogModel, { DialogTypes } from "../../entities/db/DialogModel";
 import Message, { MessageSendingStatus } from "../../entities/local/Message";
 import SendMessageContainerDTO from "../../entities/dtos/SendMessageContainerDTO";
 import MessageDTO from "../../entities/dtos/MessageDTO";
-import MessageService from "../../services/MessageService";
 
 const useChat = (chatId?: string) => {
   const dispatch = useDispatch();
@@ -56,11 +56,7 @@ const useChat = (chatId?: string) => {
     MessageService.replaceSendingMessageByUuid(dispatch, currentDialog.id, currentDialog.type, toReplaceTempMessage, tempMessage.id);
   }
 
-  const handleChangeCurrentDialog = (id: number, type: DialogTypes) => {
-    ChatService.changeCurrentDialog(dispatch, id, type, allDialogs, dialogsFetched);
-  }
-
-  React.useEffect(() => {
+  const handleChangeCurrentDialog = (chatId: string) => {
     if (!chatId || chatId.split.length != 2) { return; }
     const stringType: string = chatId.split("=")[0];
     const id: number = Number(chatId.split("=")[1]);
@@ -80,9 +76,15 @@ const useChat = (chatId?: string) => {
       }
     }
 
-    handleChangeCurrentDialog(id, type);
+    ChatService.changeCurrentDialog(dispatch, id, type, allDialogs, dialogsFetched);
+  }
 
-  }, [chatId]);
+  React.useEffect(() => {
+    if (!chatId) return;
+    if (!dialogsFetched) return;
+
+    handleChangeCurrentDialog(chatId);
+  }, [chatId, dialogsFetched]);
 
   React.useEffect(() => {
     if (!currentDialogInfo) return;

@@ -1,7 +1,8 @@
-import $api, { BASE_URL } from "../http";
+import $api from "../http";
 import { AppDispatch } from "../redux/store";
-import { addDialog, findCurrentDialog, setCurrentDialogInfo, setDialogs, setDialogsFetched } from "../redux/slices/chatSlice";
+import { addDialog, addDialogMessage, findCurrentDialog, setCurrentDialogInfo, setDialogs, setDialogsFetched } from "../redux/slices/chatSlice";
 import { uuid } from "../utils";
+import ProfileService from "./ProfileService";
 import UserModel from "../entities/db/UserModel";
 import DialogModel, { DialogTypes } from "../entities/db/DialogModel";
 import PrivateDialogDTO from "../entities/dtos/PrivateDialogDTO";
@@ -11,6 +12,7 @@ import MessageDTO from "../entities/dtos/MessageDTO";
 import SendMessageContainerDTO from "../entities/dtos/SendMessageContainerDTO";
 import DialogsDTO from "../entities/dtos/DialogsDTO";
 import GroupDialogCreatingDataDTO from "../entities/dtos/GroupDialogCreatingDataDTO";
+import NewMessageDTO from "../entities/dtos/NewMessageDTO";
 
 export default class ChatService {
   static async searchGroupDialogsByNameContains(name: string): Promise<GroupDialogDTO[]> {
@@ -74,7 +76,6 @@ export default class ChatService {
       return null;
     }
   }
-
   static async sendMessageToUser(message: SendMessageContainerDTO): Promise<MessageDTO | null> {
     const response = await $api.post<MessageDTO>("/Chat/SendMessageToUser", message);
     return response.data;
@@ -84,15 +85,58 @@ export default class ChatService {
     return response.data;
   }
 
+  static async handleNewMessage(dispatch: AppDispatch, newMessageDTO: NewMessageDTO, allDialogs: DialogModel[]) {
+    const message: Message = ChatService.processMessageDTO(newMessageDTO.messageDTO);
+
+    if (newMessageDTO.dialogType === DialogTypes.private) {
+      ChatService.handleNewPrivateMessage(dispatch, newMessageDTO.dialogId, message, allDialogs);
+    }
+    else {
+      ChatService.handleNewGroupMessage(dispatch, newMessageDTO.dialogId, message, allDialogs);
+    }
+  }
+
+  static async handleNewPrivateMessage(dispatch: AppDispatch, dialogId: number, message: Message, allDialogs: DialogModel[]) {
+    let dialog: DialogModel | null = ChatService.findDialog(dialogId, DialogTypes.private, allDialogs);
+    if (dialog) {
+      dispatch(addDialogMessage({ dialogId: dialogId, dialogType: DialogTypes.private, message }));
+    }
+    else {
+      const dialogDTO = await ChatService.getPrivateDialogFromApi(dialogId);
+      if (dialogDTO) {
+        dialog = ChatService.processPrivateDialogDTO(dialogDTO);
+        dispatch(addDialog(dialog));
+        return;
+      }
+      else {
+        throw new Error("handle new private message from unknown dialog");
+      }
+    }
+
+  }
+  static async handleNewGroupMessage(dispatch: AppDispatch, dialogId: number, message: Message, allDialogs: DialogModel[]) {
+    let dialog: DialogModel | null = ChatService.findDialog(dialogId, DialogTypes.group, allDialogs);
+    if (!dialog) {
+      const dialogDTO = await ChatService.getGroupDialogFromApi(dialogId);
+      if (dialogDTO) {
+        dialog = ChatService.processGroupDialogDTO(dialogDTO);
+      }
+      else {
+        dialog = ChatService.createEmptyDialogModel(dialogId, DialogTypes.group);
+      }
+    }
+
+    dispatch(addDialogMessage({ dialogId: dialogId, dialogType: DialogTypes.group, message }));
+  }
+
   static findDialog(id: number, type: DialogTypes, dialogs: DialogModel[]): DialogModel | null {
-    const dialog = findCurrentDialog(dialogs, { id: id, type: type, index: -1 });
-    return dialog ? dialog : null;
+    return findCurrentDialog(dialogs, { id: id, type: type, index: -1 });
   }
   static async changeCurrentDialog(dispatch: AppDispatch, id: number, type: DialogTypes, dialogs: DialogModel[], dialogsFetched: boolean) {
     dispatch(setCurrentDialogInfo(null));
 
     let dialog = ChatService.findDialog(id, type, dialogs);
-    const index = dialogs.length;
+    const index = -1;
     if (dialog) {
       dispatch(setCurrentDialogInfo({ id: id, type: type, index: index }));
       return;
@@ -105,18 +149,18 @@ export default class ChatService {
     let dialogDTO: PrivateDialogDTO | GroupDialogDTO | null;
     switch (type) {
       case DialogTypes.private: {
-        dialogDTO = await this.getPrivateDialogFromApi(id);
+        dialogDTO = await ChatService.getPrivateDialogFromApi(id);
         if (!dialogDTO) {
-          dialog = this.createEmptyDialogModel(id, type);
+          dialog = await ChatService.createNewPrivateDialog(id);
           break;
         }
         dialog = ChatService.processPrivateDialogDTO(dialogDTO);
         break;
       }
       case DialogTypes.group: {
-        dialogDTO = await this.getGroupDialogFromApi(id);
+        dialogDTO = await ChatService.getGroupDialogFromApi(id);
         if (!dialogDTO) {
-          dialog = this.createEmptyDialogModel(id, type);
+          dialog = ChatService.createEmptyDialogModel(id, type);
           break;
         }
         dialog = ChatService.processGroupDialogDTO(dialogDTO);
@@ -136,6 +180,23 @@ export default class ChatService {
       messages: [],
       name: "",
       avatarUrl: null,
+      inputMessage: { id: uuid(), text: "", attachments: [] }
+    }
+  }
+
+  static async createNewPrivateDialog(userId: number): Promise<DialogModel> {
+    const user: UserModel | null = await ProfileService.getUser(userId);
+    if (!user) {
+      throw new Error("user not found");
+    }
+
+    return {
+      id: userId,
+      type: DialogTypes.private,
+      userIds: [user.id],
+      messages: [],
+      name: user.login,
+      avatarUrl: user.avatarUrl,
       inputMessage: { id: uuid(), text: "", attachments: [] }
     }
   }

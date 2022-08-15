@@ -9,6 +9,8 @@ const rootPath = path.resolve(__dirname, "..", "..")
 const mode = process.env.mode || "development";
 const PORT = Number(process.env.PORT) || 3000;
 
+console.log("builded in " + mode + " mode");
+
 const isDev = mode === "development";
 const isProd = mode === "production";
 

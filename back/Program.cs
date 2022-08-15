@@ -15,7 +15,7 @@ builder.Services.AddControllers();
 builder.Services.AddSignalR();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+//builder.Services.AddSwaggerGen();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
@@ -48,9 +48,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 
 builder.Services.AddDbContext<DataContext>(options =>
 {
-	options.UseSqlite($"Data Source={Environment.CurrentDirectory}\\messenger.db");
-	//options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
-	//options.EnableSensitiveDataLogging();
+	options.UseSqlite($"Data Source={Environment.CurrentDirectory}/messenger.db");
 });
 
 builder.Services.AddScoped<AsyncUnitOfWork>();
@@ -82,11 +80,11 @@ builder.Services.AddCors(options =>
 
 WebApplication app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-	app.UseSwagger();
-	app.UseSwaggerUI();
-}
+//if (app.Environment.IsDevelopment())
+//{
+//	app.UseSwagger();
+//	app.UseSwaggerUI();
+//}
 
 if (app.Environment.IsDevelopment())
 {

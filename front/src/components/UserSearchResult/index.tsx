@@ -1,6 +1,8 @@
 import * as React from "react";
 import useOutsideClick from "../../hooks/useOutsideClick";
 import UserModel from "../../entities/db/UserModel";
+import { getUserDataUrl } from "../../utils";
+import defaultAvatar from "../../../public/defaultAvatar.jpg";
 
 import styles from "./UserSearchResult.module.css";
 
@@ -28,10 +30,14 @@ const GroupAndUserSearchResult: React.FC<GroupAndUserSearchResultProps> =
           <div ref={listRef} className={styles.list}>
             {items.map(user => (
               <div key={user.id} onClick={() => handleUserItemClick(user.id)} className={styles.item}>
-                {user.avatarUrl &&
-                  <img src={user.avatarUrl} alt="avatar" />
-                }
-                <span>{user.login}</span>
+                <div className={styles.avatarContainer}>
+                  {user.avatarUrl ?
+                    <img src={getUserDataUrl(user.avatarUrl)} className={styles.avatar} alt="avatar" />
+                    :
+                    <img src={defaultAvatar} className={styles.avatar} alt="avatar" />
+                  }
+                </div>
+                <span className={styles.login}>{user.login}</span>
               </div>
             ))}
           </div>}

@@ -4,11 +4,9 @@ import { HttpTransportType, HubConnection, HubConnectionBuilder, LogLevel } from
 import { BASE_URL, NodeEnv } from "../http";
 import useAppSelector from "./useAppSelector";
 import { AppDispatch } from "../redux/store";
-import { addDialogMessage } from "../redux/slices/chatSlice";
 import ChatService from "../services/ChatService";
 import NewMessageDTO from "../entities/dtos/NewMessageDTO";
-import { DialogTypes } from "../entities/db/DialogModel";
-import Message from "../entities/local/Message";
+import DialogModel, { DialogTypes } from "../entities/db/DialogModel";
 
 export enum MessagingHubMethods {
   ReceiveNewMessage = "ReceiveNewMessage"
@@ -34,7 +32,7 @@ const buildHubConnection = (token: string): HubConnection => {
   return connection;
 }
 
-const setClientHandlers = (connection: HubConnection, dispatch: AppDispatch) => {
+const setClientHandlers = (connection: HubConnection, dispatch: AppDispatch, allDialogsRef: React.RefObject<DialogModel[]>) => {
   connection.on(MessagingHubMethods.ReceiveNewMessage, (newMessageDTO: NewMessageDTO) => {
     switch (newMessageDTO.dialogType) { // convert backend int enum to string enum
       case 0:
@@ -47,10 +45,8 @@ const setClientHandlers = (connection: HubConnection, dispatch: AppDispatch) => 
       default:
         return;
     }
-
-    const message: Message = ChatService.processMessageDTO(newMessageDTO.messageDTO);
-
-    dispatch(addDialogMessage({ dialogId: newMessageDTO.dialogId, dialogType: newMessageDTO.dialogType, message }));
+    if (!allDialogsRef.current) { throw new Error("allDialogsRef.current is null"); }
+    ChatService.handleNewMessage(dispatch, newMessageDTO, allDialogsRef.current);
   });
 }
 
@@ -60,14 +56,16 @@ const useMessagingHub = () => {
   const isAuthorized = useAppSelector(state => state.auth.isAuthorized);
   const token = useAppSelector(state => state.auth.token);
   const ownerUser = useAppSelector(state => state.profile.user);
+  const allDialogs = useAppSelector(state => state.chat.dialogs);
 
   const connectionRef = React.useRef<HubConnection | null>(null);
+  const allDialogsRef = React.useRef<DialogModel[]>([]);
 
   React.useEffect(() => {
     if (!isAuthorized || !token || !ownerUser || !dispatch || connectionRef.current) return;
 
     const connection: HubConnection = buildHubConnection(token);
-    setClientHandlers(connection, dispatch);
+    setClientHandlers(connection, dispatch, allDialogsRef);
 
     connectionRef.current = connection;
 
@@ -77,6 +75,10 @@ const useMessagingHub = () => {
     }
 
   }, [isAuthorized, ownerUser, dispatch]);
+
+  React.useEffect(() => {
+    allDialogsRef.current = allDialogs;
+  }, [allDialogs]);
 }
 
 export default useMessagingHub;
