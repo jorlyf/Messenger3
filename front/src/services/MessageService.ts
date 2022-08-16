@@ -23,11 +23,11 @@ export default class MessageService {
     }
   }
   static async sendMessageToUser(message: SendMessageContainerDTO): Promise<MessageDTO | null> {
-    const response = await $api.post<MessageDTO>("/Chat/SendMessageToUser", message);
+    const response = await $api.post<MessageDTO>("/Message/SendMessageToUser", message);
     return response.data;
   }
   static async sendMessageToGroup(message: SendMessageContainerDTO): Promise<MessageDTO | null> {
-    const response = await $api.post<MessageDTO>("/Chat/SendMessageToGroup", message);
+    const response = await $api.post<MessageDTO>("/Message/SendMessageToGroup", message);
     return response.data;
   }
 

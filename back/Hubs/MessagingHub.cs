@@ -15,7 +15,7 @@ namespace back.Hubs
 			if (this.Context.User == null) return base.OnConnectedAsync();
 
 			int userId = Utils.GetAuthorizedUserId(this.Context.User);
-			if (!MessagingService.ConnectUser(this.Context.ConnectionId, userId))
+			if (!MessageService.ConnectUser(this.Context.ConnectionId, userId))
 			{
 				this.Context.Abort();
 			}
@@ -26,7 +26,7 @@ namespace back.Hubs
 			if (this.Context.User == null) return base.OnDisconnectedAsync(exception);
 
 			int userId = Utils.GetAuthorizedUserId(this.Context.User);
-			MessagingService.DisconnectUser(this.Context.ConnectionId, userId);
+			MessageService.DisconnectUser(this.Context.ConnectionId, userId);
 			return base.OnDisconnectedAsync(exception);
 		}
 	}

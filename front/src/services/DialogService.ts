@@ -14,7 +14,7 @@ import UserModel from "../entities/db/UserModel";
 export default class DialogService {
   static async loadDialogs(dispatch: AppDispatch) {
     try {
-      const response = await $api.get<DialogsDTO>("/Chat/GetDialogs");
+      const response = await $api.get<DialogsDTO>("/Dialog/GetDialogs");
       const { privateDialogDTOs, groupDialogDTOs } = response.data;
 
       const dialogs: DialogModel[] = [];
@@ -131,7 +131,7 @@ export default class DialogService {
     }
 
     try {
-      const response = await $api.post<GroupDialogDTO>("/Chat/CreateGroupDialog", dto);
+      const response = await $api.post<GroupDialogDTO>("/Dialog/CreateGroupDialog", dto);
       return DialogService.processGroupDialogDTO(response.data);
     } catch (error) {
       return null;
@@ -140,7 +140,7 @@ export default class DialogService {
 
   static async getPrivateDialogFromApi(userId: number): Promise<PrivateDialogDTO | null> {
     try {
-      const response = await $api.get<PrivateDialogDTO>(`/Chat/GetPrivateDialog?userId=${userId}`);
+      const response = await $api.get<PrivateDialogDTO>(`/Dialog/GetPrivateDialog?userId=${userId}`);
       return response.data;
     } catch (error) {
       return null;
@@ -148,10 +148,20 @@ export default class DialogService {
   }
   static async getGroupDialogFromApi(groupId: number): Promise<GroupDialogDTO | null> {
     try {
-      const response = await $api.get<GroupDialogDTO>(`/Chat/GetGroupDialog?groupId=${groupId}`);
+      const response = await $api.get<GroupDialogDTO>(`/Dialog/GetGroupDialog?groupId=${groupId}`);
       return response.data;
     } catch (error) {
       return null;
+    }
+  }
+
+  static async searchGroupDialogsByNameContains(name: string): Promise<GroupDialogDTO[]> {
+    try {
+      const response = await $api.get<GroupDialogDTO[]>(`/Dialog/SearchGroupDialogsByNameContains?name=${name}`);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      return [];
     }
   }
 

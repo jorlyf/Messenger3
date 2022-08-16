@@ -15,11 +15,6 @@ namespace back.Services
 			this.FileService = fileService;
 		}
 
-		public Task<UserModel?> GetUserAsync(int id)
-		{
-			return this.UoW.UserRepository.GetByIdAsync(id);
-		}
-
 		public async Task<string> UploadAvatarAsync(int userId, IFormFile avatar)
 		{
 			Task<UserModel?> userTask = this.UoW.UserRepository.GetByIdAsync(userId);

@@ -54,9 +54,10 @@ builder.Services.AddDbContext<DataContext>(options =>
 builder.Services.AddScoped<AsyncUnitOfWork>();
 
 builder.Services.AddScoped<AuthService>();
-builder.Services.AddScoped<ChatService>();
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<DialogService>();
+builder.Services.AddScoped<MessageService>();
 builder.Services.AddScoped<ProfileService>();
-builder.Services.AddScoped<MessagingService>();
 
 builder.Services.AddSingleton<FileService>();
 

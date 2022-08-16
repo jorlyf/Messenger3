@@ -1,4 +1,5 @@
 import * as React from "react";
+import { getUserDataUrl } from "../../utils";
 import useCreateGroupDialogModal from "./useCreateGroupDialogModal";
 import UserSearchContainer from "../../containers/UserSearchContainer";
 import defaultAvatar from "../../../public/DefaultAvatar.jpg";
@@ -31,7 +32,7 @@ const CreateGroupDialogModal: React.FC = () => {
                   <div key={x.id} className={styles.userListItem}>
                     <div className={styles.userListItemAvatarContainer}>
                       {x.avatarUrl ?
-                        <img className={styles.userListItemAvatar} src={x.avatarUrl} />
+                        <img className={styles.userListItemAvatar} src={getUserDataUrl(x.avatarUrl)} />
                         :
                         <img className={styles.userListItemAvatar} src={defaultAvatar} />
                       }

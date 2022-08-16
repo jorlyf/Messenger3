@@ -13,10 +13,12 @@ namespace back.Controllers
 	public class ProfileController : ControllerBase
 	{
 		private ProfileService ProfileService { get; }
+		private UserService UserService { get; }
 
-		public ProfileController(ProfileService profileService)
+		public ProfileController(ProfileService profileService, UserService userService)
 		{
 			this.ProfileService = profileService;
+			this.UserService = userService;
 		}
 
 
@@ -27,28 +29,7 @@ namespace back.Controllers
 			try
 			{
 				int id = Utils.GetAuthorizedUserId(this.User);
-				UserModel? user = await this.ProfileService.GetUserAsync(id);
-				if (user == null) { throw new ApiException(ApiExceptionReason.UserIsNotFound); }
-
-				return Ok(user);
-			}
-			catch (ApiException ex)
-			{
-				return BadRequest(ex.Reason);
-			}
-			catch (Exception)
-			{
-				return StatusCode(500);
-			}
-		}
-
-		[HttpGet]
-		[Route("GetUser")]
-		public async Task<ActionResult<UserModel>> GetUserAsync(int id)
-		{
-			try
-			{
-				UserModel? user = await this.ProfileService.GetUserAsync(id);
+				UserModel? user = await this.UserService.GetUserByIdAsync(id);
 				if (user == null) { throw new ApiException(ApiExceptionReason.UserIsNotFound); }
 
 				return Ok(user);
