@@ -1,7 +1,7 @@
 import * as React from "react";
 import useAppSelector from "../../hooks/useAppSelector";
 import Message, { MessageSendingStatus } from "../../entities/local/Message";
-import defaultAvatar from "../../../public/defaultAvatar.jpg";
+import defaultAvatar from "../../../public/DefaultAvatar.jpg";
 
 import styles from "./MessageListItem.module.css";
 import IsLoad from "../IsLoad";

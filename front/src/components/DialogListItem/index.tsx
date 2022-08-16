@@ -1,17 +1,18 @@
 import React from "react";
+import { getUserDataUrl } from "../../utils";
 import useAppSelector from "../../hooks/useAppSelector";
+import DialogService from "../../services/DialogService";
 import DialogModel, { DialogTypes } from "../../entities/db/DialogModel";
-import defaultAvatar from "../../../public/defaultAvatar.jpg";
+import defaultAvatar from "../../../public/DefaultAvatar.jpg";
 
 import styles from "./DialogListItem.module.css";
-import { findCurrentDialog } from "../../redux/slices/chatSlice";
-import { getUserDataUrl } from "../../utils";
 
 export interface DialogListItemProps {
   id: number;
   type: DialogTypes;
   name: string;
   avatarUrl: string | null;
+  isCurrentDialog: boolean;
   onClick?: () => void;
   lastMessageText?: string | null;
   isLastMessageMy?: boolean;
@@ -19,13 +20,6 @@ export interface DialogListItemProps {
 }
 
 const DialogListItem: React.FC<DialogListItemProps> = (props) => {
-
-  const [currentDialog, setCurrentDialog] = React.useState<DialogModel | null>(null);
-
-  const allDialogs = useAppSelector(state => state.chat.dialogs);
-  const currentDialogInfo = useAppSelector(state => state.chat.currentDialogInfo);
-  const isCurrentDialog: boolean = props.id === currentDialog?.id && props.type === currentDialog.type;
-
   const getLastMessageText = (): string => {
     if (!props.lastMessageText) return "";
     
@@ -42,15 +36,8 @@ const DialogListItem: React.FC<DialogListItemProps> = (props) => {
     return props.name;
   }
 
-  React.useEffect(() => {
-    if (!currentDialogInfo) return;
-
-    const dialog = findCurrentDialog(allDialogs, currentDialogInfo);
-    setCurrentDialog(dialog);
-  }, [currentDialogInfo]);
-
   return (
-    <div className={`${styles.dialog} ${isCurrentDialog && styles.current}`}>
+    <div className={`${styles.dialog} ${props.isCurrentDialog && styles.current}`}>
       <div className={styles.avatarContainer}>
         {props.avatarUrl ?
           <img src={getUserDataUrl(props.avatarUrl)} className={styles.avatar} />

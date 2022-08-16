@@ -1,10 +1,11 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { uuid } from "../../utils";
+import DialogService from "../../services/DialogService";
 import DialogModel, { DialogTypes } from "../../entities/db/DialogModel";
 import AttachmentDTO from "../../entities/dtos/AttachmentDTO";
 import Message, { MessageSendingStatus } from "../../entities/local/Message";
-import { uuid } from "../../utils";
 
-interface CurrentDialogInfo {
+export interface CurrentDialogInfo {
   id: number;
   type: DialogTypes;
   index: number;
@@ -14,28 +15,6 @@ interface ChatState {
   dialogs: DialogModel[];
   dialogsFetched: boolean;
   currentDialogInfo: CurrentDialogInfo | null;
-}
-
-export const findCurrentDialog = (dialogs: DialogModel[], current: CurrentDialogInfo): DialogModel | null => {
-  let dialog: DialogModel | null | undefined = findCurrentDialogByIndex(dialogs, current);
-  if (dialog) {
-    return dialog;
-  }
-  dialog = dialogs.find(x => x.id === current.id && x.type === current.type);
-  return dialog ? dialog : null;
-}
-const findCurrentDialogByIndex = (dialogs: DialogModel[], current: CurrentDialogInfo): DialogModel | null => {
-  if (current.index < 0) return null;
-
-  const dialog = dialogs.at(current.index);
-  if (!dialog) return null;
-  if (dialog.id !== current.id || dialog.type !== current.type) return null;
-  return dialog;
-}
-
-export const findDialog = (dialogs: DialogModel[], id: number, type: DialogTypes): DialogModel | null => {
-  const dialog = dialogs.find(x => x.id === id && x.type === type);
-  return dialog ? dialog : null;
 }
 
 const initialState: ChatState = {
@@ -65,7 +44,7 @@ const chatSlice = createSlice({
     },
     setCurrentDialogInputMessageText(state, action: PayloadAction<string>) {
       if (state.currentDialogInfo) {
-        const dialog = findCurrentDialog(state.dialogs, state.currentDialogInfo);
+        const dialog = DialogService.findCurrentDialog(state.dialogs, state.currentDialogInfo);
         if (!dialog) return;
 
         dialog.inputMessage.text = action.payload;
@@ -73,7 +52,7 @@ const chatSlice = createSlice({
     },
     clearCurrentDialogInputMessage(state) {
       if (state.currentDialogInfo) {
-        const dialog = findCurrentDialog(state.dialogs, state.currentDialogInfo);
+        const dialog = DialogService.findCurrentDialog(state.dialogs, state.currentDialogInfo);
         if (!dialog) return;
 
         dialog.inputMessage = { id: uuid(), text: "", attachments: [] }
@@ -81,7 +60,7 @@ const chatSlice = createSlice({
     },
     addCurrentDialogInputMessageAttachment(state, action: PayloadAction<AttachmentDTO>) {
       if (state.currentDialogInfo) {
-        const dialog = findCurrentDialog(state.dialogs, state.currentDialogInfo);
+        const dialog = DialogService.findCurrentDialog(state.dialogs, state.currentDialogInfo);
         if (!dialog) return;
 
         dialog.inputMessage.attachments.push(action.payload);
@@ -89,7 +68,7 @@ const chatSlice = createSlice({
     },
     addCurrentDialogMessage(state, action: PayloadAction<Message>) {
       if (state.currentDialogInfo) {
-        const dialog = findCurrentDialog(state.dialogs, state.currentDialogInfo);
+        const dialog = DialogService.findCurrentDialog(state.dialogs, state.currentDialogInfo);
         if (!dialog) return;
 
         dialog.messages.push(action.payload);
@@ -97,7 +76,7 @@ const chatSlice = createSlice({
     },
     replaceDialogTempMessage(state, action: PayloadAction<{ dialogId: number, dialogType: DialogTypes, message: Message, uuid: string }>) {
       if (state.currentDialogInfo) {
-        const dialog = findDialog(state.dialogs, action.payload.dialogId, action.payload.dialogType);
+        const dialog = DialogService.findDialog(state.dialogs, action.payload.dialogId, action.payload.dialogType);
         if (!dialog) return;
 
         const tempMessage = dialog.messages.find(x => x.id === action.payload.uuid);
@@ -110,13 +89,13 @@ const chatSlice = createSlice({
       }
     },
     addDialogMessage(state, action: PayloadAction<{ dialogId: number, dialogType: DialogTypes, message: Message }>) {
-      const dialog = findDialog(state.dialogs, action.payload.dialogId, action.payload.dialogType);
+      const dialog = DialogService.findDialog(state.dialogs, action.payload.dialogId, action.payload.dialogType);
       if (!dialog) return;
 
       dialog.messages.push(action.payload.message);
     },
     setMessageSendingStatus(state, action: PayloadAction<{ dialogId: number, dialogType: DialogTypes, uuid: string, status: MessageSendingStatus }>) {
-      const dialog = findDialog(state.dialogs, action.payload.dialogId, action.payload.dialogType);
+      const dialog = DialogService.findDialog(state.dialogs, action.payload.dialogId, action.payload.dialogType);
       if (!dialog) return;
 
       const message = dialog.messages.find(x => x.id === action.payload.uuid);

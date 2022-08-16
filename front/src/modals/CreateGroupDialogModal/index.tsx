@@ -1,7 +1,7 @@
 import * as React from "react";
 import useCreateGroupDialogModal from "./useCreateGroupDialogModal";
 import UserSearchContainer from "../../containers/UserSearchContainer";
-import defaultAvatar from "../../../public/defaultAvatar.jpg";
+import defaultAvatar from "../../../public/DefaultAvatar.jpg";
 import deleteIcon from "../../../public/icons/Delete.png";
 
 import styles from "./CreateGroupDialogModal.module.css";

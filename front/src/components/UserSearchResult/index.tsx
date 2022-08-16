@@ -2,7 +2,7 @@ import * as React from "react";
 import useOutsideClick from "../../hooks/useOutsideClick";
 import UserModel from "../../entities/db/UserModel";
 import { getUserDataUrl } from "../../utils";
-import defaultAvatar from "../../../public/defaultAvatar.jpg";
+import defaultAvatar from "../../../public/DefaultAvatar.jpg";
 
 import styles from "./UserSearchResult.module.css";
 

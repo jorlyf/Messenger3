@@ -1,6 +1,6 @@
 import * as React from "react";
 import useProfilePage from "./useProfilePage";
-import defaultAvatar from "../../../public/defaultAvatar.jpg";
+import defaultAvatar from "../../../public/DefaultAvatar.jpg";
 
 import styles from "./Profile.module.css";
 import { getUserDataUrl } from "../../utils";

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import useDebounce from '../../hooks/useDebounce';
 import useAppSelector from '../../hooks/useAppSelector';
-import ChatService from '../../services/ChatService';
+import UserService from '../../services/UserService';
 import Search from '../../components/Search';
 import UserSearchResult from '../../components/UserSearchResult';
 import UserModel from '../../entities/db/UserModel';
@@ -23,7 +23,7 @@ const UserSearchContainer: React.FC<UserSearchContainerProps> = ({ handleUserIte
   const search = useDebounce(async (value: string) => {
     if (!ownerUser) return;
 
-    let users = await ChatService.searchUsersByLoginContains(value);
+    let users = await UserService.searchUsersByLoginContains(value);
     users = users.filter(u => u.id !== ownerUser.id);
 
     setSearchResult(users);

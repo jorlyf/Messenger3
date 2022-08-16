@@ -1,5 +1,5 @@
 import React from "react";
-import defaultAvatar from "../../../public/defaultAvatar.jpg";
+import defaultAvatar from "../../../public/DefaultAvatar.jpg";
 import { getUserDataUrl } from "../../utils";
 
 import styles from "./RightColumnHeader.module.css";

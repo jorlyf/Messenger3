@@ -1,7 +1,8 @@
 import * as React from "react";
 import { useDispatch } from "react-redux";
-import { findCurrentDialog, setCurrentDialogInputMessageText } from "../../redux/slices/chatSlice";
+import { setCurrentDialogInputMessageText } from "../../redux/slices/chatSlice";
 import useAppSelector from "../../hooks/useAppSelector";
+import DialogService from "../../services/DialogService";
 import ChatInput from "../../components/ChatInput";
 import DialogModel from "../../entities/db/DialogModel";
 
@@ -28,7 +29,7 @@ const ChatInputContainer: React.FC<ChatInputContainerProps> = ({ handleSubmit })
   React.useEffect(() => {
     if (!currentDialogInfo) return;
 
-    const dialog = findCurrentDialog(allDialogs, currentDialogInfo);
+    const dialog = DialogService.findCurrentDialog(allDialogs, currentDialogInfo);
     setCurrentDialog(dialog);
   }, [allDialogs, currentDialogInfo]);
 

@@ -10,12 +10,11 @@ import "./index.css";
 
 const rootElement = document.getElementById("root");
 
-if (!rootElement) { throw new Error("root element not found"); }
+if (!rootElement) { throw new Error("root div not found"); }
 
 const root = createRoot(rootElement);
 root.render(
   <Provider store={store}>
-
     <BrowserRouter>
       <App />
     </BrowserRouter>

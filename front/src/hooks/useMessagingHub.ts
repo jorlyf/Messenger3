@@ -1,10 +1,10 @@
 import * as React from "react";
+import { BASE_URL, NodeEnv } from "../http";
 import { useDispatch } from "react-redux";
 import { HttpTransportType, HubConnection, HubConnectionBuilder, LogLevel } from "@microsoft/signalr";
-import { BASE_URL, NodeEnv } from "../http";
 import useAppSelector from "./useAppSelector";
 import { AppDispatch } from "../redux/store";
-import ChatService from "../services/ChatService";
+import MessageService from "../services/MessageService";
 import NewMessageDTO from "../entities/dtos/NewMessageDTO";
 import DialogModel, { DialogTypes } from "../entities/db/DialogModel";
 
@@ -46,7 +46,7 @@ const setClientHandlers = (connection: HubConnection, dispatch: AppDispatch, all
         return;
     }
     if (!allDialogsRef.current) { throw new Error("allDialogsRef.current is null"); }
-    ChatService.handleNewMessage(dispatch, newMessageDTO, allDialogsRef.current);
+    MessageService.handleNewMessage(dispatch, newMessageDTO, allDialogsRef.current);
   });
 }
 

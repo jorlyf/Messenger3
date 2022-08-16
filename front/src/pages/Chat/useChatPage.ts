@@ -1,9 +1,9 @@
 import * as React from "react";
 import { useDispatch } from "react-redux";
-import useAppSelector from "../../hooks/useAppSelector";
-import { clearCurrentDialogInputMessage, findCurrentDialog } from "../../redux/slices/chatSlice";
 import { uuid } from "../../utils";
-import ChatService from "../../services/ChatService";
+import useAppSelector from "../../hooks/useAppSelector";
+import { clearCurrentDialogInputMessage } from "../../redux/slices/chatSlice";
+import DialogService from "../../services/DialogService";
 import MessageService from "../../services/MessageService";
 import DialogModel, { DialogTypes } from "../../entities/db/DialogModel";
 import Message, { MessageSendingStatus } from "../../entities/local/Message";
@@ -46,13 +46,13 @@ const useChat = (chatId?: string) => {
         attachments: currentDialog.inputMessage.attachments
       }
     }
-    const apiMessageDTO: MessageDTO | null = await ChatService.sendMessage(currentDialog, sendMessageDTO);
+    const apiMessageDTO: MessageDTO | null = await MessageService.sendMessage(currentDialog, sendMessageDTO);
     if (!apiMessageDTO) {
       MessageService.changeStatusSendingMessage(dispatch, currentDialog.id, currentDialog.type, tempMessage.id, MessageSendingStatus.error);
       return;
     }
 
-    const toReplaceTempMessage: Message = ChatService.processMessageDTO(apiMessageDTO);
+    const toReplaceTempMessage: Message = MessageService.processMessageDTO(apiMessageDTO);
     MessageService.replaceSendingMessageByUuid(dispatch, currentDialog.id, currentDialog.type, toReplaceTempMessage, tempMessage.id);
   }
 
@@ -76,7 +76,7 @@ const useChat = (chatId?: string) => {
       }
     }
 
-    ChatService.changeCurrentDialog(dispatch, id, type, allDialogs, dialogsFetched);
+    DialogService.changeCurrentDialog(dispatch, id, type, allDialogs, dialogsFetched);
   }
 
   React.useEffect(() => {
@@ -89,7 +89,7 @@ const useChat = (chatId?: string) => {
   React.useEffect(() => {
     if (!currentDialogInfo) return;
 
-    const dialog = findCurrentDialog(allDialogs, currentDialogInfo);
+    const dialog = DialogService.findCurrentDialog(allDialogs, currentDialogInfo);
     setCurrentDialog(dialog);
   }, [allDialogs, currentDialogInfo]);
 

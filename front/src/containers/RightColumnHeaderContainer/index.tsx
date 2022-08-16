@@ -1,6 +1,6 @@
 import * as React from "react";
-import { findCurrentDialog } from "../../redux/slices/chatSlice";
 import useAppSelector from "../../hooks/useAppSelector";
+import DialogService from "../../services/DialogService";
 import RightColumnHeader from "../../components/RightColumnHeader";
 import DialogModel from "../../entities/db/DialogModel";
 
@@ -13,7 +13,7 @@ const RightColumnHeaderContainer: React.FC = () => {
   React.useEffect(() => {
     if (!currentDialogInfo) return;
 
-    const dialog = findCurrentDialog(allDialogs, currentDialogInfo);
+    const dialog = DialogService.findCurrentDialog(allDialogs, currentDialogInfo);
     setCurrentDialog(dialog);
   }, [allDialogs, currentDialogInfo]);
 

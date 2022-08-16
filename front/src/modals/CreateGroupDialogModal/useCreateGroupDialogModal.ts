@@ -2,10 +2,10 @@ import * as React from "react";
 import { useDispatch } from "react-redux";
 import { addUserId, clearUserIds, closeCreateDialogModal, removeUserId } from "../../redux/slices/createGroupDialogSlice";
 import useAppSelector from "../../hooks/useAppSelector";
-import ProfileService from "../../services/ProfileService";
 import UserModel from "../../entities/db/UserModel";
-import ChatService from "../../services/ChatService";
 import { DialogTypes } from "../../entities/db/DialogModel";
+import UserService from "../../services/UserService";
+import DialogService from "../../services/DialogService";
 
 const useCreateGroupDialogModal = () => {
   const dispatch = useDispatch();
@@ -22,7 +22,7 @@ const useCreateGroupDialogModal = () => {
     if (userIds.includes(userId)) return;
 
     dispatch(addUserId(userId));
-    const user = await ProfileService.getUser(userId);
+    const user = await UserService.getUserById(userId);
     if (user === null) {
       handleRemoveUserId(userId);
       return;
@@ -40,13 +40,13 @@ const useCreateGroupDialogModal = () => {
     if (userIds.length === 0) return;
     if (!ownerUserId) return;
 
-    const dialog = await ChatService.createGroupDialog(ownerUserId, [...userIds, ownerUserId]);
+    const dialog = await DialogService.createGroupDialog(ownerUserId, [...userIds, ownerUserId]);
     if (!dialog) {
       console.error("Dialog is null");
       return;
     }
 
-    ChatService.changeCurrentDialog(dispatch, dialog.groupId, DialogTypes.group, allDialogs, dialogsFetched);
+    DialogService.changeCurrentDialog(dispatch, dialog.id, DialogTypes.group, allDialogs, dialogsFetched);
   }
   const validateSubmit = (): boolean => {
     if (userIds.length === 0) return false;
