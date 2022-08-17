@@ -5,7 +5,7 @@ import defaultAvatar from "../../../public/DefaultAvatar.jpg";
 
 import styles from "./DialogListItem.module.css";
 
-export interface DialogListItemProps {
+export interface DialogItem {
   id: number;
   type: DialogTypes;
   name: string;
@@ -17,35 +17,43 @@ export interface DialogListItemProps {
   notificationCount?: number;
 }
 
-const DialogListItem: React.FC<DialogListItemProps> = (props) => {
-  const getLastMessageText = (): string => {
-    if (!props.lastMessageText) return "";
+export interface DialogListItemProps {
+  index: number;
+  style: any;
+  data: DialogItem[];
+}
 
-    if (props.lastMessageText.length > 15) {
-      return props.lastMessageText.slice(0, 15) + "...";
+const DialogListItem: React.FC<DialogListItemProps> = ({index, style, data}) => {
+  const dialog = data[index];
+
+  const getLastMessageText = (): string => {
+    if (!dialog.lastMessageText) return "";
+
+    if (dialog.lastMessageText.length > 15) {
+      return dialog.lastMessageText.slice(0, 15) + "...";
     }
-    return props.lastMessageText;
+    return dialog.lastMessageText;
   }
 
   const getName = (): string => {
-    if (props.name.length > 14) {
-      return props.name.slice(0, 14) + "...";
+    if (dialog.name.length > 14) {
+      return dialog.name.slice(0, 14) + "...";
     }
-    return props.name;
+    return dialog.name;
   }
 
   return (
-    <div className={`${styles.dialog} ${props.isCurrentDialog && styles.current}`}>
+    <div style={style} className={`${styles.dialog} ${dialog.isCurrentDialog && styles.current}`}>
       <div className={styles.avatarContainer}>
-        {props.avatarUrl ?
-          <img src={getUserDataUrl(props.avatarUrl)} className={styles.avatar} />
+        {dialog.avatarUrl ?
+          <img src={getUserDataUrl(dialog.avatarUrl)} className={styles.avatar} />
           :
           <img src={defaultAvatar} className={styles.avatar} />
         }
       </div>
-      <div onClick={props.onClick} className={styles.container}>
+      <div onClick={dialog.onClick} className={styles.container}>
         <span className={styles.name}>{getName()}</span>
-        <span className={styles.lastMessageText}>{props.isLastMessageMy && "Вы: "}{getLastMessageText()}</span>
+        <span className={styles.lastMessageText}>{dialog.isLastMessageMy && "Вы: "}{getLastMessageText()}</span>
       </div>
     </div>
   )

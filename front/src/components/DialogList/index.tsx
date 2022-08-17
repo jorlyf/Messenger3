@@ -1,18 +1,32 @@
 import * as React from "react";
-import Dialog, { DialogListItemProps } from "../DialogListItem";
+import { FixedSizeList } from "react-window";
+import Dialog, { DialogItem } from "../DialogListItem";
 
 import styles from "./DialogList.module.css";
 
 interface DialogListProps {
-  items: DialogListItemProps[];
+  items: DialogItem[];
 }
 
 const DialogList: React.FC<DialogListProps> = ({ items }) => {
+  const ref = React.useRef<any>(null);
+
   return (
     <div className={styles.dialogList}>
-      {items?.map(item => (
-        <Dialog key={`${item.type}${item.id}`} {...item} />
-      ))}
+      <FixedSizeList
+        height={550}
+        width={350}
+
+        itemData={items}
+        itemCount={items.length}
+        itemSize={100}
+        itemKey={(index, data) => data[index].id}
+        overscanCount={2}
+
+        ref={ref}
+      >
+        {Dialog}
+      </FixedSizeList>
     </div>
   )
 }
