@@ -19,9 +19,10 @@ const DialogListContainer: React.FC = () => {
   const dialogsFetched = useAppSelector(state => state.chat.dialogsFetched);
   const currentDialogInfo = useAppSelector(state => state.chat.currentDialogInfo);
 
-  const getLastMessage = (messages: Message[]): Message | undefined => {
-    if (messages.length === 0) return undefined;
-    return messages.reduce((x, y) => (x.timeMilliseconds > y.timeMilliseconds) ? x : y);
+  const getLastMessage = (messages: Message[]): Message | null => {
+    if (messages.length === 0) return null;
+    const msg = messages.reduce((x, y) => (x.timeMilliseconds > y.timeMilliseconds) ? x : y);
+    return msg ? msg : null;
   }
 
   const getDialogNavigateUrl = (d: DialogModel) => {
@@ -38,7 +39,9 @@ const DialogListContainer: React.FC = () => {
   }
 
   const items: DialogListItemProps[] = React.useMemo(() => {
-    return dialogs.map(d => {
+    console.log("update dialog list items");
+    
+    return dialogs.map(d => {   
       const lastMsg = getLastMessage(d.messages);
       const isCurrentDialog = d.id === currentDialogInfo?.id && d.type === currentDialogInfo.type;
       return {
@@ -49,10 +52,11 @@ const DialogListContainer: React.FC = () => {
         name: d.name,
         avatarUrl: d.avatarUrl,
         lastMessageText: lastMsg?.text,
-        isLastMessageMy: lastMsg?.senderUser.id === ownerUser?.id
+        isLastMessageMy: lastMsg?.senderUser.id === ownerUser?.id,
+        lastUpdateTotalMilliseconds: d.lastUpdateTotalMilliseconds
       }
-    });
-  }, [dialogs, navigate]);
+    }).sort((x, y) => y.lastUpdateTotalMilliseconds - x.lastUpdateTotalMilliseconds);
+  }, [dialogs, currentDialogInfo, navigate]);
 
   React.useEffect(() => {
     if (!isAuthorized || !ownerUser || dialogsFetched) return;

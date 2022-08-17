@@ -4,7 +4,7 @@ import Dialog, { DialogListItemProps } from "../DialogListItem";
 import styles from "./DialogList.module.css";
 
 interface DialogListProps {
-  items?: DialogListItemProps[];
+  items: DialogListItemProps[];
 }
 
 const DialogList: React.FC<DialogListProps> = ({ items }) => {

@@ -46,14 +46,13 @@ const useChat = (chatId?: string) => {
         attachments: currentDialog.inputMessage.attachments
       }
     }
-    const apiMessageDTO: MessageDTO | null = await MessageService.sendMessage(currentDialog, sendMessageDTO);
-    if (!apiMessageDTO) {
+    const apiMessage: Message | null = await MessageService.sendMessage(dispatch, currentDialog, sendMessageDTO);
+    if (!apiMessage) {
       MessageService.changeStatusSendingMessage(dispatch, currentDialog.id, currentDialog.type, tempMessage.id, MessageSendingStatus.error);
       return;
     }
 
-    const toReplaceTempMessage: Message = MessageService.processMessageDTO(apiMessageDTO);
-    MessageService.replaceSendingMessageByUuid(dispatch, currentDialog.id, currentDialog.type, toReplaceTempMessage, tempMessage.id);
+    MessageService.replaceSendingMessageByUuid(dispatch, currentDialog.id, currentDialog.type, apiMessage, tempMessage.id);
   }
 
   const handleChangeCurrentDialog = (chatId: string) => {

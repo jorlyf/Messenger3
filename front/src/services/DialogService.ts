@@ -104,7 +104,8 @@ export default class DialogService {
       messages: [],
       name: "",
       avatarUrl: null,
-      inputMessage: { id: uuid(), text: "", attachments: [] }
+      inputMessage: { id: uuid(), text: "", attachments: [] },
+      lastUpdateTotalMilliseconds: Number(Date.now())
     }
   }
 
@@ -121,7 +122,8 @@ export default class DialogService {
       messages: [],
       name: user.login,
       avatarUrl: user.avatarUrl,
-      inputMessage: { id: uuid(), text: "", attachments: [] }
+      inputMessage: { id: uuid(), text: "", attachments: [] },
+      lastUpdateTotalMilliseconds: Number(Date.now())
     }
   }
   static async createGroupDialog(ownerUserId: number, userIds: number[]): Promise<DialogModel | null> {
@@ -174,7 +176,8 @@ export default class DialogService {
       messages: messages,
       userIds: [dialog.userId],
       inputMessage: { id: uuid(), text: "", attachments: [] },
-      avatarUrl: dialog.userAvatarUrl
+      avatarUrl: dialog.userAvatarUrl,
+      lastUpdateTotalMilliseconds: dialog.lastUpdateTotalMilliseconds
     };
   }
   static processGroupDialogDTO(dialog: GroupDialogDTO): DialogModel {
@@ -186,7 +189,8 @@ export default class DialogService {
       messages: messages,
       userIds: dialog.userIds,
       inputMessage: { id: uuid(), text: "", attachments: [] },
-      avatarUrl: dialog.groupAvatarUrl
+      avatarUrl: dialog.groupAvatarUrl,
+      lastUpdateTotalMilliseconds: dialog.lastUpdateTotalMilliseconds
     };
   }
 }

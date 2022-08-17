@@ -1,7 +1,7 @@
 import $api from "../http";
 import { uuid } from "../utils";
 import { AppDispatch } from "../redux/store";
-import { addCurrentDialogMessage, addDialog, addDialogMessage, replaceDialogTempMessage, setMessageSendingStatus } from "../redux/slices/chatSlice";
+import { addCurrentDialogMessage, addDialog, addDialogMessage, replaceDialogTempMessage, setMessageSendingStatus, updateDialogTotalMilliseconds } from "../redux/slices/chatSlice";
 import DialogService from "./DialogService";
 import Message, { MessageSendingStatus } from "../entities/local/Message";
 import DialogModel, { DialogTypes } from "../entities/db/DialogModel";
@@ -10,25 +10,29 @@ import NewMessageDTO from "../entities/dtos/NewMessageDTO";
 import SendMessageContainerDTO from "../entities/dtos/SendMessageContainerDTO";
 
 export default class MessageService {
-  static async sendMessage(dialog: DialogModel, message: SendMessageContainerDTO): Promise<MessageDTO | null> {
+  static async sendMessage(dispatch: AppDispatch, dialog: DialogModel, messageDTO: SendMessageContainerDTO): Promise<Message | null> {
     try {
       if (dialog.type === DialogTypes.private) {
-        return await MessageService.sendMessageToUser(message);
+        const message: Message | null = await MessageService.sendMessageToUser(messageDTO);
+        dispatch(updateDialogTotalMilliseconds({ dialogId: dialog.id, dialogType: dialog.type, value: new Date().getTime() }));
+        return message;
       }
       else {
-        return await MessageService.sendMessageToGroup(message);
+        const message: Message | null = await MessageService.sendMessageToGroup(messageDTO);
+        dispatch(updateDialogTotalMilliseconds({ dialogId: dialog.id, dialogType: dialog.type, value: new Date().getTime() }));
+        return message;
       }
     } catch (error) {
       return null;
     }
   }
-  static async sendMessageToUser(message: SendMessageContainerDTO): Promise<MessageDTO | null> {
-    const response = await $api.post<MessageDTO>("/Message/SendMessageToUser", message);
-    return response.data;
+  static async sendMessageToUser(sendMessageDTO: SendMessageContainerDTO): Promise<Message | null> {
+    const response = await $api.post<MessageDTO>("/Message/SendMessageToUser", sendMessageDTO);
+    return MessageService.processMessageDTO(response.data);
   }
-  static async sendMessageToGroup(message: SendMessageContainerDTO): Promise<MessageDTO | null> {
+  static async sendMessageToGroup(message: SendMessageContainerDTO): Promise<Message | null> {
     const response = await $api.post<MessageDTO>("/Message/SendMessageToGroup", message);
-    return response.data;
+    return MessageService.processMessageDTO(response.data);
   }
 
   static async handleNewMessage(dispatch: AppDispatch, newMessageDTO: NewMessageDTO, allDialogs: DialogModel[]) {

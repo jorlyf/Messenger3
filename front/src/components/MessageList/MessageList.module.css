@@ -1,8 +1,4 @@
 .list {
-  flex-grow     : 1;
-  display       : flex;
-  flex-direction: column;
-  row-gap       : 15px;
   overflow-y    : auto;
   overflow-x    : hidden;
   max-width     : 800px;

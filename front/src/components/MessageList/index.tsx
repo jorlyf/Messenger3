@@ -1,7 +1,7 @@
 import * as React from "react";
+import MessageListItem from "../MessageListItem";
 import { DialogTypes } from "../../entities/db/DialogModel";
 import Message from "../../entities/local/Message";
-import MessageListItem from "../MessageListItem";
 
 import styles from "./MessageList.module.css";
 
@@ -12,6 +12,7 @@ interface MessageListProps {
 }
 
 const MessageList: React.FC<MessageListProps> = ({ dialogId, dialogType, items }) => {
+  const endListRef = React.useRef<any>(null);
 
   const scrollListToBottom = (behavior: string = "smooth") => {
     endListRef.current?.scrollIntoView({
@@ -20,7 +21,6 @@ const MessageList: React.FC<MessageListProps> = ({ dialogId, dialogType, items }
     });
   }
 
-  const endListRef: any = React.useRef(null);
   React.useEffect(() => {
     scrollListToBottom("smooth");
   }, [items]);
@@ -31,12 +31,14 @@ const MessageList: React.FC<MessageListProps> = ({ dialogId, dialogType, items }
 
   return (
     <div className={styles.list}>
+
       {items.map(item =>
         <MessageListItem
           key={item.id}
-          message={item}
+          data={item}
         />
       )}
+
       <div ref={endListRef} />
     </div>
   );

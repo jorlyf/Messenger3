@@ -1,51 +1,50 @@
 import * as React from "react";
+import { getUserDataUrl } from "../../utils";
 import useAppSelector from "../../hooks/useAppSelector";
+import IsLoad from "../IsLoad";
 import Message, { MessageSendingStatus } from "../../entities/local/Message";
 import defaultAvatar from "../../../public/DefaultAvatar.jpg";
 
 import styles from "./MessageListItem.module.css";
-import IsLoad from "../IsLoad";
-import { getUserDataUrl } from "../../utils";
 
 interface MessageListItemProps {
-  message: Message;
+  data: Message;
 }
 
-const MessageListItem: React.FC<MessageListItemProps> = ({ message }) => {
-
+const MessageListItem: React.FC<MessageListItemProps> = ({ data }) => {
   const ownerUser = useAppSelector(state => state.profile.user);
-  const isMessageMy: boolean = message.senderUser.id === ownerUser?.id;
+  const isMessageMy: boolean = data?.senderUser.id === ownerUser?.id;
 
   return (
     <>
       {isMessageMy ?
         <div className={styles.item + " " + styles.my}>
           <div className={styles.loginAndText}>
-            <span className={styles.login + " " + styles.my}>{message.senderUser.login}</span>
-            <span className={styles.text}>{message.text}</span>
+            <span className={styles.login + " " + styles.my}>{data.senderUser.login}</span>
+            <span className={styles.text}>{data?.text}</span>
           </div>
-          {message.senderUser.avatarUrl ?
-            <img className={styles.avatar} src={getUserDataUrl(message.senderUser.avatarUrl)} />
+          {data.senderUser.avatarUrl ?
+            <img className={styles.avatar} src={getUserDataUrl(data.senderUser.avatarUrl)} />
             :
             <img className={styles.avatar} src={defaultAvatar} />
           }
-          {message.status === MessageSendingStatus.isSending &&
+          {data.status === MessageSendingStatus.isSending &&
             <IsLoad />
           }
-          {message.status === MessageSendingStatus.error &&
+          {data.status === MessageSendingStatus.error &&
             <span>ОШИБКА</span>
           }
         </div>
         :
         <div className={styles.item}>
-          {message.senderUser.avatarUrl ?
-            <img className={styles.avatar} src={getUserDataUrl(message.senderUser.avatarUrl)} />
+          {data.senderUser.avatarUrl ?
+            <img className={styles.avatar} src={getUserDataUrl(data.senderUser.avatarUrl)} />
             :
             <img className={styles.avatar} src={defaultAvatar} />
           }
           <div className={styles.loginAndText}>
-            <span className={styles.login}>{message.senderUser.login}</span>
-            <span className={styles.text}>{message.text}</span>
+            <span className={styles.login}>{data.senderUser.login}</span>
+            <span className={styles.text}>{data.text}</span>
           </div>
         </div>
       }

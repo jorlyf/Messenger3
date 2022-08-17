@@ -102,6 +102,12 @@ const chatSlice = createSlice({
       if (!message) return;
 
       message.status = action.payload.status;
+    },
+    updateDialogTotalMilliseconds(state, action: PayloadAction<{ dialogId: number, dialogType: DialogTypes, value: number }>) {
+      const dialog = DialogService.findDialog(state.dialogs, action.payload.dialogId, action.payload.dialogType);
+      if (!dialog) return;
+
+      dialog.lastUpdateTotalMilliseconds = action.payload.value;
     }
   }
 });
@@ -118,7 +124,8 @@ export const {
   addCurrentDialogMessage,
   replaceDialogTempMessage,
   addDialogMessage,
-  setMessageSendingStatus
+  setMessageSendingStatus,
+  updateDialogTotalMilliseconds
 } = chatSlice.actions;
 
 export default chatSlice.reducer;

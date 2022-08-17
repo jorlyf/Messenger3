@@ -14,4 +14,5 @@ export default interface DialogModel {
   userIds: number[];
   inputMessage: MessageInput;
   avatarUrl: string | null;
+  lastUpdateTotalMilliseconds: number;
 }
