@@ -31,7 +31,7 @@ const MessageList: React.FC<MessageListProps> = ({ dialogId, dialogType, items }
 
     const getGap = () => {
       return { paddingTop: index === 0 ? 0 : 15 }
-    } 
+    }
 
     const ownerUser = useAppSelector(state => state.profile.user);
     const isMessageMy: boolean = message.senderUser.id === ownerUser?.id;
@@ -113,9 +113,8 @@ const MessageList: React.FC<MessageListProps> = ({ dialogId, dialogType, items }
             width={width}
             estimatedItemSize={60}
 
-            itemKey={(index, data) => data[index].id}
+            itemKey={(index) => items[index].id}
             itemSize={getRowHeight}
-            itemData={items}
             itemCount={items.length}
 
             ref={listRef}

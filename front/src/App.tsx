@@ -19,6 +19,11 @@ import styles from "./App.module.css";
 
 const App: React.FC = () => {
 
+  const dialogs = useAppSelector(state => state.chat.dialogs);
+  React.useEffect(() => {
+    console.log("dialogs update");  
+  }, [dialogs]); // debug
+
   const wasInitAuthAttempt = useAppSelector(state => state.auth.wasInitAuthAttempt);
 
   useInitAuth();

@@ -1,7 +1,9 @@
+import { DialogTypes } from "../db/DialogModel";
 import AttachmentDTO from "../dtos/AttachmentDTO";
 
 export default interface MessageInput {
-  id: string;
+  dialogId: number;
+  dialogType: DialogTypes;
   text: string;
   attachments: AttachmentDTO[];
 }

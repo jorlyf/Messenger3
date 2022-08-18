@@ -19,17 +19,21 @@ const useChat = (chatId?: string) => {
   const dialogsFetched = useAppSelector(state => state.chat.dialogsFetched);
   const currentDialogInfo = useAppSelector(state => state.chat.currentDialogInfo);
   const ownerUser = useAppSelector(state => state.profile.user);
+  const inputMessages = useAppSelector(state => state.chat.inputMessages);
 
   const handleSendMessage = async () => {
-    if (!currentDialog) return;
+    if (!currentDialog || !currentDialogInfo) return;
     if (!ownerUser) return;
 
-    if (!currentDialog.inputMessage.text && currentDialog.inputMessage.attachments.length === 0) return;
-    if (currentDialog.inputMessage.text.length > 4096) return;
+    const inputMessage = MessageService.findInputMessage(inputMessages, currentDialogInfo.id, currentDialogInfo?.type);
+    if (!inputMessage) return;
+    
+    if (!inputMessage.text && inputMessage.attachments.length === 0) return;
+    if (inputMessage.text.length > 4096) return;
 
     const tempMessage: Message = { // to display, will replaced by message from api
       id: uuid(),
-      text: currentDialog.inputMessage.text,
+      text: inputMessage.text,
       senderUser: ownerUser,
       attachments: [],
       status: MessageSendingStatus.isSending,
@@ -39,16 +43,16 @@ const useChat = (chatId?: string) => {
     dispatch(clearCurrentDialogInputMessage());
 
     const sendMessageDTO: SendMessageContainerDTO = {
-      toId: currentDialog.id,
-      type: currentDialog.type,
+      toId: currentDialogInfo.id,
+      type: currentDialogInfo.type,
       message: {
-        text: currentDialog.inputMessage.text,
-        attachments: currentDialog.inputMessage.attachments
+        text: inputMessage.text,
+        attachments: inputMessage.attachments
       }
     }
     const apiMessage: Message | null = await MessageService.sendMessage(dispatch, currentDialog, sendMessageDTO);
     if (!apiMessage) {
-      MessageService.changeStatusSendingMessage(dispatch, currentDialog.id, currentDialog.type, tempMessage.id, MessageSendingStatus.error);
+      MessageService.changeStatusSendingMessage(dispatch, currentDialogInfo.id, currentDialogInfo.type, tempMessage.id, MessageSendingStatus.error);
       return;
     }
 

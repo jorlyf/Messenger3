@@ -4,9 +4,9 @@ import { useNavigate } from "react-router-dom";
 import useAppSelector from "../../hooks/useAppSelector";
 import DialogService from "../../services/DialogService";
 import DialogList from "../../components/DialogList";
-import { DialogListItemProps } from "../../components/DialogListItem";
+import { DialogItem } from "../../components/DialogListItem";
 import Message from "../../entities/local/Message";
-import DialogModel from "../../entities/db/DialogModel";
+import DialogModel, { DialogTypes } from "../../entities/db/DialogModel";
 
 const DialogListContainer: React.FC = () => {
   const dispatch = useDispatch();
@@ -27,21 +27,16 @@ const DialogListContainer: React.FC = () => {
 
   const getDialogNavigateUrl = (d: DialogModel) => {
     let prefix: string = "";
-    switch (d.type) {
-      case 0:
-        prefix = "user"
-        break;
-      case 1:
-        prefix = "group"
-        break;
-    }
+    if (d.type === DialogTypes.private)
+      prefix = "user";
+    else if (d.type === DialogTypes.group)
+      prefix = "group";
+
     return `/${prefix}=${d.id}`;
   }
 
-  const items: DialogListItemProps[] = React.useMemo(() => {
-    console.log("update dialog list items");
-    
-    return dialogs.map(d => {   
+  const items: DialogItem[] = React.useMemo(() => {
+    return dialogs.map(d => {
       const lastMsg = getLastMessage(d.messages);
       const isCurrentDialog = d.id === currentDialogInfo?.id && d.type === currentDialogInfo.type;
       return {

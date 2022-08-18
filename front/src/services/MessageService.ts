@@ -8,8 +8,34 @@ import DialogModel, { DialogTypes } from "../entities/db/DialogModel";
 import MessageDTO from "../entities/dtos/MessageDTO";
 import NewMessageDTO from "../entities/dtos/NewMessageDTO";
 import SendMessageContainerDTO from "../entities/dtos/SendMessageContainerDTO";
+import MessageInput from "../entities/local/MessageInput";
 
 export default class MessageService {
+  static createInputMessage(dialogId: number, dialogType: DialogTypes): MessageInput {
+    return {
+      dialogId,
+      dialogType,
+      text: "",
+      attachments: []
+    }
+  }
+  static findInputMessage(inputMessages: MessageInput[], dialogId: number, dialogType: DialogTypes): MessageInput | null {
+    const inputMessage = inputMessages.find(x => x.dialogId === dialogId && x.dialogType === dialogType);
+    return inputMessage ? inputMessage : null;
+  }
+  static getInputMessage(inputMessages: MessageInput[], dialogId: number, dialogType: DialogTypes): MessageInput {
+    let inputMessage = MessageService.findInputMessage(
+      inputMessages,
+      dialogId,
+      dialogType
+    );
+    if (!inputMessage) {
+      inputMessage = MessageService.createInputMessage(dialogId, dialogType);
+      inputMessages.push(inputMessage);
+    }
+    return inputMessage;
+  }
+
   static async sendMessage(dispatch: AppDispatch, dialog: DialogModel, messageDTO: SendMessageContainerDTO): Promise<Message | null> {
     try {
       if (dialog.type === DialogTypes.private) {

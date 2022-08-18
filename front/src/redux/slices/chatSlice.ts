@@ -4,6 +4,8 @@ import DialogService from "../../services/DialogService";
 import DialogModel, { DialogTypes } from "../../entities/db/DialogModel";
 import AttachmentDTO from "../../entities/dtos/AttachmentDTO";
 import Message, { MessageSendingStatus } from "../../entities/local/Message";
+import MessageInput from "../../entities/local/MessageInput";
+import MessageService from "../../services/MessageService";
 
 export interface CurrentDialogInfo {
   id: number;
@@ -15,12 +17,14 @@ interface ChatState {
   dialogs: DialogModel[];
   dialogsFetched: boolean;
   currentDialogInfo: CurrentDialogInfo | null;
+  inputMessages: MessageInput[];
 }
 
 const initialState: ChatState = {
   dialogs: [],
   dialogsFetched: false,
-  currentDialogInfo: null
+  currentDialogInfo: null,
+  inputMessages: []
 }
 
 const chatSlice = createSlice({
@@ -47,7 +51,10 @@ const chatSlice = createSlice({
         const dialog = DialogService.findCurrentDialog(state.dialogs, state.currentDialogInfo);
         if (!dialog) return;
 
-        dialog.inputMessage.text = action.payload;
+        const inputMessage = MessageService.getInputMessage(state.inputMessages, state.currentDialogInfo.id, state.currentDialogInfo.type);
+
+        inputMessage.text = action.payload;
+        console.log(inputMessage.text);
       }
     },
     clearCurrentDialogInputMessage(state) {
@@ -55,7 +62,10 @@ const chatSlice = createSlice({
         const dialog = DialogService.findCurrentDialog(state.dialogs, state.currentDialogInfo);
         if (!dialog) return;
 
-        dialog.inputMessage = { id: uuid(), text: "", attachments: [] }
+        const inputMessage = MessageService.getInputMessage(state.inputMessages, state.currentDialogInfo.id, state.currentDialogInfo.type);
+
+        inputMessage.text = "";
+        inputMessage.attachments = [];
       }
     },
     addCurrentDialogInputMessageAttachment(state, action: PayloadAction<AttachmentDTO>) {
@@ -63,7 +73,9 @@ const chatSlice = createSlice({
         const dialog = DialogService.findCurrentDialog(state.dialogs, state.currentDialogInfo);
         if (!dialog) return;
 
-        dialog.inputMessage.attachments.push(action.payload);
+        const inputMessage = MessageService.getInputMessage(state.inputMessages, state.currentDialogInfo.id, state.currentDialogInfo.type);
+
+        inputMessage.attachments.push(action.payload);
       }
     },
     addCurrentDialogMessage(state, action: PayloadAction<Message>) {
