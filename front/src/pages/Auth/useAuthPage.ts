@@ -3,8 +3,8 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router";
 import useAppSelector from "../../hooks/useAppSelector";
 import AuthService from "../../services/AuthService";
-import LoginDataDTO from "../../entities/dtos/LoginDataDTO";
-import RegistrationDataDTO from "../../entities/dtos/RegistrationDataDTO";
+import LoginDataDTO from "../../entities/dtos/auth/LoginDataDTO";
+import RegistrationDataDTO from "../../entities/dtos/auth/RegistrationDataDTO";
 
 export enum Mode {
   login,

@@ -1,6 +1,6 @@
 import React from "react";
 import { getUserDataUrl } from "../../utils";
-import { DialogTypes } from "../../entities/db/DialogModel";
+import { DialogTypes } from "../../entities/local/Dialog";
 import defaultAvatar from "../../../public/DefaultAvatar.jpg";
 
 import styles from "./DialogListItem.module.css";

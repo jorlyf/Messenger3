@@ -5,8 +5,8 @@ import { HttpTransportType, HubConnection, HubConnectionBuilder, LogLevel } from
 import useAppSelector from "./useAppSelector";
 import { AppDispatch } from "../redux/store";
 import MessageService from "../services/MessageService";
-import NewMessageDTO from "../entities/dtos/NewMessageDTO";
-import DialogModel, { DialogTypes } from "../entities/db/DialogModel";
+import NewMessageDTO from "../entities/dtos/chat/NewMessageDTO";
+import Dialog, { DialogTypes } from "../entities/local/Dialog";
 
 export enum MessagingHubMethods {
   ReceiveNewMessage = "ReceiveNewMessage"
@@ -32,7 +32,7 @@ const buildHubConnection = (token: string): HubConnection => {
   return connection;
 }
 
-const setClientHandlers = (connection: HubConnection, dispatch: AppDispatch, allDialogsRef: React.RefObject<DialogModel[]>) => {
+const setClientHandlers = (connection: HubConnection, dispatch: AppDispatch, allDialogsRef: React.RefObject<Dialog[]>) => {
   connection.on(MessagingHubMethods.ReceiveNewMessage, (newMessageDTO: NewMessageDTO) => {
     switch (newMessageDTO.dialogType) { // convert backend int enum to string enum
       case 0:
@@ -45,8 +45,7 @@ const setClientHandlers = (connection: HubConnection, dispatch: AppDispatch, all
       default:
         return;
     }
-    if (!allDialogsRef.current) { throw new Error("allDialogsRef.current is null"); }
-    MessageService.handleNewMessage(dispatch, newMessageDTO, allDialogsRef.current);
+    MessageService.handleNewMessage(dispatch, newMessageDTO, allDialogsRef.current!);
   });
 }
 
@@ -59,7 +58,7 @@ const useMessagingHub = () => {
   const allDialogs = useAppSelector(state => state.chat.dialogs);
 
   const connectionRef = React.useRef<HubConnection | null>(null);
-  const allDialogsRef = React.useRef<DialogModel[]>([]);
+  const allDialogsRef = React.useRef<Dialog[]>([]);
 
   React.useEffect(() => {
     if (!isAuthorized || !token || !ownerUser || !dispatch || connectionRef.current) return;

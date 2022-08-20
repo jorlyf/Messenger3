@@ -16,7 +16,6 @@ const Chat: React.FC = () => {
         <>
           <MessageListContainer
             dialog={currentDialog}
-            messages={currentDialog.messages}
           />
           <ChatInputContainer
             handleSubmit={handleSendMessage}

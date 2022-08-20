@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useDispatch } from "react-redux";
-import { setCurrentDialogInputMessageText } from "../../redux/slices/chatSlice";
+import { setCurrentDialogMessageInputText } from "../../redux/slices/chatSlice";
 import useAppSelector from "../../hooks/useAppSelector";
 import ChatInput from "../../components/ChatInput";
 import MessageService from "../../services/MessageService";
@@ -13,9 +13,9 @@ interface ChatInputContainerProps {
 const ChatInputContainer: React.FC<ChatInputContainerProps> = ({ handleSubmit }) => {
   const dispatch = useDispatch();
 
-  const [currentInputMessage, setCurrentInputMessage] = React.useState<MessageInput | null>(null);
+  const [currentMessageInput, setCurrentMessageInput] = React.useState<MessageInput | null>(null);
 
-  const inputMessages = useAppSelector(state => state.chat.inputMessages);
+  const messageInputs = useAppSelector(state => state.chat.messageInputs);
   const currentDialogInfo = useAppSelector(state => state.chat.currentDialogInfo);
 
   const handleAttach = () => {
@@ -23,19 +23,19 @@ const ChatInputContainer: React.FC<ChatInputContainerProps> = ({ handleSubmit })
   }
 
   const handleSetText = (value: string) => {
-    dispatch(setCurrentDialogInputMessageText(value));
+    dispatch(setCurrentDialogMessageInputText(value));
   }
 
   React.useEffect(() => {
     if (!currentDialogInfo) return;
 
-    const inputMessage = MessageService.findInputMessage(inputMessages, currentDialogInfo.id, currentDialogInfo.type);
-    setCurrentInputMessage(inputMessage);
-  }, [inputMessages, currentDialogInfo]);
+    const messageInput = MessageService.findMessageInput(messageInputs, currentDialogInfo.id, currentDialogInfo.type);
+    setCurrentMessageInput(messageInput);
+  }, [messageInputs, currentDialogInfo]);
 
   return (
     <ChatInput
-      value={currentInputMessage?.text || ""}
+      value={currentMessageInput?.text || ""}
       setValue={handleSetText}
       handleSubmit={handleSubmit}
       handleAttach={handleAttach}

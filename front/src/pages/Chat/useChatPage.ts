@@ -2,13 +2,12 @@ import * as React from "react";
 import { useDispatch } from "react-redux";
 import { uuid } from "../../utils";
 import useAppSelector from "../../hooks/useAppSelector";
-import { clearCurrentDialogInputMessage } from "../../redux/slices/chatSlice";
+import { clearCurrentDialogMessageInput } from "../../redux/slices/chatSlice";
 import DialogService from "../../services/DialogService";
 import MessageService from "../../services/MessageService";
-import DialogModel, { DialogTypes } from "../../entities/db/DialogModel";
+import DialogModel, { DialogTypes } from "../../entities/local/Dialog";
 import Message, { MessageSendingStatus } from "../../entities/local/Message";
-import SendMessageContainerDTO from "../../entities/dtos/SendMessageContainerDTO";
-import MessageDTO from "../../entities/dtos/MessageDTO";
+import SendMessageContainerDTO from "../../entities/dtos/chat/SendMessageContainerDTO";
 
 const useChat = (chatId?: string) => {
   const dispatch = useDispatch();
@@ -19,35 +18,36 @@ const useChat = (chatId?: string) => {
   const dialogsFetched = useAppSelector(state => state.chat.dialogsFetched);
   const currentDialogInfo = useAppSelector(state => state.chat.currentDialogInfo);
   const ownerUser = useAppSelector(state => state.profile.user);
-  const inputMessages = useAppSelector(state => state.chat.inputMessages);
+  const messageInputs = useAppSelector(state => state.chat.messageInputs);
 
   const handleSendMessage = async () => {
     if (!currentDialog || !currentDialogInfo) return;
     if (!ownerUser) return;
 
-    const inputMessage = MessageService.findInputMessage(inputMessages, currentDialogInfo.id, currentDialogInfo?.type);
-    if (!inputMessage) return;
+    const messageInput = MessageService.findMessageInput(messageInputs, currentDialogInfo.id, currentDialogInfo?.type);
+    if (!messageInput) return;
     
-    if (!inputMessage.text && inputMessage.attachments.length === 0) return;
-    if (inputMessage.text.length > 4096) return;
+    if (!messageInput.text && messageInput.attachments.length === 0) return;
+    if (messageInput.text.length > 4096) return;
 
     const tempMessage: Message = { // to display, will replaced by message from api
       id: uuid(),
-      text: inputMessage.text,
+      apiId: null,
+      text: messageInput.text,
       senderUser: ownerUser,
       attachments: [],
       status: MessageSendingStatus.isSending,
-      timeMilliseconds: new Date().getTime()
+      sentAtTotalMilliseconds: new Date().getTime()
     }
     MessageService.addSendingMessage(dispatch, tempMessage);
-    dispatch(clearCurrentDialogInputMessage());
+    dispatch(clearCurrentDialogMessageInput());
 
     const sendMessageDTO: SendMessageContainerDTO = {
-      toId: currentDialogInfo.id,
-      type: currentDialogInfo.type,
-      message: {
-        text: inputMessage.text,
-        attachments: inputMessage.attachments
+      toDialogId: currentDialogInfo.id,
+      dialogType: currentDialogInfo.type,
+      sendMessageDTO: {
+        text: messageInput.text,
+        sendAttachmentDTOs: [] // will updated
       }
     }
     const apiMessage: Message | null = await MessageService.sendMessage(dispatch, currentDialog, sendMessageDTO);

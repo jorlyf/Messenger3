@@ -1,6 +1,5 @@
 import $api from "../http";
 import UserModel from "../entities/db/UserModel";
-import GroupDialogDTO from "../entities/dtos/GroupDialogDTO";
 
 export default class UserService {
   static async getUserById(userId: number): Promise<UserModel | null> {

@@ -3,12 +3,14 @@ import { useDispatch } from "react-redux";
 import { addUserId, clearUserIds, closeCreateDialogModal, removeUserId } from "../../redux/slices/createGroupDialogSlice";
 import useAppSelector from "../../hooks/useAppSelector";
 import UserModel from "../../entities/db/UserModel";
-import { DialogTypes } from "../../entities/db/DialogModel";
+import { DialogTypes } from "../../entities/local/Dialog";
 import UserService from "../../services/UserService";
 import DialogService from "../../services/DialogService";
+import { useNavigate } from "react-router-dom";
 
 const useCreateGroupDialogModal = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const ownerUserId = useAppSelector(state => state.profile.user?.id);
   const allDialogs = useAppSelector(state => state.chat.dialogs);
@@ -42,11 +44,11 @@ const useCreateGroupDialogModal = () => {
 
     const dialog = await DialogService.createGroupDialog(ownerUserId, [...userIds, ownerUserId]);
     if (!dialog) {
-      console.error("Dialog is null");
+      console.error("Dialog is null"); //bad create dialog
       return;
     }
 
-    DialogService.changeCurrentDialog(dispatch, dialog.id, DialogTypes.group, allDialogs, dialogsFetched);
+    navigate(`/group=${dialog.id}`);
   }
   const validateSubmit = (): boolean => {
     if (userIds.length === 0) return false;

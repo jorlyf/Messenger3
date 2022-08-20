@@ -6,7 +6,7 @@ import DialogService from "../../services/DialogService";
 import DialogList from "../../components/DialogList";
 import { DialogItem } from "../../components/DialogListItem";
 import Message from "../../entities/local/Message";
-import DialogModel, { DialogTypes } from "../../entities/db/DialogModel";
+import Dialog, { DialogTypes } from "../../entities/local/Dialog";
 
 const DialogListContainer: React.FC = () => {
   const dispatch = useDispatch();
@@ -21,15 +21,15 @@ const DialogListContainer: React.FC = () => {
 
   const getLastMessage = (messages: Message[]): Message | null => {
     if (messages.length === 0) return null;
-    const msg = messages.reduce((x, y) => (x.timeMilliseconds > y.timeMilliseconds) ? x : y);
+    const msg = messages.reduce((x, y) => (x.sentAtTotalMilliseconds > y.sentAtTotalMilliseconds) ? x : y);
     return msg ? msg : null;
   }
 
-  const getDialogNavigateUrl = (d: DialogModel) => {
-    let prefix: string = "";
+  const getDialogNavigateUrl = (d: Dialog) => {
+    let prefix: string;
     if (d.type === DialogTypes.private)
       prefix = "user";
-    else if (d.type === DialogTypes.group)
+    else
       prefix = "group";
 
     return `/${prefix}=${d.id}`;
@@ -61,7 +61,10 @@ const DialogListContainer: React.FC = () => {
   }, [isAuthorized, ownerUser, dialogsFetched]);
 
   return (
-    <DialogList items={items} />
+    <DialogList
+      items={items}
+      loadMoreItems={() => { }}
+    />
   );
 }
 

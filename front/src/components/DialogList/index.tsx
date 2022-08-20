@@ -1,32 +1,48 @@
 import * as React from "react";
-import { FixedSizeList } from "react-window";
+import { FixedSizeList, ListOnScrollProps } from "react-window";
+import AutoSizer from "react-virtualized-auto-sizer";
 import Dialog, { DialogItem } from "../DialogListItem";
 
 import styles from "./DialogList.module.css";
 
 interface DialogListProps {
   items: DialogItem[];
+  loadMoreItems: () => void;
 }
 
-const DialogList: React.FC<DialogListProps> = ({ items }) => {
+const DialogList: React.FC<DialogListProps> = ({ items, loadMoreItems }) => {
   const ref = React.useRef<any>(null);
+
+  const dialogHeight = 100;
+
+  const onScroll = (props: ListOnScrollProps) => {
+    if (props.scrollOffset > dialogHeight * items.length - 100) {
+      loadMoreItems();
+    }
+  }
 
   return (
     <div className={styles.dialogList}>
-      <FixedSizeList
-        height={550}
-        width={350}
+      <AutoSizer>
+        {({ height, width }) => (
+          <FixedSizeList
+            height={height}
+            width={width}
 
-        itemData={items}
-        itemCount={items.length}
-        itemSize={100}
-        itemKey={(index, data) => data[index].id}
-        overscanCount={2}
+            itemData={items}
+            itemCount={items.length}
+            itemSize={dialogHeight}
+            itemKey={(index, data) => `${data[index].id}-${data[index].type}`}
+            overscanCount={2}
 
-        ref={ref}
-      >
-        {Dialog}
-      </FixedSizeList>
+            onScroll={onScroll}
+
+            ref={ref}
+          >
+            {Dialog}
+          </FixedSizeList>
+        )}
+      </AutoSizer>
     </div>
   )
 }

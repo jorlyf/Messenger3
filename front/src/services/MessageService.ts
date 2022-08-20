@@ -4,14 +4,44 @@ import { AppDispatch } from "../redux/store";
 import { addCurrentDialogMessage, addDialog, addDialogMessage, replaceDialogTempMessage, setMessageSendingStatus, updateDialogTotalMilliseconds } from "../redux/slices/chatSlice";
 import DialogService from "./DialogService";
 import Message, { MessageSendingStatus } from "../entities/local/Message";
-import DialogModel, { DialogTypes } from "../entities/db/DialogModel";
-import MessageDTO from "../entities/dtos/MessageDTO";
-import NewMessageDTO from "../entities/dtos/NewMessageDTO";
-import SendMessageContainerDTO from "../entities/dtos/SendMessageContainerDTO";
+import Dialog, { DialogTypes } from "../entities/local/Dialog";
+import MessageDTO from "../entities/dtos/chat/MessageDTO";
+import NewMessageDTO from "../entities/dtos/chat/NewMessageDTO";
+import SendMessageContainerDTO from "../entities/dtos/chat/SendMessageContainerDTO";
 import MessageInput from "../entities/local/MessageInput";
+import Attachment from "../entities/local/Attachment";
 
 export default class MessageService {
-  static createInputMessage(dialogId: number, dialogType: DialogTypes): MessageInput {
+  static async getOldestMessages(dialogs: Dialog[], dialogId: number, dialogType: DialogTypes): Promise<Message[]> {
+    try {
+      const dialog = DialogService.findDialog(dialogs, dialogId, dialogType);
+      if (!dialog) return [];
+      if (dialog.totalMessagesCount <= dialog.messages.length) {
+        return []; // all messages getted
+      }
+      const apiMessages = dialog.messages.filter(x => x.apiId);
+      if (apiMessages.length === 0) return [];
+      const oldestMessageId = apiMessages.reduce((x, y) => (x.apiId! < y.apiId!) ? x : y).apiId;
+
+      if (!oldestMessageId) return [];
+      const params = {
+        dialogId,
+        dialogType,
+        oldestMessageId
+      }
+      const response = await $api.get<MessageDTO[]>("/Message/GetDialogMessages", { params });
+      const newMessages = MessageService.processMessageDTOs(response.data);
+      if (newMessages.length === 0) {
+        console.log("сообщений больше нет");
+      }
+      return newMessages;
+    } catch (error) {
+      console.log(error);
+      return [];
+    }
+  }
+
+  static createMessageInput(dialogId: number, dialogType: DialogTypes): MessageInput {
     return {
       dialogId,
       dialogType,
@@ -19,24 +49,24 @@ export default class MessageService {
       attachments: []
     }
   }
-  static findInputMessage(inputMessages: MessageInput[], dialogId: number, dialogType: DialogTypes): MessageInput | null {
-    const inputMessage = inputMessages.find(x => x.dialogId === dialogId && x.dialogType === dialogType);
-    return inputMessage ? inputMessage : null;
+  static findMessageInput(messageInputs: MessageInput[], dialogId: number, dialogType: DialogTypes): MessageInput | null {
+    const messageInput = messageInputs.find(x => x.dialogId === dialogId && x.dialogType === dialogType);
+    return messageInput ? messageInput : null;
   }
-  static getInputMessage(inputMessages: MessageInput[], dialogId: number, dialogType: DialogTypes): MessageInput {
-    let inputMessage = MessageService.findInputMessage(
-      inputMessages,
+  static getMessageInput(messageInputs: MessageInput[], dialogId: number, dialogType: DialogTypes): MessageInput {
+    let messageInput = MessageService.findMessageInput(
+      messageInputs,
       dialogId,
       dialogType
     );
-    if (!inputMessage) {
-      inputMessage = MessageService.createInputMessage(dialogId, dialogType);
-      inputMessages.push(inputMessage);
+    if (!messageInput) {
+      messageInput = MessageService.createMessageInput(dialogId, dialogType);
+      messageInputs.push(messageInput);
     }
-    return inputMessage;
+    return messageInput;
   }
 
-  static async sendMessage(dispatch: AppDispatch, dialog: DialogModel, messageDTO: SendMessageContainerDTO): Promise<Message | null> {
+  static async sendMessage(dispatch: AppDispatch, dialog: Dialog, messageDTO: SendMessageContainerDTO): Promise<Message | null> {
     try {
       if (dialog.type === DialogTypes.private) {
         const message: Message | null = await MessageService.sendMessageToUser(messageDTO);
@@ -52,16 +82,16 @@ export default class MessageService {
       return null;
     }
   }
-  static async sendMessageToUser(sendMessageDTO: SendMessageContainerDTO): Promise<Message | null> {
-    const response = await $api.post<MessageDTO>("/Message/SendMessageToUser", sendMessageDTO);
+  static async sendMessageToUser(sendMessageContainerDTO: SendMessageContainerDTO): Promise<Message | null> {
+    const response = await $api.post<MessageDTO>("/Message/SendMessageToUser", sendMessageContainerDTO);
     return MessageService.processMessageDTO(response.data);
   }
-  static async sendMessageToGroup(message: SendMessageContainerDTO): Promise<Message | null> {
-    const response = await $api.post<MessageDTO>("/Message/SendMessageToGroup", message);
+  static async sendMessageToGroup(sendMessageContainerDTO: SendMessageContainerDTO): Promise<Message | null> {
+    const response = await $api.post<MessageDTO>("/Message/SendMessageToGroup", sendMessageContainerDTO);
     return MessageService.processMessageDTO(response.data);
   }
 
-  static async handleNewMessage(dispatch: AppDispatch, newMessageDTO: NewMessageDTO, allDialogs: DialogModel[]) {
+  static async handleNewMessage(dispatch: AppDispatch, newMessageDTO: NewMessageDTO, allDialogs: Dialog[]) {
     const message: Message = MessageService.processMessageDTO(newMessageDTO.messageDTO);
 
     if (newMessageDTO.dialogType === DialogTypes.private) {
@@ -72,8 +102,8 @@ export default class MessageService {
     }
   }
 
-  static async handleNewPrivateMessage(dispatch: AppDispatch, dialogId: number, message: Message, allDialogs: DialogModel[]) {
-    let dialog: DialogModel | null = DialogService.findDialog(allDialogs, dialogId, DialogTypes.private);
+  static async handleNewPrivateMessage(dispatch: AppDispatch, dialogId: number, message: Message, allDialogs: Dialog[]) {
+    let dialog = DialogService.findDialog(allDialogs, dialogId, DialogTypes.private);
     if (dialog) {
       dispatch(addDialogMessage({ dialogId: dialogId, dialogType: DialogTypes.private, message }));
     }
@@ -90,8 +120,8 @@ export default class MessageService {
     }
 
   }
-  static async handleNewGroupMessage(dispatch: AppDispatch, dialogId: number, message: Message, allDialogs: DialogModel[]) {
-    let dialog: DialogModel | null = DialogService.findDialog(allDialogs, dialogId, DialogTypes.group);
+  static async handleNewGroupMessage(dispatch: AppDispatch, dialogId: number, message: Message, allDialogs: Dialog[]) {
+    let dialog = DialogService.findDialog(allDialogs, dialogId, DialogTypes.group);
     if (!dialog) {
       const dialogDTO = await DialogService.getGroupDialogFromApi(dialogId);
       if (dialogDTO) {
@@ -131,16 +161,17 @@ export default class MessageService {
     });
   }
   static processMessageDTO(dto: MessageDTO): Message {
-    const att = dto.attachments.map(a => {
-      return { id: uuid(), type: a.type, url: a.url }
+    const atts: Attachment[] = dto.attachmentDTOs.map(a => {
+      return { id: uuid(), apiId: a.id, type: a.type, url: a.url }
     });
     return {
       id: uuid(),
+      apiId: dto.id,
       text: dto.text,
-      attachments: att,
+      attachments: atts,
       senderUser: dto.senderUser,
       status: MessageSendingStatus.ok,
-      timeMilliseconds: dto.sentAtTotalMilliseconds
+      sentAtTotalMilliseconds: dto.sentAtTotalMilliseconds
     }
   }
 }

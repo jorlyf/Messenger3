@@ -1,14 +1,13 @@
 import $api from "../http";
-import { uuid } from "../utils";
 import { AppDispatch } from "../redux/store";
 import { addDialog, CurrentDialogInfo, setCurrentDialogInfo, setDialogs, setDialogsFetched } from "../redux/slices/chatSlice";
 import MessageService from "./MessageService";
 import UserService from "./UserService";
-import DialogModel, { DialogTypes } from "../entities/db/DialogModel";
-import DialogsDTO from "../entities/dtos/DialogsDTO";
-import PrivateDialogDTO from "../entities/dtos/PrivateDialogDTO";
-import GroupDialogDTO from "../entities/dtos/GroupDialogDTO";
-import GroupDialogCreatingDataDTO from "../entities/dtos/GroupDialogCreatingDataDTO";
+import Dialog, { DialogTypes } from "../entities/local/Dialog";
+import DialogsDTO from "../entities/dtos/chat/DialogsDTO";
+import PrivateDialogDTO from "../entities/dtos/chat/PrivateDialogDTO";
+import GroupDialogDTO from "../entities/dtos/chat/GroupDialogDTO";
+import GroupDialogCreatingDataDTO from "../entities/dtos/chat/GroupDialogCreatingDataDTO";
 import UserModel from "../entities/db/UserModel";
 
 export default class DialogService {
@@ -17,7 +16,7 @@ export default class DialogService {
       const response = await $api.get<DialogsDTO>("/Dialog/GetDialogs");
       const { privateDialogDTOs, groupDialogDTOs } = response.data;
 
-      const dialogs: DialogModel[] = [];
+      const dialogs: Dialog[] = [];
       privateDialogDTOs.forEach(d => {
         dialogs.push(DialogService.processPrivateDialogDTO(d));
       });
@@ -32,13 +31,13 @@ export default class DialogService {
     }
   }
 
-  static findDialog(dialogs: DialogModel[], id: number, type: DialogTypes): DialogModel | null {
+  static findDialog(dialogs: Dialog[], id: number, type: DialogTypes): Dialog | null {
     const dialog = dialogs.find(x => x.id === id && x.type === type);
     return dialog ? dialog : null;
   }
 
-  static findCurrentDialog(dialogs: DialogModel[], current: CurrentDialogInfo): DialogModel | null {
-    let dialog: DialogModel | null = DialogService.findCurrentDialogByIndex(dialogs, current);
+  static findCurrentDialog(dialogs: Dialog[], current: CurrentDialogInfo): Dialog | null {
+    let dialog: Dialog | null = DialogService.findCurrentDialogByIndex(dialogs, current);
     if (dialog) {
       return dialog;
     }
@@ -46,7 +45,7 @@ export default class DialogService {
     return dialog ? dialog : null;
   }
 
-  static findCurrentDialogByIndex(dialogs: DialogModel[], current: CurrentDialogInfo): DialogModel | null {
+  static findCurrentDialogByIndex(dialogs: Dialog[], current: CurrentDialogInfo): Dialog | null {
     if (current.index < 0) return null;
     if (current.index >= dialogs.length) throw new Error("invalid index of current dialog");
 
@@ -56,7 +55,7 @@ export default class DialogService {
     return dialog;
   }
 
-  static async changeCurrentDialog(dispatch: AppDispatch, id: number, type: DialogTypes, dialogs: DialogModel[], dialogsFetched: boolean) {
+  static async changeCurrentDialog(dispatch: AppDispatch, id: number, type: DialogTypes, dialogs: Dialog[], dialogsFetched: boolean) {
     dispatch(setCurrentDialogInfo(null));
 
     let dialog = DialogService.findDialog(dialogs, id, type);
@@ -96,20 +95,20 @@ export default class DialogService {
     dispatch(addDialog(dialog));
     dispatch(setCurrentDialogInfo({ id: id, type: type, index: index }));
   }
-  static createEmptyDialogModel(id: number, type: DialogTypes): DialogModel {
+  static createEmptyDialogModel(id: number, type: DialogTypes): Dialog {
     return {
       id: id,
       type: type,
       userIds: [],
       messages: [],
+      totalMessagesCount: 0,
       name: "",
       avatarUrl: null,
-      inputMessage: { id: uuid(), text: "", attachments: [] },
-      lastUpdateTotalMilliseconds: Number(Date.now())
+      lastUpdateTotalMilliseconds: new Date().getTime()
     }
   }
 
-  static async createPrivateDialog(userId: number): Promise<DialogModel> {
+  static async createPrivateDialog(userId: number): Promise<Dialog> {
     const user: UserModel | null = await UserService.getUserById(userId);
     if (!user) {
       throw new Error("user not found");
@@ -120,13 +119,13 @@ export default class DialogService {
       type: DialogTypes.private,
       userIds: [user.id],
       messages: [],
+      totalMessagesCount: 0,
       name: user.login,
       avatarUrl: user.avatarUrl,
-      inputMessage: { id: uuid(), text: "", attachments: [] },
-      lastUpdateTotalMilliseconds: Number(Date.now())
+      lastUpdateTotalMilliseconds: new Date().getTime()
     }
   }
-  static async createGroupDialog(ownerUserId: number, userIds: number[]): Promise<DialogModel | null> {
+  static async createGroupDialog(ownerUserId: number, userIds: number[]): Promise<Dialog | null> {
     const dto: GroupDialogCreatingDataDTO = {
       userCreatorId: ownerUserId,
       userIds: userIds
@@ -167,28 +166,28 @@ export default class DialogService {
     }
   }
 
-  static processPrivateDialogDTO(dialog: PrivateDialogDTO): DialogModel {
+  static processPrivateDialogDTO(dialog: PrivateDialogDTO): Dialog {
     const messages = MessageService.processMessageDTOs(dialog.messages);
     return {
       id: dialog.userId,
       type: DialogTypes.private,
       name: dialog.name,
       messages: messages,
+      totalMessagesCount: dialog.totalMessagesCount,
       userIds: [dialog.userId],
-      inputMessage: { id: uuid(), text: "", attachments: [] },
       avatarUrl: dialog.userAvatarUrl,
       lastUpdateTotalMilliseconds: dialog.lastUpdateTotalMilliseconds
     };
   }
-  static processGroupDialogDTO(dialog: GroupDialogDTO): DialogModel {
+  static processGroupDialogDTO(dialog: GroupDialogDTO): Dialog {
     const messages = MessageService.processMessageDTOs(dialog.messages);
     return {
       id: dialog.groupId,
       type: DialogTypes.group,
       name: dialog.name,
       messages: messages,
+      totalMessagesCount: dialog.totalMessagesCount,
       userIds: dialog.userIds,
-      inputMessage: { id: uuid(), text: "", attachments: [] },
       avatarUrl: dialog.groupAvatarUrl,
       lastUpdateTotalMilliseconds: dialog.lastUpdateTotalMilliseconds
     };

@@ -2,10 +2,10 @@ import $api from "../http";
 import { AppDispatch } from "../redux/store";
 import { loginByTokenSuccess, loginError, loginInit, loginSuccess } from "../redux/slices/authSlice";
 import ProfileService from "./ProfileService";
-import LoginDataDTO from "../entities/dtos/LoginDataDTO";
-import LoginAnswerDataDTO from "../entities/dtos/LoginAnswerDataDTO";
-import RegistrationDataDTO from "../entities/dtos/RegistrationDataDTO";
-import RegistrationAnswerDataDTO from "../entities/dtos/RegistrationAnswerDataDTO";
+import LoginDataDTO from "../entities/dtos/auth/LoginDataDTO";
+import LoginAnswerDataDTO from "../entities/dtos/auth/LoginAnswerDataDTO";
+import RegistrationDataDTO from "../entities/dtos/auth/RegistrationDataDTO";
+import RegistrationAnswerDataDTO from "../entities/dtos/auth/RegistrationAnswerDataDTO";
 
 export default class AuthService {
   static async loginByToken(dispatch: AppDispatch): Promise<void> {

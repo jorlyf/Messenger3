@@ -1,9 +1,9 @@
 import * as React from "react";
+import { getUserDataUrl } from "../../utils";
 import useProfilePage from "./useProfilePage";
 import defaultAvatar from "../../../public/DefaultAvatar.jpg";
 
 import styles from "./Profile.module.css";
-import { getUserDataUrl } from "../../utils";
 
 const Profile: React.FC = () => {
   const { login, avatarUrl, handleUploadAvatar } = useProfilePage();
