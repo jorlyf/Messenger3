@@ -38,9 +38,11 @@ const useAuthPage = () => {
     AuthService.login(dispatch, loginData);
   }
 
-  const handleSubmitRegistrate = () => {
+  const handleSubmitRegistrate = async () => {
     const registrationData: RegistrationDataDTO = { login, password }
-    AuthService.registrate(dispatch, registrationData);
+    if (await AuthService.registrate(dispatch, registrationData)) {
+      navigate("/");
+    }
   }
 
   React.useEffect(() => {

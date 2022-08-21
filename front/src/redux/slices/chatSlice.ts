@@ -14,6 +14,7 @@ export interface CurrentDialogInfo {
 
 interface ChatState {
   dialogs: Dialog[];
+  totalDialogCount: number | null;
   dialogsFetched: boolean;
   currentDialogInfo: CurrentDialogInfo | null;
   messageInputs: MessageInput[];
@@ -21,6 +22,7 @@ interface ChatState {
 
 const initialState: ChatState = {
   dialogs: [],
+  totalDialogCount: null,
   dialogsFetched: false,
   currentDialogInfo: null,
   messageInputs: []
@@ -33,6 +35,9 @@ const chatSlice = createSlice({
     setDialogs(state, action: PayloadAction<Dialog[]>) {
       state.dialogs = action.payload;
     },
+    setTotalDialogCount(state, action: PayloadAction<number>) {
+      state.totalDialogCount = action.payload;
+    },
     setDialogsFetched(state, action: PayloadAction<boolean>) {
       state.dialogsFetched = action.payload;
     },
@@ -41,6 +46,9 @@ const chatSlice = createSlice({
     },
     addDialog(state, action: PayloadAction<Dialog>) {
       state.dialogs.push(action.payload);
+    },
+    addDialogs(state, action: PayloadAction<Dialog[]>) {
+      state.dialogs = [...state.dialogs, ...action.payload];
     },
     removeDialogById(state, action: PayloadAction<number>) {
       state.dialogs = state.dialogs.filter(d => d.id !== action.payload);
@@ -130,9 +138,11 @@ const chatSlice = createSlice({
 
 export const {
   setDialogs,
+  setTotalDialogCount,
   setDialogsFetched,
   setCurrentDialogInfo,
   addDialog,
+  addDialogs,
   removeDialogById,
   setCurrentDialogMessageInputText,
   clearCurrentDialogMessageInput,

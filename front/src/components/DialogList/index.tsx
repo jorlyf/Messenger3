@@ -16,7 +16,9 @@ const DialogList: React.FC<DialogListProps> = ({ items, loadMoreItems }) => {
   const dialogHeight = 100;
 
   const onScroll = (props: ListOnScrollProps) => {
-    if (props.scrollOffset > dialogHeight * items.length - 100) {
+    if (!ref.current) return;
+  
+    if (props.scrollOffset + ref.current.props.height > dialogHeight * items.length - 100) {
       loadMoreItems();
     }
   }

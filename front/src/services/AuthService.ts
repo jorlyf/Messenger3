@@ -29,13 +29,15 @@ export default class AuthService {
       dispatch(loginError());
     }
   }
-  static async registrate(dispatch: AppDispatch, registrationData: RegistrationDataDTO): Promise<void> {
+  static async registrate(dispatch: AppDispatch, registrationData: RegistrationDataDTO): Promise<boolean> {
     try {
       dispatch(loginInit());
       const response = await $api.post<RegistrationAnswerDataDTO>("/Auth/Registrate", registrationData);
       AuthService.onLoginSuccess(dispatch, response.data.token);
+      return true;
     } catch (error) {
       dispatch(loginError());
+      return false;
     }
   }
   static logout(): void {

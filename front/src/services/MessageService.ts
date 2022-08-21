@@ -29,7 +29,7 @@ export default class MessageService {
         dialogType,
         oldestMessageId
       }
-      const response = await $api.get<MessageDTO[]>("/Message/GetDialogMessages", { params });
+      const response = await $api.get<MessageDTO[]>("/Message/GetMoreDialogMessages", { params });
       const newMessages = MessageService.processMessageDTOs(response.data);
       if (newMessages.length === 0) {
         console.log("сообщений больше нет");

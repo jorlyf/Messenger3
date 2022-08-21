@@ -18,6 +18,9 @@ const DialogListContainer: React.FC = () => {
   const dialogs = useAppSelector(state => state.chat.dialogs);
   const dialogsFetched = useAppSelector(state => state.chat.dialogsFetched);
   const currentDialogInfo = useAppSelector(state => state.chat.currentDialogInfo);
+  const totalDialogCount = useAppSelector(state => state.chat.totalDialogCount);
+
+  const [fetchDialogsAvailable, setFetchDialogsAvailable] = React.useState<boolean>(true);
 
   const getLastMessage = (messages: Message[]): Message | null => {
     if (messages.length === 0) return null;
@@ -33,6 +36,18 @@ const DialogListContainer: React.FC = () => {
       prefix = "group";
 
     return `/${prefix}=${d.id}`;
+  }
+
+  const loadMoreDialogs = async () => {
+    if (!fetchDialogsAvailable) return;
+    if (!dialogsFetched) return;   
+
+    setFetchDialogsAvailable(false);
+    await DialogService.getMoreDialogs(dispatch, dialogs, totalDialogCount);
+    
+    setTimeout(() => {
+      setFetchDialogsAvailable(true);
+    }, 200);
   }
 
   const items: DialogItem[] = React.useMemo(() => {
@@ -56,14 +71,14 @@ const DialogListContainer: React.FC = () => {
   React.useEffect(() => {
     if (!isAuthorized || !ownerUser || dialogsFetched) return;
 
-    DialogService.loadDialogs(dispatch);
+    DialogService.fisrtLoadDialogs(dispatch);
 
   }, [isAuthorized, ownerUser, dialogsFetched]);
 
   return (
     <DialogList
       items={items}
-      loadMoreItems={() => { }}
+      loadMoreItems={loadMoreDialogs}
     />
   );
 }

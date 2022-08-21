@@ -1,20 +1,38 @@
 import $api from "../http";
 import { AppDispatch } from "../redux/store";
-import { addDialog, CurrentDialogInfo, setCurrentDialogInfo, setDialogs, setDialogsFetched } from "../redux/slices/chatSlice";
+import { addDialog, addDialogs, CurrentDialogInfo, setCurrentDialogInfo, setDialogsFetched, setTotalDialogCount } from "../redux/slices/chatSlice";
 import MessageService from "./MessageService";
 import UserService from "./UserService";
 import Dialog, { DialogTypes } from "../entities/local/Dialog";
-import DialogsDTO from "../entities/dtos/chat/DialogsDTO";
 import PrivateDialogDTO from "../entities/dtos/chat/PrivateDialogDTO";
 import GroupDialogDTO from "../entities/dtos/chat/GroupDialogDTO";
 import GroupDialogCreatingDataDTO from "../entities/dtos/chat/GroupDialogCreatingDataDTO";
 import UserModel from "../entities/db/UserModel";
+import { MoreDialogsAnswer, MoreDialogsRequest } from "../entities/dtos/MoreDialogs";
 
 export default class DialogService {
-  static async loadDialogs(dispatch: AppDispatch) {
+  static async fisrtLoadDialogs(dispatch: AppDispatch) {
     try {
-      const response = await $api.get<DialogsDTO>("/Dialog/GetDialogs");
-      const { privateDialogDTOs, groupDialogDTOs } = response.data;
+      await DialogService.getMoreDialogs(dispatch, [], null);
+      dispatch(setDialogsFetched(true));
+    } catch (error) { }
+  }
+
+  static async getMoreDialogs(dispatch: AppDispatch, existingDialogs: Dialog[], totalDialogCount: number | null) {
+    if (totalDialogCount && existingDialogs.length >= totalDialogCount) return;
+
+    const moreDialogsRequest: MoreDialogsRequest = {
+      existingDialogs: existingDialogs.map(x => {
+        return {
+          id: x.id,
+          type: x.type
+        }
+      })
+    }
+
+    try {
+      const response = await $api.post<MoreDialogsAnswer>("/Dialog/GetMoreDialogs", moreDialogsRequest);
+      const { privateDialogDTOs, groupDialogDTOs } = response.data.dialogsDTO;
 
       const dialogs: Dialog[] = [];
       privateDialogDTOs.forEach(d => {
@@ -23,11 +41,10 @@ export default class DialogService {
       groupDialogDTOs.forEach(d => {
         dialogs.push(DialogService.processGroupDialogDTO(d));
       });
-
-      dispatch(setDialogs(dialogs));
-      dispatch(setDialogsFetched(true));
+      dispatch(addDialogs(dialogs));
+      if (!totalDialogCount) { dispatch(setTotalDialogCount(response.data.totalDialogCount)); }
     } catch (error) {
-      console.log(error);
+      console.log("Неудачная попытка загрузить диалоги");
     }
   }
 
