@@ -3,7 +3,7 @@ using back.Entities.Db.User;
 
 namespace back.Entities.Db.Message
 {
-	public class MessageModel
+	public class MessageModel : IEntity
 	{
 		[Key]
 		public int Id { get; set; }

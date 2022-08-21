@@ -28,27 +28,8 @@ namespace back.Controllers
 			try
 			{
 				GroupDialogModel model = await this.DialogService.CreateGroupDialogAsync(data.UserIds);
-				GroupDialogDTO groupDialogDTO = this.DialogService.GroupDialogModelToDTO(model);
+				GroupDialogDTO groupDialogDTO = this.DialogService.GroupDialogModelToDTO(model, model.Messages.Count);
 				return Ok(groupDialogDTO);
-			}
-			catch (ApiException ex)
-			{
-				return BadRequest(ex.Reason);
-			}
-			catch (Exception)
-			{
-				return StatusCode(500);
-			}
-		}
-
-		[HttpGet]
-		[Route("GetDialogs")]
-		public async Task<ActionResult<DialogsDTO>> GetDialogsDTOAsync()
-		{
-			try
-			{
-				int senderId = Utils.GetAuthorizedUserId(this.User);
-				return Ok(await this.DialogService.GetDialogsDTOAsync(senderId));
 			}
 			catch (ApiException ex)
 			{
@@ -67,10 +48,7 @@ namespace back.Controllers
 			try
 			{
 				int senderId = Utils.GetAuthorizedUserId(this.User);
-				PrivateDialogModel? dialogModel = await this.DialogService.GetPrivateDialogAsync(senderId, userId);
-				if (dialogModel == null) { throw new ApiException(ApiExceptionReason.DialogIsNotFound); }
-
-				PrivateDialogDTO dialogDTO = this.DialogService.PrivateDialogModelToDTO(dialogModel, userId);
+				PrivateDialogDTO dialogDTO = await this.DialogService.GetPrivateDialogDTOAsync(senderId, userId);
 				return Ok(dialogDTO);
 			}
 			catch (ApiException ex)
@@ -89,11 +67,28 @@ namespace back.Controllers
 		{
 			try
 			{
-				GroupDialogModel? dialogModel = await this.DialogService.GetGroupDialogAsync(groupId);
-				if (dialogModel == null) { throw new ApiException(ApiExceptionReason.DialogIsNotFound); }
-
-				GroupDialogDTO dialogDTO = this.DialogService.GroupDialogModelToDTO(dialogModel);
+				GroupDialogDTO dialogDTO = await this.DialogService.GetGroupDialogDTOAsync(groupId);
 				return Ok(dialogDTO);
+			}
+			catch (ApiException ex)
+			{
+				return BadRequest(ex.Reason);
+			}
+			catch (Exception)
+			{
+				return StatusCode(500);
+			}
+		}
+
+		[HttpPost]
+		[Route("GetMoreDialogs")]
+		public async Task<ActionResult<MoreDialogsAnswer>> GetMoreDialogsDTO([FromBody] MoreDialogsRequest moreDialogsRequest)
+		{
+			try
+			{
+				int senderId = Utils.GetAuthorizedUserId(this.User);
+				MoreDialogsAnswer moreDialogsAnswer = await this.DialogService.GetMoreDialogsDTOAsync(senderId, moreDialogsRequest);
+				return moreDialogsAnswer;
 			}
 			catch (ApiException ex)
 			{

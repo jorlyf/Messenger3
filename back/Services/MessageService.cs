@@ -9,19 +9,20 @@ using back.Entities.Db.Message;
 using back.Infrastructure;
 using back.Infrastructure.Exceptions;
 using back.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace back.Services
 {
 	public class MessageService
 	{
-		private AsyncUnitOfWork UoW { get; }
+		private UnitOfWork UoW { get; }
 		private DialogService DialogService { get; }
 		private FileService FileService { get; }
 
 		public static SynchronizedCollection<MessagingUser> ActiveUsers { get; set; } = new();
 		private IHubContext<MessagingHub, IMessagingHubClient> MessagingHubContext { get; }
 
-		public MessageService(AsyncUnitOfWork uow, DialogService dialogService, FileService fileService, IHubContext<MessagingHub, IMessagingHubClient> messagingHubContext)
+		public MessageService(UnitOfWork uow, DialogService dialogService, FileService fileService, IHubContext<MessagingHub, IMessagingHubClient> messagingHubContext)
 		{
 			this.UoW = uow;
 			this.DialogService = dialogService;
@@ -31,14 +32,17 @@ namespace back.Services
 
 		public async Task<MessageDTO> SendMessageToUserAsync(int senderId, SendMessageContainerDTO messageContainerDTO)
 		{
-			if (!ValidateSendMessageDTO(messageContainerDTO.Message)) { throw new ApiException(ApiExceptionReason.MessageIsNotValid); }
+			if (!ValidateSendMessageDTO(messageContainerDTO.SendMessageDTO)) { throw new ApiException(ApiExceptionReason.MessageIsNotValid); }
 
-			if (senderId == messageContainerDTO.ToId)
+			if (senderId == messageContainerDTO.ToDialogId)
 			{ throw new ApiException(ApiExceptionReason.SenderUserIsReceiver); }
 
-			Task<UserModel?> senderUserTask = this.UoW.UserRepository.GetByIdAsync(senderId);
-			Task<UserModel?> receiveUserTask = this.UoW.UserRepository.GetByIdAsync(messageContainerDTO.ToId);
-			Task<PrivateDialogModel?> dialogTask = this.DialogService.GetPrivateDialogAsync(senderId, messageContainerDTO.ToId);
+			Task<UserModel?> senderUserTask = this.UoW.UserRepository.GetById(senderId).FirstOrDefaultAsync();
+			Task<UserModel?> receiveUserTask = this.UoW.UserRepository.GetById(messageContainerDTO.ToDialogId).FirstOrDefaultAsync();
+			Task<PrivateDialogModel?> dialogTask = this.UoW.PrivateDialogRepository
+				.GetByUserIds(senderId, messageContainerDTO.ToDialogId)
+				.Include(x => x.Messages)
+				.FirstOrDefaultAsync();
 
 			Task.WaitAll(senderUserTask, receiveUserTask, dialogTask);
 			UserModel? senderUser = senderUserTask.Result;
@@ -50,10 +54,10 @@ namespace back.Services
 			if (dialog == null)
 			{ dialog = await this.DialogService.CreatePrivateDialogAsync(senderUser, receiveUser); }
 
-			string? messageText = messageContainerDTO.Message.Text;
+			string? messageText = messageContainerDTO.SendMessageDTO.Text;
 			IEnumerable<AttachmentModel> attachments = Enumerable.Empty<AttachmentModel>();
-			if (messageContainerDTO.Message.Attachments != null && messageContainerDTO.Message.Attachments.Any())
-			{ attachments = await this.FileService.SaveMessageAttachmentsAsync(messageContainerDTO.Message.Attachments); }
+			if (messageContainerDTO.SendMessageDTO.SendAttachmentDTOs != null && messageContainerDTO.SendMessageDTO.SendAttachmentDTOs.Any())
+			{ attachments = await this.FileService.SaveMessageAttachmentsAsync(messageContainerDTO.SendMessageDTO.SendAttachmentDTOs); }
 
 			MessageModel messageModel = new()
 			{
@@ -70,7 +74,7 @@ namespace back.Services
 
 			dialog.Messages.Add(messageModel);
 			dialog.LastUpdate = DateTime.Now;
-			await this.UoW.PrivateDialogRepository.UpdateAsync(dialog);
+			this.UoW.PrivateDialogRepository.Update(dialog);
 			await this.UoW.PrivateDialogRepository.SaveAsync();
 
 			MessageDTO messageDTO = MessageModelToDTO(messageModel);
@@ -81,10 +85,13 @@ namespace back.Services
 		}
 		public async Task<MessageDTO> SendMessageToGroupAsync(int senderId, SendMessageContainerDTO messageContainerDTO)
 		{
-			if (!ValidateSendMessageDTO(messageContainerDTO.Message)) { throw new ApiException(ApiExceptionReason.MessageIsNotValid); }
+			if (!ValidateSendMessageDTO(messageContainerDTO.SendMessageDTO)) { throw new ApiException(ApiExceptionReason.MessageIsNotValid); }
 
-			Task<UserModel?> senderUserTask = this.UoW.UserRepository.GetByIdAsync(senderId);
-			Task<GroupDialogModel?> dialogTask = this.UoW.GroupDialogRepository.GetByIdAsync(messageContainerDTO.ToId);
+			Task<UserModel?> senderUserTask = this.UoW.UserRepository.GetById(senderId).FirstOrDefaultAsync();
+			Task<GroupDialogModel?> dialogTask = this.UoW.GroupDialogRepository
+				.GetById(messageContainerDTO.ToDialogId)
+				.Include(x => x.Messages)
+				.FirstOrDefaultAsync();
 
 			Task.WaitAll(senderUserTask, dialogTask);
 			UserModel? senderUser = senderUserTask.Result;
@@ -93,10 +100,10 @@ namespace back.Services
 			GroupDialogModel? dialog = dialogTask.Result;
 			if (dialog == null) { throw new ApiException(ApiExceptionReason.DialogIsNotFound); }
 
-			string? messageText = messageContainerDTO.Message.Text;
+			string? messageText = messageContainerDTO.SendMessageDTO.Text;
 			IEnumerable<AttachmentModel> attachments = Enumerable.Empty<AttachmentModel>();
-			if (messageContainerDTO.Message.Attachments != null && messageContainerDTO.Message.Attachments.Any())
-			{ attachments = await this.FileService.SaveMessageAttachmentsAsync(messageContainerDTO.Message.Attachments); }
+			if (messageContainerDTO.SendMessageDTO.SendAttachmentDTOs != null && messageContainerDTO.SendMessageDTO.SendAttachmentDTOs.Any())
+			{ attachments = await this.FileService.SaveMessageAttachmentsAsync(messageContainerDTO.SendMessageDTO.SendAttachmentDTOs); }
 
 			MessageModel messageModel = new()
 			{
@@ -113,7 +120,7 @@ namespace back.Services
 
 			dialog.Messages.Add(messageModel);
 			dialog.LastUpdate = DateTime.Now;
-			await this.UoW.GroupDialogRepository.UpdateAsync(dialog);
+			this.UoW.GroupDialogRepository.Update(dialog);
 			await this.UoW.GroupDialogRepository.SaveAsync();
 
 			MessageDTO messageDTO = MessageModelToDTO(messageModel);
@@ -121,6 +128,42 @@ namespace back.Services
 			NotifyNewMessage(dialog.Id, DialogTypes.Group, messageDTO);
 
 			return messageDTO;
+		}
+
+		public async Task<IEnumerable<MessageDTO>> GetMoreDialogMessageDTOsAsync(int dialogId, DialogTypes dialogType, int oldestId, int limit)
+		{
+			DialogBaseModel? dialog = null;
+			switch (dialogType)
+			{
+				case DialogTypes.Private:
+					dialog = await this.UoW.PrivateDialogRepository
+						.GetById(dialogId)
+						.Include(x => x.Messages)
+							.ThenInclude(x => x.Attachments)
+						.Include(x => x.Messages)
+							.ThenInclude(x => x.SenderUser)
+						.FirstOrDefaultAsync();
+					break;
+				case DialogTypes.Group:
+					dialog = await this.UoW.GroupDialogRepository
+						.GetById(dialogId)
+						.Include(x => x.Messages)
+							.ThenInclude(x => x.Attachments)
+						.Include(x => x.Messages)
+							.ThenInclude(x => x.SenderUser)
+						.FirstOrDefaultAsync();
+					break;
+			}
+			if (dialog == null) { throw new ApiException(ApiExceptionReason.DialogIsNotFound); }
+
+			IList<MessageModel> messages = dialog.Messages
+				.Where(x => x.Id < oldestId)
+				.OrderBy(x => x.Id)
+				.TakeLast(limit)
+				.ToList();
+
+			IEnumerable<MessageDTO> messageDTOs = messages.Select(x => MessageModelToDTO(x));
+			return messageDTOs;
 		}
 
 		public void NotifyNewMessage(int dialogId, DialogTypes dialogType, MessageDTO messageDTO)
@@ -153,20 +196,26 @@ namespace back.Services
 			{ this.MessagingHubContext.Clients.All.ReceiveNewMessage(newMessageDTO); }
 		}
 
-		private MessageDTO MessageModelToDTO(MessageModel model)
+		public static MessageDTO MessageModelToDTO(MessageModel model)
 		{
 			return new MessageDTO()
 			{
+				Id = model.Id,
 				SenderUser = model.SenderUser,
 				Text = model.Text,
-				Attachments = model.Attachments,
+				AttachmentDTOs = model.Attachments.Select(x => new AttachmentDTO
+				{
+					Id = x.Id,
+					Type = x.Type,
+					Url = x.Url
+				}),
 				SentAtTotalMilliseconds = Utils.GetTotalMilliseconds(model.SentAt)
 			};
 		}
 
-		private bool ValidateSendMessageDTO(SendMessageDTO messageDTO)
+		private static bool ValidateSendMessageDTO(SendMessageDTO messageDTO)
 		{
-			if (string.IsNullOrEmpty(messageDTO.Text) && (messageDTO.Attachments == null || !messageDTO.Attachments.Any()))
+			if (string.IsNullOrEmpty(messageDTO.Text) && (messageDTO.SendAttachmentDTOs == null || !messageDTO.SendAttachmentDTOs.Any()))
 				return false;
 
 			return true;

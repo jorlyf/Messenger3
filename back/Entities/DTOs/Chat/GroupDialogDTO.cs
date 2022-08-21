@@ -14,6 +14,9 @@ namespace back.Entities.DTOs.Chat
 		public IEnumerable<MessageDTO> Messages { get; set; }
 
 		[Required]
+		public int TotalMessagesCount { get; set; }
+
+		[Required]
 		public string Name { get; set; }
 
 		public string? GroupAvatarUrl { get; set; }

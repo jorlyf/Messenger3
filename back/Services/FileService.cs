@@ -7,10 +7,10 @@ namespace back.Services
 	public class FileService
 	{
 		#region MessageAttachments
-		public async Task<IEnumerable<AttachmentModel>> SaveMessageAttachmentsAsync(IEnumerable<AttachmentDTO> attachments)
+		public async Task<IEnumerable<AttachmentModel>> SaveMessageAttachmentsAsync(IEnumerable<SendAttachmentDTO> attachments)
 		{
 			List<Task<AttachmentModel>> tasks = new();
-			foreach (AttachmentDTO attachmentDTO in attachments)
+			foreach (SendAttachmentDTO attachmentDTO in attachments)
 			{
 				tasks.Add(SaveMessageAttachmentAsync(attachmentDTO));
 			}
@@ -18,7 +18,7 @@ namespace back.Services
 			await Task.WhenAll(tasks);
 			return tasks.Select(task => task.Result);
 		}
-		public Task<AttachmentModel> SaveMessageAttachmentAsync(AttachmentDTO attachment)
+		public Task<AttachmentModel> SaveMessageAttachmentAsync(SendAttachmentDTO attachment)
 		{
 			switch (attachment.Type)
 			{

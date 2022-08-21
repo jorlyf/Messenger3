@@ -8,6 +8,6 @@ namespace back.Entities.DTOs.Chat
 		public string? Text { get; set; }
 
 		[Required]
-		public IEnumerable<AttachmentDTO> Attachments { get; set; }
+		public IEnumerable<SendAttachmentDTO> SendAttachmentDTOs { get; set; }
 	}
 }

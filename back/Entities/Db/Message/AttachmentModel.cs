@@ -8,7 +8,7 @@ namespace back.Entities.Db.Message
 		Video,
 		File
 	}
-	public class AttachmentModel
+	public class AttachmentModel : IEntity
 	{
 		[Key]
 		public int Id { get; set; }

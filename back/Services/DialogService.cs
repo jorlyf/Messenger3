@@ -1,4 +1,5 @@
-﻿using back.Entities.Db.Dialog;
+﻿using Microsoft.EntityFrameworkCore;
+using back.Entities.Db.Dialog;
 using back.Entities.Db.Message;
 using back.Entities.Db.User;
 using back.Entities.DTOs.Chat;
@@ -10,54 +11,131 @@ namespace back.Services
 {
 	public class DialogService
 	{
-		private AsyncUnitOfWork UoW { get; }
+		private UnitOfWork UoW { get; }
 
-		public DialogService(AsyncUnitOfWork uow)
+		public DialogService(UnitOfWork uow)
 		{
 			this.UoW = uow;
 		}
 
-		public async Task<DialogsDTO> GetDialogsDTOAsync(int responseSenderUserId)
+		public async Task<PrivateDialogDTO> GetPrivateDialogDTOAsync(int senderUserId, int secondUserId)
 		{
-			Task<IEnumerable<PrivateDialogModel>> privateDialogs = this.UoW.PrivateDialogRepository.GetByUserId(responseSenderUserId);
-			Task<IEnumerable<GroupDialogModel>> groupDialogs = this.UoW.GroupDialogRepository.GetByUserId(responseSenderUserId);
+			PrivateDialogModel? dialogModel = await this.UoW.PrivateDialogRepository
+				.GetByUserIds(senderUserId, secondUserId)
+				.AsNoTracking()
+				.Include(x => x.FirstUser)
+				.Include(x => x.SecondUser)
+				.Include(x => x.Messages)
+					.ThenInclude(x => x.Attachments)
+				.Include(x => x.Messages)
+					.ThenInclude(x => x.SenderUser)
+				.FirstOrDefaultAsync();
+			if (dialogModel == null) { throw new ApiException(ApiExceptionReason.DialogIsNotFound); }
 
-			await Task.WhenAll(privateDialogs, groupDialogs);
+			int totalMessagesCount = dialogModel.Messages.Count;
+			dialogModel.Messages = dialogModel.Messages.OrderBy(x => x.Id).TakeLast(Constants.MessageCountGetLimit).ToList();
 
-			IList<PrivateDialogDTO> privateDialogDTOs = new List<PrivateDialogDTO>();
-			foreach (PrivateDialogModel dialog in privateDialogs.Result)
+			PrivateDialogDTO dialogDTO = PrivateDialogModelToDTO(dialogModel, secondUserId, totalMessagesCount);
+			return dialogDTO;
+		}
+
+		public async Task<GroupDialogDTO> GetGroupDialogDTOAsync(int id)
+		{
+			GroupDialogModel? dialogModel = await this.UoW.GroupDialogRepository
+				.GetById(id)
+				.AsNoTracking()
+				.Include(x => x.Users)
+				.Include(x => x.Messages)
+					.ThenInclude(x => x.Attachments)
+				.Include(x => x.Messages)
+					.ThenInclude(x => x.SenderUser)
+				.FirstOrDefaultAsync();
+			if (dialogModel == null) { throw new ApiException(ApiExceptionReason.DialogIsNotFound); }
+
+			int totalMessagesCount = dialogModel.Messages.Count;
+			dialogModel.Messages = dialogModel.Messages.OrderBy(x => x.Id).TakeLast(Constants.MessageCountGetLimit).ToList();
+
+			GroupDialogDTO dialogDTO = GroupDialogModelToDTO(dialogModel, totalMessagesCount);
+			return dialogDTO;
+		}
+
+		public async Task<MoreDialogsAnswer> GetMoreDialogsDTOAsync(int senderUserId, MoreDialogsRequest moreDialogsRequest)
+		{
+			Task<List<PrivateDialogModel>> privateDialogsTask = this.UoW.PrivateDialogRepository
+				.GetByUserId(senderUserId)
+				.AsNoTracking()
+				.Include(x => x.FirstUser)
+				.Include(x => x.SecondUser)
+				.Include(x => x.Messages)
+					.ThenInclude(x => x.Attachments)
+				.Include(x => x.Messages)
+					.ThenInclude(x => x.SenderUser)
+				.ToListAsync();
+
+			Task<List<GroupDialogModel>> groupDialogsTask = this.UoW.GroupDialogRepository
+				.GetByUserId(senderUserId)
+				.AsNoTracking()
+				.Include(x => x.Users)
+				.Include(x => x.Messages)
+					.ThenInclude(x => x.Attachments)
+				.Include(x => x.Messages)
+					.ThenInclude(x => x.SenderUser)
+				.ToListAsync();
+
+			await Task.WhenAll(privateDialogsTask, groupDialogsTask);
+
+			int totalDialogCount = privateDialogsTask.Result.Count + groupDialogsTask.Result.Count;
+
+			List<DialogBaseModel> newBaseDialogModels = new();
+			foreach (PrivateDialogModel dialog in privateDialogsTask.Result)
 			{
-				int id;
-				if (dialog.FirstUserId != responseSenderUserId) { id = dialog.FirstUserId; }
-				else { id = dialog.SecondUserId; }
+				if (!moreDialogsRequest.ExistingDialogs.Any(exist => dialog.Id == exist.Id && DialogTypes.Private == exist.Type))
+					newBaseDialogModels.Add(dialog);
+			}
+			foreach (GroupDialogModel dialog in groupDialogsTask.Result)
+			{
+				if (!moreDialogsRequest.ExistingDialogs.Any(exist => dialog.Id == exist.Id && DialogTypes.Group == exist.Type))
+					newBaseDialogModels.Add(dialog);
+			}
+			IEnumerable<DialogBaseModel> limitedBaseDialogModels = newBaseDialogModels
+				.OrderBy(x => x.LastUpdate)
+				.TakeLast(Constants.DialogCountGetLimit);
 
-				privateDialogDTOs.Add(PrivateDialogModelToDTO(dialog, id));
+
+			List<PrivateDialogDTO> privateDialogDTOs = new();
+			List<GroupDialogDTO> groupDialogDTOs = new();
+
+			foreach (DialogBaseModel model in limitedBaseDialogModels)
+			{
+				int totalMessageCount = model.Messages.Count;
+				model.Messages = model.Messages.OrderBy(x => x.Id).TakeLast(Constants.MessageCountGetLimit).ToList();
+				if (model is PrivateDialogModel privateDialog)
+				{
+					int id;
+					if (privateDialog.FirstUserId != senderUserId) { id = privateDialog.FirstUserId; }
+					else { id = privateDialog.SecondUserId; }
+
+					privateDialogDTOs.Add(PrivateDialogModelToDTO(privateDialog, id, totalMessageCount));
+				}
+				else if (model is GroupDialogModel groupdDialog)
+				{
+					groupDialogDTOs.Add(GroupDialogModelToDTO(groupdDialog, totalMessageCount));
+				}
 			}
 
-			IList<GroupDialogDTO> groupDialogDTOs = new List<GroupDialogDTO>();
-			foreach (GroupDialogModel dialog in groupDialogs.Result)
-			{
-				groupDialogDTOs.Add(GroupDialogModelToDTO(dialog));
-			}
 
-			return new DialogsDTO
+			return new MoreDialogsAnswer
 			{
-				PrivateDialogDTOs = privateDialogDTOs,
-				GroupDialogDTOs = groupDialogDTOs
+				DialogsDTO = new DialogsDTO
+				{
+					PrivateDialogDTOs = privateDialogDTOs,
+					GroupDialogDTOs = groupDialogDTOs
+				},
+				TotalDialogCount = totalDialogCount
 			};
 		}
 
-		public Task<PrivateDialogModel?> GetPrivateDialogAsync(int firstId, int secondId)
-		{
-			return this.UoW.PrivateDialogRepository.GetByUserIdsAsync(firstId, secondId);
-		}
-
-		public Task<GroupDialogModel?> GetGroupDialogAsync(int groupId)
-		{
-			return this.UoW.GroupDialogRepository.GetByIdAsync(groupId);
-		}
-
-		public PrivateDialogDTO PrivateDialogModelToDTO(PrivateDialogModel model, int userId)
+		public PrivateDialogDTO PrivateDialogModelToDTO(PrivateDialogModel model, int userId, int totalMessagesCount)
 		{
 			if (userId != model.FirstUserId && userId != model.SecondUserId)
 			{ throw new ArgumentException("bad create private dialog dto"); }
@@ -77,32 +155,22 @@ namespace back.Services
 			return new PrivateDialogDTO
 			{
 				UserId = userId,
-				Messages = model.Messages.Select(x => new MessageDTO
-				{
-					SenderUser = x.SenderUser,
-					Text = x.Text,
-					Attachments = x.Attachments,
-					SentAtTotalMilliseconds = Utils.GetTotalMilliseconds(x.SentAt)
-				}),
+				Messages = model.Messages.Select(x => MessageService.MessageModelToDTO(x)),
+				TotalMessagesCount = totalMessagesCount,
 				Name = login,
 				UserAvatarUrl = avatarUrl,
 				LastUpdateTotalMilliseconds = Utils.GetTotalMilliseconds(model.LastUpdate)
 			};
 		}
 
-		public GroupDialogDTO GroupDialogModelToDTO(GroupDialogModel model)
+		public GroupDialogDTO GroupDialogModelToDTO(GroupDialogModel model, int totalMessagesCount)
 		{
 			return new GroupDialogDTO
 			{
 				GroupId = model.Id,
 				UserIds = model.Users.Select(x => x.Id),
-				Messages = model.Messages.Select(x => new MessageDTO
-				{
-					SenderUser = x.SenderUser,
-					Text = x.Text,
-					Attachments = x.Attachments,
-					SentAtTotalMilliseconds = Utils.GetTotalMilliseconds(x.SentAt)
-				}),
+				Messages = model.Messages.Select(x => MessageService.MessageModelToDTO(x)),
+				TotalMessagesCount = totalMessagesCount,
 				Name = model.Name,
 				GroupAvatarUrl = model.AvatarUrl,
 				LastUpdateTotalMilliseconds = Utils.GetTotalMilliseconds(model.LastUpdate)
@@ -111,7 +179,7 @@ namespace back.Services
 
 		public async Task<PrivateDialogModel> CreatePrivateDialogAsync(UserModel firstUser, UserModel secondUser)
 		{
-			if ((await this.UoW.PrivateDialogRepository.GetByUserIdsAsync(firstUser.Id, secondUser.Id)) != null)
+			if ((await this.UoW.PrivateDialogRepository.GetByUserIds(firstUser.Id, secondUser.Id).FirstOrDefaultAsync()) != null)
 			{
 				throw new ApiException(ApiExceptionReason.PrivateDialogExists);
 			}
@@ -136,7 +204,7 @@ namespace back.Services
 			List<Task<UserModel?>> usersTask = new();
 			foreach (int id in userIds)
 			{
-				usersTask.Add(this.UoW.UserRepository.GetByIdAsync(id));
+				usersTask.Add(this.UoW.UserRepository.GetById(id).FirstOrDefaultAsync());
 			}
 
 			await Task.WhenAll(usersTask);

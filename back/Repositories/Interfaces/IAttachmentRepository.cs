@@ -2,8 +2,8 @@
 
 namespace back.Repositories.Interfaces
 {
-	public interface IAsyncMessageRepository : IAsyncRepositoryBase<MessageModel>
+	public interface IAttachmentRepository : IRepositoryBase<AttachmentModel>
 	{
-		
+
 	}
 }

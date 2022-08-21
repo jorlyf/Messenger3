@@ -1,4 +1,5 @@
-﻿using back.Entities.Db.User;
+﻿using Microsoft.EntityFrameworkCore;
+using back.Entities.Db.User;
 using back.Infrastructure.Exceptions;
 using back.Repositories;
 
@@ -6,10 +7,10 @@ namespace back.Services
 {
 	public class ProfileService
 	{
-		private AsyncUnitOfWork UoW { get; }
+		private UnitOfWork UoW { get; }
 		private FileService FileService { get; }
 
-		public ProfileService(AsyncUnitOfWork uow, FileService fileService)
+		public ProfileService(UnitOfWork uow, FileService fileService)
 		{
 			this.UoW = uow;
 			this.FileService = fileService;
@@ -17,7 +18,7 @@ namespace back.Services
 
 		public async Task<string> UploadAvatarAsync(int userId, IFormFile avatar)
 		{
-			Task<UserModel?> userTask = this.UoW.UserRepository.GetByIdAsync(userId);
+			Task<UserModel?> userTask = this.UoW.UserRepository.GetById(userId).FirstOrDefaultAsync();
 			Task<string> avatarUrlTask = this.FileService.SaveAvatar(avatar);
 
 			await Task.WhenAll(userTask, avatarUrlTask);
@@ -27,7 +28,7 @@ namespace back.Services
 			if (user == null) throw new ApiException(ApiExceptionReason.UserIsNotFound);
 
 			user.AvatarUrl = avatarUrl;
-			await this.UoW.UserRepository.UpdateAsync(user);
+			this.UoW.UserRepository.Update(user);
 			await this.UoW.UserRepository.SaveAsync();
 
 			return avatarUrl;

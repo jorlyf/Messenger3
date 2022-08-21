@@ -1,4 +1,5 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -12,9 +13,9 @@ namespace back.Services
 	public class AuthService
 	{
 		private IConfiguration Configuration { get; }
-		private AsyncUnitOfWork UoW { get; }
+		private UnitOfWork UoW { get; }
 
-		public AuthService(IConfiguration configuration, AsyncUnitOfWork uow)
+		public AuthService(IConfiguration configuration, UnitOfWork uow)
 		{
 			this.Configuration = configuration;
 			this.UoW = uow;
@@ -23,7 +24,7 @@ namespace back.Services
 
 		public async Task<string> LoginAsync(LoginDataDTO loginData)
 		{
-			UserModel? user = await this.UoW.UserRepository.GetByLoginAsync(loginData.Login);
+			UserModel? user = await this.UoW.UserRepository.GetByLogin(loginData.Login).FirstOrDefaultAsync();
 			if (user == null)
 			{
 				throw new ApiException(ApiExceptionReason.UserIsNotFound);
@@ -46,7 +47,7 @@ namespace back.Services
 				Password = registrationData.Password
 			};
 
-			if (await this.UoW.UserRepository.GetByLoginAsync(user.Login) != null)
+			if ((await this.UoW.UserRepository.GetByLogin(user.Login).FirstOrDefaultAsync()) != null)
 			{
 				throw new ApiException(ApiExceptionReason.LoginIsNotUnique);
 			}

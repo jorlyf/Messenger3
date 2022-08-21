@@ -8,7 +8,7 @@ namespace back.Entities.Db.Dialog
 		Private,
 		Group
 	}
-	public abstract class DialogBaseModel
+	public abstract class DialogBaseModel : IEntity
 	{
 		[Key]
 		public int Id { get; set; }

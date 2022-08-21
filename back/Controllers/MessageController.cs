@@ -1,9 +1,10 @@
-﻿using back.Entities.DTOs.Chat;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using back.Entities.Db.Dialog;
+using back.Entities.DTOs.Chat;
 using back.Infrastructure;
 using back.Infrastructure.Exceptions;
 using back.Services;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 
 namespace back.Controllers
 {
@@ -48,6 +49,26 @@ namespace back.Controllers
 			{
 				int senderId = Utils.GetAuthorizedUserId(this.User);
 				return await this.MessageService.SendMessageToGroupAsync(senderId, messageContainerDTO);
+			}
+			catch (ApiException ex)
+			{
+				return BadRequest(ex.Reason);
+			}
+			catch (Exception)
+			{
+				return StatusCode(500);
+			}
+		}
+
+		[HttpGet]
+		[Route("GetMoreDialogMessages")]
+		public async Task<ActionResult<IEnumerable<MessageDTO>>> GetMoreDialogMessageDTOsAsync(int dialogId, DialogTypes dialogType, int oldestMessageId)
+		{
+			try
+			{
+				int limit = Constants.MessageCountGetLimit;
+				IEnumerable<MessageDTO> messageDTOs = await this.MessageService.GetMoreDialogMessageDTOsAsync(dialogId, dialogType, oldestMessageId, limit);
+				return Ok(messageDTOs);
 			}
 			catch (ApiException ex)
 			{

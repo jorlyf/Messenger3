@@ -1,13 +1,17 @@
 ﻿using back.Entities.Db.Dialog;
+using System.ComponentModel.DataAnnotations;
 
 namespace back.Entities.DTOs.Chat
 {
 	public class SendMessageContainerDTO
 	{
-		public int ToId { get; set; }
+		[Required]
+		public int ToDialogId { get; set; }
 
-		public DialogTypes Type { get; set; }
+		[Required]
+		public DialogTypes DialogType { get; set; }
 
-		public SendMessageDTO Message { get; set; }
+		[Required]
+		public SendMessageDTO SendMessageDTO { get; set; }
 	}
 }

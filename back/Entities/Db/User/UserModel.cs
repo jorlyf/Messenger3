@@ -1,10 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using back.Entities.Db.Dialog;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 
 namespace back.Entities.Db.User
 {
 	[Index(nameof(Login), IsUnique = true)]
-	public class UserModel
+	public class UserModel : IEntity
 	{
 		[Key]
 		public int Id { get; set; }
@@ -18,5 +19,7 @@ namespace back.Entities.Db.User
 		public string Password { get; set; }
 
 		public string? AvatarUrl { get; set; }
+
+		public IEnumerable<GroupDialogModel> GroupDialogs { get; set; }
 	}
 }
