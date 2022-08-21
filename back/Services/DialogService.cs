@@ -3,6 +3,7 @@ using back.Entities.Db.Dialog;
 using back.Entities.Db.Message;
 using back.Entities.Db.User;
 using back.Entities.DTOs.Chat;
+using back.Entities.DTOs.Chat;
 using back.Infrastructure;
 using back.Infrastructure.Exceptions;
 using back.Repositories;
@@ -61,6 +62,15 @@ namespace back.Services
 
 		public async Task<MoreDialogsAnswer> GetMoreDialogsDTOAsync(int senderUserId, MoreDialogsRequest moreDialogsRequest)
 		{
+			IEnumerable<int> existingPrivateDialogIds = moreDialogsRequest.ExistingDialogs
+				.Where(x => x.Type == DialogTypes.Private)
+				.Select(x => x.Id)
+				.ToList();
+			IEnumerable<int> existingGroupDialogIds = moreDialogsRequest.ExistingDialogs
+				.Where(x => x.Type == DialogTypes.Group)
+				.Select(x => x.Id)
+				.ToList();
+			var start = DateTime.Now;
 			Task<List<PrivateDialogModel>> privateDialogsTask = this.UoW.PrivateDialogRepository
 				.GetByUserId(senderUserId)
 				.AsNoTracking()
@@ -70,6 +80,9 @@ namespace back.Services
 					.ThenInclude(x => x.Attachments)
 				.Include(x => x.Messages)
 					.ThenInclude(x => x.SenderUser)
+				.Where(x => !existingPrivateDialogIds.Contains(x.Id))
+				.OrderByDescending(x => x.LastUpdate)
+				.Take(Constants.MessageCountGetLimit)
 				.ToListAsync();
 
 			Task<List<GroupDialogModel>> groupDialogsTask = this.UoW.GroupDialogRepository
@@ -80,26 +93,30 @@ namespace back.Services
 					.ThenInclude(x => x.Attachments)
 				.Include(x => x.Messages)
 					.ThenInclude(x => x.SenderUser)
+				.Where(x => !existingGroupDialogIds.Contains(x.Id))
+				.OrderByDescending(x => x.LastUpdate)
+				.Take(Constants.MessageCountGetLimit)
 				.ToListAsync();
 
 			await Task.WhenAll(privateDialogsTask, groupDialogsTask);
+			var end = DateTime.Now;
+
+			Console.WriteLine("after " + $"{(end - start).TotalMilliseconds}");
 
 			int totalDialogCount = privateDialogsTask.Result.Count + groupDialogsTask.Result.Count;
 
 			List<DialogBaseModel> newBaseDialogModels = new();
 			foreach (PrivateDialogModel dialog in privateDialogsTask.Result)
 			{
-				if (!moreDialogsRequest.ExistingDialogs.Any(exist => dialog.Id == exist.Id && DialogTypes.Private == exist.Type))
-					newBaseDialogModels.Add(dialog);
+				newBaseDialogModels.Add(dialog);
 			}
 			foreach (GroupDialogModel dialog in groupDialogsTask.Result)
 			{
-				if (!moreDialogsRequest.ExistingDialogs.Any(exist => dialog.Id == exist.Id && DialogTypes.Group == exist.Type))
-					newBaseDialogModels.Add(dialog);
+				newBaseDialogModels.Add(dialog);
 			}
 			IEnumerable<DialogBaseModel> limitedBaseDialogModels = newBaseDialogModels
-				.OrderBy(x => x.LastUpdate)
-				.TakeLast(Constants.DialogCountGetLimit);
+				.OrderByDescending(x => x.LastUpdate)
+				.Take(Constants.DialogCountGetLimit);
 
 
 			List<PrivateDialogDTO> privateDialogDTOs = new();
