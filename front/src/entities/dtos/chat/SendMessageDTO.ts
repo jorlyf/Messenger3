@@ -1,6 +1,6 @@
 import SendAttachmentDTO from "./SendAttachmentDTO";
 
 export default interface SendMessageDTO {
-  text: string | null;
+  text: string;
   sendAttachmentDTOs: SendAttachmentDTO[];
 }

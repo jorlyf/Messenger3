@@ -66,15 +66,29 @@ export default class MessageService {
     return messageInput;
   }
 
-  static async sendMessage(dispatch: AppDispatch, dialog: Dialog, messageDTO: SendMessageContainerDTO): Promise<Message | null> {
+  static async sendMessage(dispatch: AppDispatch, dialog: Dialog, sendMessageContainerDTO: SendMessageContainerDTO): Promise<Message | null> {
+    const formMessage = new FormData();
+    formMessage.set("ToDialogId", sendMessageContainerDTO.toDialogId.toString());
+    formMessage.set("DialogType", sendMessageContainerDTO.dialogType.toString());
+    formMessage.set("SendMessageDTO.Text", sendMessageContainerDTO.sendMessageDTO.text);
+    if (sendMessageContainerDTO.sendMessageDTO.sendAttachmentDTOs.length > 0) {
+      sendMessageContainerDTO.sendMessageDTO.sendAttachmentDTOs.forEach((attachmentDTO, index) => {
+        formMessage.append(`SendMessageDTO.SendAttachmentDTOs[${index}].Type`, attachmentDTO.type.toString());
+        formMessage.append(`SendMessageDTO.SendAttachmentDTOs[${index}].FormFile`, attachmentDTO.formFile);
+      });
+    }
+    else {
+      formMessage.set("SendMessageDTO.SendAttachmentDTOs[]", [].toString());
+    }
+
     try {
       if (dialog.type === DialogTypes.private) {
-        const message: Message | null = await MessageService.sendMessageToUser(messageDTO);
+        const message = await MessageService.sendMessageToUser(formMessage);
         dispatch(updateDialogTotalMilliseconds({ dialogId: dialog.id, dialogType: dialog.type, value: new Date().getTime() }));
         return message;
       }
       else {
-        const message: Message | null = await MessageService.sendMessageToGroup(messageDTO);
+        const message = await MessageService.sendMessageToGroup(formMessage);
         dispatch(updateDialogTotalMilliseconds({ dialogId: dialog.id, dialogType: dialog.type, value: new Date().getTime() }));
         return message;
       }
@@ -82,13 +96,19 @@ export default class MessageService {
       return null;
     }
   }
-  static async sendMessageToUser(sendMessageContainerDTO: SendMessageContainerDTO): Promise<Message | null> {
-    const response = await $api.post<MessageDTO>("/Message/SendMessageToUser", sendMessageContainerDTO);
+  static async sendMessageToUser(formMessage: FormData): Promise<Message | null> {
+    const response = await $api.post<MessageDTO>("/Message/SendMessageToUser", formMessage);
     return MessageService.processMessageDTO(response.data);
   }
-  static async sendMessageToGroup(sendMessageContainerDTO: SendMessageContainerDTO): Promise<Message | null> {
-    const response = await $api.post<MessageDTO>("/Message/SendMessageToGroup", sendMessageContainerDTO);
+  static async sendMessageToGroup(formMessage: FormData): Promise<Message | null> {
+    const response = await $api.post<MessageDTO>("/Message/SendMessageToGroup", formMessage);
     return MessageService.processMessageDTO(response.data);
+  }
+  static validateMessageBeforeSending(messageInput: MessageInput): boolean {
+    if (!messageInput.text && messageInput.attachments.length === 0) return false;
+    if (messageInput.text.length > 4096) return false;
+
+    return true;
   }
 
   static async handleNewMessage(dispatch: AppDispatch, newMessageDTO: NewMessageDTO, allDialogs: Dialog[]) {

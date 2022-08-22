@@ -4,7 +4,7 @@ import MessageService from "../../services/MessageService";
 import Dialog, { DialogTypes } from "../../entities/local/Dialog";
 import Message, { MessageSendingStatus } from "../../entities/local/Message";
 import MessageInput from "../../entities/local/MessageInput";
-import Attachment from "../../entities/local/Attachment";
+import MessageInputAttachment from "../../entities/local/MessageInputAttachment";
 
 export interface CurrentDialogInfo {
   id: number;
@@ -80,14 +80,14 @@ const chatSlice = createSlice({
 
       dialog.messages = [...dialog.messages, ...action.payload.messages];
     },
-    addCurrentDialogMessageInputAttachment(state, action: PayloadAction<Attachment>) {
+    addCurrentDialogMessageInputAttachments(state, action: PayloadAction<MessageInputAttachment[]>) {
       if (state.currentDialogInfo) {
         const dialog = DialogService.findCurrentDialog(state.dialogs, state.currentDialogInfo);
         if (!dialog) return;
 
         const messageInput = MessageService.getMessageInput(state.messageInputs, state.currentDialogInfo.id, state.currentDialogInfo.type);
 
-        messageInput.attachments.push(action.payload);
+        messageInput.attachments = [...messageInput.attachments, ...action.payload];
       }
     },
     addCurrentDialogMessage(state, action: PayloadAction<Message>) {
@@ -147,7 +147,7 @@ export const {
   setCurrentDialogMessageInputText,
   clearCurrentDialogMessageInput,
   addDialogMessages,
-  addCurrentDialogMessageInputAttachment,
+  addCurrentDialogMessageInputAttachments,
   addCurrentDialogMessage,
   replaceDialogTempMessage,
   addDialogMessage,

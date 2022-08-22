@@ -101,7 +101,7 @@ namespace back.Services
 			if (dialog == null) { throw new ApiException(ApiExceptionReason.DialogIsNotFound); }
 
 			string? messageText = messageContainerDTO.SendMessageDTO.Text;
-			IEnumerable<AttachmentModel> attachments = Enumerable.Empty<AttachmentModel>();
+			ICollection<AttachmentModel> attachments = new List<AttachmentModel>();
 			if (messageContainerDTO.SendMessageDTO.SendAttachmentDTOs != null && messageContainerDTO.SendMessageDTO.SendAttachmentDTOs.Any())
 			{ attachments = await this.FileService.SaveMessageAttachmentsAsync(messageContainerDTO.SendMessageDTO.SendAttachmentDTOs); }
 
@@ -215,7 +215,7 @@ namespace back.Services
 
 		private static bool ValidateSendMessageDTO(SendMessageDTO messageDTO)
 		{
-			if (string.IsNullOrEmpty(messageDTO.Text) && (messageDTO.SendAttachmentDTOs == null || !messageDTO.SendAttachmentDTOs.Any()))
+			if (string.IsNullOrEmpty(messageDTO.Text) && !messageDTO.SendAttachmentDTOs.Any())
 				return false;
 
 			return true;

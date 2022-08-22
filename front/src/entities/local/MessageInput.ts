@@ -1,9 +1,9 @@
 import { DialogTypes } from "../local/Dialog";
-import Attachment from "./Attachment";
+import MessageInputAttachment from "./MessageInputAttachment";
 
 export default interface MessageInput {
   dialogId: number;
   dialogType: DialogTypes;
   text: string;
-  attachments: Attachment[];
+  attachments: MessageInputAttachment[];
 }

@@ -3,7 +3,6 @@ using back.Entities.Db.Dialog;
 using back.Entities.Db.Message;
 using back.Entities.Db.User;
 using back.Entities.DTOs.Chat;
-using back.Entities.DTOs.Chat;
 using back.Infrastructure;
 using back.Infrastructure.Exceptions;
 using back.Repositories;

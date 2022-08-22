@@ -29,3 +29,15 @@
 .loginAndText {
   padding-top: 5px;
 }
+
+.attachments {
+  display              : grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap             : 5px;
+  width                : max-content;
+}
+
+.photoAttachment {
+  max-width : 250px;
+  max-height: 250px;
+}

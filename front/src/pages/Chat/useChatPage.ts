@@ -26,9 +26,8 @@ const useChat = (chatId?: string) => {
 
     const messageInput = MessageService.findMessageInput(messageInputs, currentDialogInfo.id, currentDialogInfo?.type);
     if (!messageInput) return;
-    
-    if (!messageInput.text && messageInput.attachments.length === 0) return;
-    if (messageInput.text.length > 4096) return;
+
+    if (!MessageService.validateMessageBeforeSending(messageInput)) return;
 
     const tempMessage: Message = { // to display, will replaced by message from api
       id: uuid(),
@@ -47,7 +46,12 @@ const useChat = (chatId?: string) => {
       dialogType: currentDialogInfo.type,
       sendMessageDTO: {
         text: messageInput.text,
-        sendAttachmentDTOs: [] // will updated
+        sendAttachmentDTOs: messageInput.attachments.map(x => {
+          return {
+            type: x.type,
+            formFile: x.file
+          }
+        })
       }
     }
     const apiMessage: Message | null = await MessageService.sendMessage(dispatch, currentDialog, sendMessageDTO);

@@ -23,7 +23,7 @@ namespace back.Controllers
 
 		[HttpPost]
 		[Route("SendMessageToUser")]
-		public async Task<ActionResult<MessageDTO>> SendMessageToUserAsync([FromBody] SendMessageContainerDTO messageContainerDTO)
+		public async Task<ActionResult<MessageDTO>> SendMessageToUserAsync([FromForm] SendMessageContainerDTO messageContainerDTO)
 		{
 			try
 			{
@@ -43,7 +43,7 @@ namespace back.Controllers
 
 		[HttpPost]
 		[Route("SendMessageToGroup")]
-		public async Task<ActionResult<MessageDTO>> SendMessageToGroupAsync([FromBody] SendMessageContainerDTO messageContainerDTO)
+		public async Task<ActionResult<MessageDTO>> SendMessageToGroupAsync([FromForm] SendMessageContainerDTO messageContainerDTO)
 		{
 			try
 			{
