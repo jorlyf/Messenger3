@@ -1,6 +1,6 @@
 import * as React from "react";
 import { useDispatch } from "react-redux";
-import { addCurrentDialogMessageInputAttachments, setCurrentDialogMessageInputText } from "../../redux/slices/chatSlice";
+import { addCurrentDialogMessageInputAttachments, removeCurrentDialogMessageInputAttachment, setCurrentDialogMessageInputText } from "../../redux/slices/chatSlice";
 import useAppSelector from "../../hooks/useAppSelector";
 import ChatInput from "../../components/ChatInput";
 import MessageService from "../../services/MessageService";
@@ -32,11 +32,15 @@ const ChatInputContainer: React.FC<ChatInputContainerProps> = ({ handleSubmit })
     input.click();
   }
 
+  const handleDettach = (id: string) => {
+    removeAttachment(id);
+  }
+
   const addAttachments = (fileList: FileList) => {
     const messageInputAttachments: MessageInputAttachment[] = [];
     for (let i = 0; i < fileList.length; i++) {
       const file = fileList.item(i);
-      console.log(file);    
+      console.log(file);
       let type: AttachmentTypes;
       switch (file?.type) {
         case "image/jpeg":
@@ -56,6 +60,10 @@ const ChatInputContainer: React.FC<ChatInputContainerProps> = ({ handleSubmit })
     dispatch(addCurrentDialogMessageInputAttachments(messageInputAttachments));
   }
 
+  const removeAttachment = (id: string) => {
+    dispatch(removeCurrentDialogMessageInputAttachment(id));
+  }
+
   const handleSetText = (value: string) => {
     dispatch(setCurrentDialogMessageInputText(value));
   }
@@ -73,6 +81,8 @@ const ChatInputContainer: React.FC<ChatInputContainerProps> = ({ handleSubmit })
       setValue={handleSetText}
       handleSubmit={handleSubmit}
       handleAttach={handleAttach}
+      handleDettach={handleDettach}
+      attachments={currentMessageInput?.attachments || []}
     />
   );
 }

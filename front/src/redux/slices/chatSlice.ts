@@ -90,6 +90,17 @@ const chatSlice = createSlice({
         messageInput.attachments = [...messageInput.attachments, ...action.payload];
       }
     },
+    removeCurrentDialogMessageInputAttachment(state, action: PayloadAction<string>) {
+      if (state.currentDialogInfo) {
+        const dialog = DialogService.findCurrentDialog(state.dialogs, state.currentDialogInfo);
+        if (!dialog) return;
+
+        const messageInput = MessageService.getMessageInput(state.messageInputs, state.currentDialogInfo.id, state.currentDialogInfo.type);
+
+        const idToRemove = action.payload;
+        messageInput.attachments = messageInput.attachments.filter(x => x.id !== idToRemove);
+      }
+    },
     addCurrentDialogMessage(state, action: PayloadAction<Message>) {
       if (state.currentDialogInfo) {
         const dialog = DialogService.findCurrentDialog(state.dialogs, state.currentDialogInfo);
@@ -148,6 +159,7 @@ export const {
   clearCurrentDialogMessageInput,
   addDialogMessages,
   addCurrentDialogMessageInputAttachments,
+  removeCurrentDialogMessageInputAttachment,
   addCurrentDialogMessage,
   replaceDialogTempMessage,
   addDialogMessage,

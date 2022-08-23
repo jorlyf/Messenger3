@@ -3,30 +3,67 @@
   display              : grid;
   grid-template-columns: max-content 1fr max-content;
   border-top           : 2px solid var(--background-color);
-  box-sizing           : border-box;  
+  border-bottom        : 2px solid var(--background-color);
+  box-sizing           : border-box;
+}
+
+.attachContainer {
+  position     : relative;
+  grid-column  : 1;
+  border-right : 2px solid var(--background-color);
+  margin-bottom: auto;
 }
 
 .attach {
-  grid-column: 1;
   margin-top: auto;
-  padding: 7px;
-  width: 32px;
-  height: 32px;
-  cursor: pointer;
-  border-right: 2px solid var(--background-color);
+  padding   : 7px;
+  width     : 32px;
+  height    : 32px;
+  cursor    : pointer;
 }
+
+.attachCount {
+  position : absolute;
+  left     : 32px;
+  opacity  : 0.5;
+  font-size: 14px;
+}
+
 .send {
-  grid-column: 3;
-  margin-top: auto;
-  padding: 7px;
-  width: 32px;
-  height: 32px;
-  cursor: pointer;
-  border-left: 2px solid var(--background-color);
+  grid-column  : 3;
+  margin-bottom: auto;
+  padding      : 7px;
+  width        : 32px;
+  height       : 32px;
+  cursor       : pointer;
+  border-left  : 2px solid var(--background-color);
 }
 
 .input {
   grid-column: 2;
-  margin-top: auto;
-  padding: 5px;
+  margin-top : auto;
+  padding    : 5px;
+}
+
+.attached {
+  display       : flex;
+  flex-direction: column;
+  row-gap       : 5px;
+  overflow-y    : auto;
+  overflow-x    : hidden;
+  max-height    : 150px;
+
+  margin: 0px 5px;
+}
+
+.detach {
+  margin : 0px 5px;
+  cursor : pointer;
+  color  : rgb(122, 1, 1);
+  opacity: 0.6;
+}
+
+.detach:hover {
+  opacity   : 1;
+  transition: 50ms ease-in;
 }

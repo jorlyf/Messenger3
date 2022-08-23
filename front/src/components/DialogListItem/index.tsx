@@ -12,6 +12,7 @@ export interface DialogItem {
   avatarUrl: string | null;
   isCurrentDialog: boolean;
   onClick?: () => void;
+  lastUpdateTotalMilliseconds: number;
   lastMessageText?: string | null;
   isLastMessageMy?: boolean;
   notificationCount?: number;
@@ -23,7 +24,7 @@ export interface DialogListItemProps {
   data: DialogItem[];
 }
 
-const DialogListItem: React.FC<DialogListItemProps> = ({index, style, data}) => {
+const DialogListItem: React.FC<DialogListItemProps> = ({ index, style, data }) => {
   const dialog = data[index];
 
   const getLastMessageText = (): string => {
@@ -42,6 +43,16 @@ const DialogListItem: React.FC<DialogListItemProps> = ({index, style, data}) => 
     return dialog.name;
   }
 
+  const getTime = (): string => {
+    const now = new Date();
+    const dialogLastUpdate = new Date(dialog.lastUpdateTotalMilliseconds);
+    if (now.toDateString() === dialogLastUpdate.toDateString()) {
+      return dialogLastUpdate.toLocaleString("ru", { hour: "2-digit", minute: "2-digit" });;
+    }
+
+    return dialogLastUpdate.toLocaleString("ru", { year: "numeric", month: "2-digit", day: "2-digit" });
+  }
+
   return (
     <div style={style} className={`${styles.dialog} ${dialog.isCurrentDialog && styles.current}`}>
       <div className={styles.avatarContainer}>
@@ -53,7 +64,10 @@ const DialogListItem: React.FC<DialogListItemProps> = ({index, style, data}) => 
       </div>
       <div onClick={dialog.onClick} className={styles.container}>
         <span className={styles.name}>{getName()}</span>
-        <span className={styles.lastMessageText}>{dialog.isLastMessageMy && "Вы: "}{getLastMessageText()}</span>
+        <div className={styles.lastMessageContainer}>
+          <span className={styles.lastMessageText}>{dialog.isLastMessageMy && "Вы: "}{getLastMessageText()}</span>
+          <span className={styles.time}>{getTime()}</span>
+        </div>
       </div>
     </div>
   )
